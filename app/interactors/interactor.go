@@ -1,32 +1,47 @@
 package interactors
 
-import "dominus/app/domain/entities"
+import (
+	"dominus/app/domain/entities"
+
+	"github.com/valyala/fasthttp"
+	jsoniter "github.com/json-iterator/go"
+)
 
 
 type interactor struct {
 	m *entities.MessageRest // Rest struct
 	// grpc struct
+	parser jsoniter.API
 }
 
 
 
-// RestToGrp sends information from  rest protocol receiver to  grpc protocol client
-func (i interactor) RestToGrp() {
+func (i interactor) RestToGrp(ctx *fasthttp.RequestCtx) {
 
 }
 
-// RestToRest sends information from rest protocol receiver to rest protocol client
-func (i interactor) RestToRest() {
+
+func (i interactor) RestToRest(ctx *fasthttp.RequestCtx) {
 
 }
 
-// GrpcToRest sends information from grpc protocol receiver to rest protocol client
+
 func (i interactor) GrpcToRest() {
 
 }
 
-// UpdateNode updates topics and subcribers in the node
-func (i interactor) UpdateNode() {
+
+func (i interactor) CreateTopic(ctx *fasthttp.RequestCtx) {
+
+}
+
+
+func (i interactor) UpdateTopic(ctx *fasthttp.RequestCtx) {
+
+}
+
+func (i interactor) GetTopic(ctx *fasthttp.RequestCtx) {
+
 
 }
 
@@ -34,13 +49,21 @@ func (i interactor) UpdateNode() {
 
 
 type InteractorInt interface {
-	RestToGrp() 
-	RestToRest()
+	// RestToGrp sends information from  rest protocol receiver to  grpc protocol client
+	RestToGrp(ctx *fasthttp.RequestCtx) 
+	// RestToRest sends information from rest protocol receiver to rest protocol client
+	RestToRest(ctx *fasthttp.RequestCtx)
+	// GrpcToRest sends information from grpc protocol receiver to rest protocol client
 	GrpcToRest()
-	UpdateNode()
+	// UpdateNode updates topics and subcribers in the node
+	UpdateTopic(ctx *fasthttp.RequestCtx)
+	// Create a new topic in dominus
+	CreateTopic(ctx *fasthttp.RequestCtx)
+	// Return all topic in dominus
+	GetTopic(ctx *fasthttp.RequestCtx)
 }
 
-
+// Create a new interactor instance
 func NewInteractor() InteractorInt {
-	return &interactor{}
+	return &interactor{m: new(entities.MessageRest), parser: jsoniter.ConfigCompatibleWithStandardLibrary}
 }
