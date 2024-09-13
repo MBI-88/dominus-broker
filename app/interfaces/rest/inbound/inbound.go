@@ -46,11 +46,7 @@ func (r rest) path() {
 }
 
 
-
-
-
-func NewRestApi(r *router.Router)  {
+func NewRestApi(r *router.Router) {
 	re := &rest{router: r}
 	re.path()
-	return
 }
