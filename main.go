@@ -119,6 +119,4 @@ func main() {
 	if err := r.Shutdown(); err != nil {
 		log.Fatal(err)
 	}
-
-
 }
