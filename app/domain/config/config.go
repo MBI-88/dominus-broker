@@ -2,10 +2,15 @@ package config
 
 import "github.com/spf13/viper"
 
-type restConfig struct {
+var (
+	apiKey = ""
+)
+
+type config struct {
 	ApiToken                          string
-	Port                              int
+	Port                              uint16
 	SslCert                           string
+	KeyFile                           string
 	WriteTimeout                      int
 	ReadTimeout                       int
 	IdleTimeout                       int
@@ -22,12 +27,14 @@ type restConfig struct {
 	StreamRequestBody                 bool
 	Dsn                               string
 	Cidr                              string
+	DominusKey                        []byte
 }
 
-func (s *restConfig) setEnv() {
+func (s *config) setEnv() {
 	s.ApiToken = viper.GetString("API_TOKEN")
-	s.Port = viper.GetInt("PORT")
+	s.Port = viper.GetUint16("PORT")
 	s.SslCert = viper.GetString("SSL_CERT")
+	s.KeyFile = viper.GetString("KEY_FILE")
 	s.WriteTimeout = viper.GetInt("WRITE_TIMEOUT")
 	s.ReadTimeout = viper.GetInt("READ_TIMEOUT")
 	s.IdleTimeout = viper.GetInt("IDLE_TIMOUT")
@@ -44,10 +51,11 @@ func (s *restConfig) setEnv() {
 	s.StreamRequestBody = viper.GetBool("STREAM_REQUEST_BODY")
 	s.Dsn = viper.GetString("DSN")
 	s.Cidr = viper.GetString("CIDR")
+	s.DominusKey = []byte(apiKey)
 
 }
 
-func (s restConfig) GetEnvVar(prod bool) restConfig {
+func (s config) GetEnvVar(prod bool) config {
 	if prod {
 		viper.SetEnvPrefix("")
 		viper.AutomaticEnv()
@@ -63,7 +71,7 @@ func (s restConfig) GetEnvVar(prod bool) restConfig {
 	return s
 }
 
-func (s restConfig) GetEnvVarTest() restConfig {
+func (s config) GetEnvVarTest() config {
 	viper.SetConfigFile("./../.env")
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -75,10 +83,14 @@ func (s restConfig) GetEnvVarTest() restConfig {
 }
 
 type restConfigInt interface {
-	GetEnvVarTest() restConfig
-	GetEnvVar(prod bool) restConfig
+	//Get variables for testing
+	GetEnvVarTest() config
+	//Get variables for development/production. 
+	//In production mode variables are setted up from system environment
+	//In development mode variables are setted up form env file
+	GetEnvVar(prod bool) config
 }
 
-func NewRestConfig() restConfigInt {
-	return new(restConfig)
+func NewConfig() restConfigInt {
+	return new(config)
 }
