@@ -1,12 +1,14 @@
 package entities
 
+
+// headers define topic for local y receiver for remote
 type headers struct {
-	Remote   bool   `json:"remote" validate:"required"`
 	Topic    string `json:"topic" validate:"required"`
 	Receiver string `json:"receiver,omitempty"`
 }
 
-type MessageRest struct {
+// Meesage cotains headers and body 
+type Message struct {
 	Headers headers `json:"headers" validate:"required"`
 	Payload []byte   `json:"payload" validate:"required,max=1000"`
 }

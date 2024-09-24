@@ -26,23 +26,24 @@ func (r rest) managerCreate(ctx *fasthttp.RequestCtx) {
 	inter.CreateTopic(ctx)
 }
 
-func (r rest) managerUpdate(ctx *fasthttp.RequestCtx) {
-	inter := interactors.NewInteractor()
-	inter.UpdateTopic(ctx)
-}
 
 func (r rest) managerGet(ctx *fasthttp.RequestCtx) {
 	inter := interactors.NewInteractor()
 	inter.GetTopic(ctx)
 }
 
+func (r rest) managerDelete(ctx *fasthttp.RequestCtx) {
+	inter := interactors.NewInteractor()
+	inter.DeleteTopic(ctx)
+}
+
 
 func (r rest) path() {
-	r.router.POST("/rest-local", r.local)
-	r.router.POST("/rest-remote", r.remote)
+	r.router.POST("/local-shipping", r.local)
+	r.router.POST("/remote-shipping", r.remote)
 	r.router.POST("/manager", r.managerCreate)
-	r.router.PATCH("/manager", r.managerUpdate)
 	r.router.GET("/manager", r.managerGet)
+	r.router.DELETE("/manager",r.managerDelete)
 }
 
 

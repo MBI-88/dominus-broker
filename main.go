@@ -22,7 +22,7 @@ var (
 	system chan os.Signal
 )
 
-//Starts rest service
+// Starts rest service
 func runRestServer(mode bool, cancel context.CancelFunc) *fasthttp.Server {
 	// creation
 	conf := config.NewConfig().GetEnvVar(mode)
@@ -70,11 +70,11 @@ func runRestServer(mode bool, cancel context.CancelFunc) *fasthttp.Server {
 	return &s
 }
 
-//Starts gRPC service
+// Starts gRPC service
 func runGrpServer(mode bool, cancel context.CancelFunc) {
 }
 
-//catches inital variables
+// catches inital variables
 func init() {
 	mode = flag.Bool("mode", false, "set operation mode")
 
@@ -87,7 +87,7 @@ func init() {
 	}
 }
 
-//Dominus entripoint
+// Dominus entripoint
 func main() {
 	// Receives commands from cli
 	flag.Parse()
