@@ -1,6 +1,8 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
 var (
 	apiKey = ""
@@ -28,6 +30,8 @@ type config struct {
 	Dsn                               string
 	Cidr                              string
 	DominusKey                        []byte
+	Database                          string
+	Collection                        string
 }
 
 func (s *config) setEnv() {
@@ -52,6 +56,8 @@ func (s *config) setEnv() {
 	s.Dsn = viper.GetString("DSN")
 	s.Cidr = viper.GetString("CIDR")
 	s.DominusKey = []byte(apiKey)
+	s.Database = viper.GetString("DATABASE")
+	s.Collection = viper.GetString("COLLECTION")
 
 }
 

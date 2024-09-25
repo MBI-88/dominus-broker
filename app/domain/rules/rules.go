@@ -55,6 +55,7 @@ func (r rule) ValidateTopic(topic map[string][]string) error {
 	return nil
 }
 
+
 type RuleInt interface {
 	ValidateMessage(data any) error
 	ValidateTopic(sub map[string][]string) error

@@ -30,7 +30,7 @@ func (t *topic) GetSubcribers(key string) []string {
 	}
 }
 
-// Returns  every topic in memory
+
 func (t *topic) GetTopic() map[string][]string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -50,9 +50,13 @@ func (t *topic) DeleteTopic(key string) error {
 
 
 type TopicInt interface {
+	//Create a new topic in memory
 	CreateTopic(key string, sub []string)
+	//Return subcribers based on a key given
 	GetSubcribers(key string) []string
+	//Returns  every topic in memory
 	GetTopic() map[string][]string
+	//Delete a topic using a selected key
 	DeleteTopic(key string) error 
 }
 

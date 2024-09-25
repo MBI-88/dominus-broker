@@ -3,8 +3,12 @@ package main
 import (
 	"context"
 	"dominus/app/domain/config"
-	"dominus/app/interfaces/rest/inbound"
+	"dominus/app/domain/event"
+	"dominus/app/domain/topic"
+	"dominus/app/interactors"
+	"dominus/app/interfaces/rest/services"
 	"dominus/app/interfaces/rest/middlewares"
+	"dominus/app/interfaces/clients"
 	"flag"
 	"fmt"
 	"log"
@@ -23,12 +27,12 @@ var (
 )
 
 // Starts rest service
-func runRestServer(mode bool, cancel context.CancelFunc) *fasthttp.Server {
+func runRestServer(mode bool, cancel context.CancelFunc, inter interactors.InteractorInt) *fasthttp.Server {
 	// creation
 	conf := config.NewConfig().GetEnvVar(mode)
 	mid := middlewares.NewMiddleware()
 	router := router.New()
-	inbound.NewRestApi(router)
+	services.NewRestApi(router, inter)
 
 	// set options
 	mid.SetApiToken(conf.ApiToken, conf.Cidr)
@@ -89,8 +93,23 @@ func init() {
 
 // Dominus entripoint
 func main() {
-	// Receives commands from cli
+	//Receives commands from cli
 	flag.Parse()
+
+
+	//Instances
+	settings := config.NewConfig()
+	env := settings.GetEnvVar(*mode)
+	client := clients.NewClient(env.Dsn, env.Database)
+	repo := client.NewMongoClient()
+	repo.Migrations(env.Collection)
+
+	topic := topic.NewTopic()
+	events := event.NewEvent(client, topic)
+	events.InitialLoad()
+
+	inter := interactors.NewInteractor(client, topic, events)
+
 
 	//signal
 	system = make(chan os.Signal, 1)
@@ -103,7 +122,7 @@ func main() {
 	defer cancel()
 
 	//servers
-	r := runRestServer(*mode, cancel)
+	r := runRestServer(*mode, cancel, inter)
 	runGrpServer(*mode, cancel)
 
 	// Wait for a signal
