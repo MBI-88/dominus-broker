@@ -32,6 +32,7 @@ func (i interactor) NewManager() ManagerInt {
 		r: rules.NewRule(),
 		t: i.topic,
 		repo: i.client.NewMongoClient(),
+		collection: "topic",
 	}
 }
 

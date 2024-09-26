@@ -6,9 +6,10 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/topic"
 	"dominus/app/interactors"
-	"dominus/app/interfaces/rest/services"
-	"dominus/app/interfaces/rest/middlewares"
 	"dominus/app/interfaces/clients"
+	"dominus/app/interfaces/database"
+	"dominus/app/interfaces/rest/middlewares"
+	"dominus/app/interfaces/rest/input"
 	"flag"
 	"fmt"
 	"log"
@@ -32,7 +33,7 @@ func runRestServer(mode bool, cancel context.CancelFunc, inter interactors.Inter
 	conf := config.NewConfig().GetEnvVar(mode)
 	mid := middlewares.NewMiddleware()
 	router := router.New()
-	services.NewRestApi(router, inter)
+	input.NewRestApi(router, inter)
 
 	// set options
 	mid.SetApiToken(conf.ApiToken, conf.Cidr)
@@ -100,7 +101,10 @@ func main() {
 	//Instances
 	settings := config.NewConfig()
 	env := settings.GetEnvVar(*mode)
-	client := clients.NewClient(env.Dsn, env.Database)
+	mongoConfig := database.NewMongoConfig()
+	mongoClient := mongoConfig.CreateClient(env.Dsn)
+	
+	client := clients.NewClient(env.Dsn, env.Database, mongoClient)
 	repo := client.NewMongoClient()
 	repo.Migrations(env.Collection)
 

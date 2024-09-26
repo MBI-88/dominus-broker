@@ -1,22 +1,33 @@
 package clients
 
-import "dominus/app/interfaces/database"
+import (
+	"dominus/app/domain/rules"
+	"dominus/app/interfaces/database"
+
+	"go.mongodb.org/mongo-driver/mongo"
+)
 
 type clients struct {
-	dsn, database string
+	dsn      string
+	database string
+	client   *mongo.Client
+	rl       rules.RuleInt
 }
 
 func (c clients) NewMongoClient() database.RepositoryInt {
-	return database.NewRepository(c.dsn, c.database)
+	return database.NewRepository(c.dsn, c.database, c.rl, c.client)
 }
 
 type ClientInt interface {
+	//New mongo client to connect with mongoDB
 	NewMongoClient() database.RepositoryInt
 }
 
-func NewClient(dsn, database string) ClientInt {
+func NewClient(dsn, database string, c *mongo.Client) ClientInt {
 	return &clients{
 		dsn:      dsn,
 		database: database,
+		client:   c,
+		rl:       rules.NewRule(),
 	}
 }

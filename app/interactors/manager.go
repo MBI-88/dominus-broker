@@ -1,28 +1,33 @@
 package interactors
 
 import (
+	"dominus/app/domain/entities"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
 	"dominus/app/interfaces/database"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type manager struct {
-	p  jsoniter.API
-	r  rules.RuleInt
-	t  topic.TopicInt
-	repo database.RepositoryInt
+	p          jsoniter.API
+	r          rules.RuleInt
+	t          topic.TopicInt
+	repo       database.RepositoryInt
+	tdb        *entities.TopicDB
+	collection string
 }
 
-
 func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
-	temp := make(map[string][]string)
-	message := make(map[string]string)
-	body := ctx.Request.Body()
+	var (
+		message = make(map[string]any)
+		body    = ctx.Request.Body()
+	)
 
-	if err := m.p.Unmarshal(body, temp); err != nil {
+	if err := m.p.Unmarshal(body, m.tdb); err != nil {
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -30,7 +35,7 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	if err := m.r.ValidateTopic(temp); err != nil {
+	if err := m.r.ValidateStruct(m.tdb); err != nil {
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -38,8 +43,14 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	for k, v := range temp {
-		m.t.CreateTopic(k, v)
+	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
+
+	if _, err := m.repo.InsertObject(m.tdb, m.collection); err != nil {
+		message["message"] = err.Error()
+		b, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
+		ctx.Response.SetBody(b)
+		return
 	}
 
 	message["message"] = "topic created successful!"
@@ -49,12 +60,26 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 }
 
 func (m manager) GetTopic(ctx *fasthttp.RequestCtx) {
-	data := m.t.GetTopic() // cambiar por conexion con la bd
-	body, err := m.p.Marshal(data)
+	var (
+		topics  []entities.TopicDB
+		message = make(map[string]any)
+	)
+
+	if err := m.repo.FindObjects(m.collection, &topics, bson.D{}); err != nil {
+		message["message"] = err.Error()
+		body, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
+		ctx.Response.SetBody(body)
+		return
+	}
+
+	message["topics"] = topics
+
+	body, err := m.p.Marshal(message)
 	if err != nil {
-		temp := make(map[string]string)
-		temp["message"] = err.Error()
-		body, _ := m.p.Marshal(temp)
+		delete(message, "topics")
+		message["message"] = err.Error()
+		body, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
 		ctx.Response.SetBody(body)
 		return
@@ -63,12 +88,11 @@ func (m manager) GetTopic(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
-	temp := make(map[string]string)
+func (m manager) UpdateTopic(ctx *fasthttp.RequestCtx) {
 	message := make(map[string]string)
 	body := ctx.Request.Body()
 
-	if err := m.p.Unmarshal(body, temp); err != nil {
+	if err := m.p.Unmarshal(body, m.tdb); err != nil {
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -76,10 +100,66 @@ func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	if err := m.t.DeleteTopic(temp["topic"]); err != nil {
+	if err := m.r.ValidateStruct(m.tdb); err != nil {
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
+	filter := primitive.D{primitive.E{Key: "topic", Value: m.tdb.Topic}}
+	update := primitive.D{primitive.E{Key: "$set", Value: m.tdb}}
+
+	if _, err := m.repo.UpdateObject(filter, update, m.collection); err != nil {
+		message["message"] = err.Error()
+		b, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	message["message"] = "topic updated successful!"
+	b, _ := m.p.Marshal(message)
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
+	ctx.Response.SetBody(b)
+}
+
+func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
+	message := make(map[string]string)
+	body := ctx.Request.Body()
+
+	if err := m.p.Unmarshal(body, m.tdb); err != nil {
+		message["message"] = err.Error()
+		b, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	if err := m.r.ValidateStruct(m.tdb); err != nil {
+		message["message"] = err.Error()
+		b, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	if err := m.t.DeleteTopic(m.tdb.Topic); err != nil {
+		message["message"] = err.Error()
+		b, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	filter := primitive.D{primitive.E{Key: "topic", Value: m.tdb.Topic}}
+
+	if _, err := m.repo.DeleteObject(filter, m.collection); err != nil {
+		message["message"] = err.Error()
+		b, _ := m.p.Marshal(message)
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
 		ctx.Response.SetBody(b)
 		return
 	}
@@ -98,4 +178,6 @@ type ManagerInt interface {
 	GetTopic(ctx *fasthttp.RequestCtx)
 	//Delete a topic using a key selected
 	DeleteTopic(ctx *fasthttp.RequestCtx)
+	//Update a topic in dominus
+	UpdateTopic(ctx *fasthttp.RequestCtx)
 }

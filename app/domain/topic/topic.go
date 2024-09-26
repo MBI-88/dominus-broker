@@ -11,15 +11,13 @@ type topic struct {
 	mu sync.RWMutex
 }
 
-
-// CreateSubcribers adds new topic with subscribers 
+ 
 func (t *topic) CreateTopic(key string, sub []string) {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	t.tp[key] = sub
 }
 
-// GetSubcribers returns subcribers related to a topic
 func (t *topic) GetSubcribers(key string) []string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
@@ -28,13 +26,6 @@ func (t *topic) GetSubcribers(key string) []string {
 	}else {
 		return []string{}
 	}
-}
-
-
-func (t *topic) GetTopic() map[string][]string {
-	t.mu.RLock()
-	defer t.mu.RUnlock()
-	return t.tp
 }
 
 func (t *topic) DeleteTopic(key string) error {
@@ -51,12 +42,24 @@ func (t *topic) DeleteTopic(key string) error {
 
 type TopicInt interface {
 	//Create a new topic in memory
+	//
+	//Parameters
+	//
+	//* key: topic name
+	//
+	//* sub: subscribers
 	CreateTopic(key string, sub []string)
 	//Return subcribers based on a key given
+	//
+	//Parameters
+	//
+	//* key: topic name
 	GetSubcribers(key string) []string
-	//Returns  every topic in memory
-	GetTopic() map[string][]string
 	//Delete a topic using a selected key
+	//
+	//Parameters
+	//
+	//* key: topic name
 	DeleteTopic(key string) error 
 }
 

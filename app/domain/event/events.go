@@ -1,8 +1,11 @@
 package event
 
 import (
+	"dominus/app/domain/entities"
 	"dominus/app/domain/topic"
 	"dominus/app/interfaces/clients"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type events struct {
@@ -11,7 +14,18 @@ type events struct {
 }
 
 func (e events) InitialLoad() {
+	var (
+		repo = e.r.NewMongoClient()
+		topics  []entities.TopicDB
+	)
 
+	if err := repo.FindObjects("topic", &topics, bson.D{}); err != nil {
+
+	}
+
+	for _, it := range topics {
+		e.t.CreateTopic(it.Topic, it.Subscribers)
+	}
 }
 
 func (e events) Resend() {
