@@ -84,13 +84,16 @@ func (m manager) GetTopic(ctx *fasthttp.RequestCtx) {
 		ctx.Response.SetBody(body)
 		return
 	}
+
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusOK)
 	ctx.Response.SetBody(body)
 }
 
 func (m manager) UpdateTopic(ctx *fasthttp.RequestCtx) {
-	message := make(map[string]string)
-	body := ctx.Request.Body()
+	var (
+		message = make(map[string]string)
+		body    = ctx.Request.Body()
+	)
 
 	if err := m.p.Unmarshal(body, m.tdb); err != nil {
 		message["message"] = err.Error()
@@ -127,8 +130,10 @@ func (m manager) UpdateTopic(ctx *fasthttp.RequestCtx) {
 }
 
 func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
-	message := make(map[string]string)
-	body := ctx.Request.Body()
+	var (
+		message = make(map[string]string)
+		body    = ctx.Request.Body()
+	)
 
 	if err := m.p.Unmarshal(body, m.tdb); err != nil {
 		message["message"] = err.Error()
@@ -169,7 +174,6 @@ func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 	ctx.Response.SetBody(b)
 }
-
 
 type ManagerInt interface {
 	//Create a new topic in dominus

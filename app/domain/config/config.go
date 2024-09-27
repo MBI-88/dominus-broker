@@ -5,12 +5,13 @@ import (
 )
 
 var (
-	apiKey = ""
+	grpcConnKey = "Dominos_connection_adf465fdaf46-2024-27-09-gRPC_//(**)-@adf-dfadlj(adfafd)-=+REST-SERVER-=+GRPC-SERVER_dafdf-MBI"
 )
 
 type config struct {
 	ApiToken                          string
-	Port                              uint16
+	RestPort                          uint16
+	GrpcPort                          uint16
 	SslCert                           string
 	KeyFile                           string
 	WriteTimeout                      int
@@ -29,14 +30,15 @@ type config struct {
 	StreamRequestBody                 bool
 	Dsn                               string
 	Cidr                              string
-	DominusKey                        []byte
+	ConnectionKey                     []byte
 	Database                          string
 	Collection                        string
 }
 
 func (s *config) setEnv() {
 	s.ApiToken = viper.GetString("API_TOKEN")
-	s.Port = viper.GetUint16("PORT")
+	s.RestPort = viper.GetUint16("REST_PORT")
+	s.GrpcPort = viper.GetUint16("GRPC_PORT")
 	s.SslCert = viper.GetString("SSL_CERT")
 	s.KeyFile = viper.GetString("KEY_FILE")
 	s.WriteTimeout = viper.GetInt("WRITE_TIMEOUT")
@@ -55,10 +57,9 @@ func (s *config) setEnv() {
 	s.StreamRequestBody = viper.GetBool("STREAM_REQUEST_BODY")
 	s.Dsn = viper.GetString("DSN")
 	s.Cidr = viper.GetString("CIDR")
-	s.DominusKey = []byte(apiKey)
+	s.ConnectionKey = []byte(grpcConnKey)
 	s.Database = viper.GetString("DATABASE")
 	s.Collection = viper.GetString("COLLECTION")
-
 }
 
 func (s config) GetEnvVar(prod bool) config {
@@ -91,7 +92,7 @@ func (s config) GetEnvVarTest() config {
 type restConfigInt interface {
 	//Get variables for testing
 	GetEnvVarTest() config
-	//Get variables for development/production. 
+	//Get variables for development/production.
 	//In production mode variables are setted up from system environment
 	//In development mode variables are setted up form env file
 	GetEnvVar(prod bool) config

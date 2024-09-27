@@ -20,7 +20,7 @@ func (e events) InitialLoad() {
 	)
 
 	if err := repo.FindObjects("topic", &topics, bson.D{}); err != nil {
-
+		return
 	}
 
 	for _, it := range topics {
@@ -37,9 +37,9 @@ func (e events) Resend() {
 
 
 type EventsInt interface {
-	//Initial load to feed topic
+	//Initial load to feed topic,looks for information on topic collection
 	InitialLoad()
-	//Resend patter for message send resiliency
+	//Resend patter sends message failed
 	Resend()
 }
 

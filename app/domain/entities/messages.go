@@ -1,14 +1,10 @@
 package entities
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
-// headers define topic for local y receiver for remote
-type headers struct {
-	Topic    string `json:"topic" validate:"required"`
-	Receiver string `json:"receiver,omitempty"`
-}
-
-// Meesage cotains headers and body 
+//Meesage cotains headers and body
 type Message struct {
-	Headers headers `json:"headers" validate:"required"`
-	Payload []byte   `json:"payload" validate:"required,max=1000"`
+	ID      primitive.ObjectID `bson:"_id,omitemtpy" json:"id,omitempty"`
+	Topic   string             `bson:"topic" json:"topic" validate:"required,min=3,max=5"`
+	Payload []byte             `bson:"payload" json:"payload" validate:"required,max=1000"`
 }

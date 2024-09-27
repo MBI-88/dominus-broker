@@ -3,6 +3,7 @@ package middlewares
 import (
 	"crypto/sha256"
 	"crypto/subtle"
+	"fmt"
 	"net"
 
 	"github.com/valyala/fasthttp"
@@ -11,47 +12,43 @@ import (
 type Middlewares func(ctx *fasthttp.RequestCtx) *fasthttp.RequestCtx
 
 type middleware struct {
-	ApiToken string
-	Cidr     string
+	token    []byte
+	cidr     string
 }
 
-func (m *middleware) SetApiToken(token, cidr string) {
-	m.ApiToken = token
-	m.Cidr = cidr
-}
 
-func (m middleware) apiMiddleware(ctx *fasthttp.RequestCtx) *fasthttp.RequestCtx {
+func (m middleware) apiMiddleware(ctx *fasthttp.RequestCtx) error {
 	token := ctx.Request.Header.Peek("API_TOKEN")
 	hashedToken := sha256.Sum256(token)
-	hashedKey := sha256.Sum256([]byte(m.ApiToken))
-
+	hashedKey := sha256.Sum256(m.token)
 	if subtle.ConstantTimeCompare(hashedKey[:], hashedToken[:]) == 0 {
-		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
-		return nil
+		return fmt.Errorf("Invalid token")
 	}
-	return ctx
-
+	return nil 
 }
 
-func (m middleware) allowedHosts(ctx *fasthttp.RequestCtx) *fasthttp.RequestCtx {
-	_, allowNet, err := net.ParseCIDR(m.Cidr)
+func (m middleware) allowedHosts(ctx *fasthttp.RequestCtx) error {
+	_, allowNet, err := net.ParseCIDR(m.cidr)
 	if err != nil && !allowNet.Contains(ctx.RemoteIP()) {
-		ctx.SetStatusCode(fasthttp.StatusUnauthorized)
-		return nil
+		return fmt.Errorf("Host not allowed")
 	}
-	return ctx
+	return nil
 
 }
 
 func (m middleware) Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {
-		if m.ApiToken != "" {
-			if ctx = m.apiMiddleware(ctx); ctx == nil {
+		if m.token != nil {
+			if err := m.apiMiddleware(ctx); err != nil {
+				ctx.SetStatusCode(fasthttp.StatusUnauthorized)
+				ctx.Response.SetBody([]byte(err.Error()))
 				return
 			}
 		}
-		if m.Cidr != "" {
-			if ctx = m.allowedHosts(ctx); ctx == nil {
+		if m.cidr != "" {
+			if err := m.allowedHosts(ctx); err != nil {
+				ctx.SetStatusCode(fasthttp.StatusUnauthorized)
+				ctx.Response.SetBody([]byte(err.Error()))
 				return
 			}
 		}	
@@ -61,10 +58,12 @@ func (m middleware) Middlewares(handler fasthttp.RequestHandler) fasthttp.Reques
 
 
 type middlewareInt interface {
-	SetApiToken(token, cidr string)
 	Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler
 }
 
-func NewMiddleware() middlewareInt {
-	return new(middleware)
+func NewMiddleware(token, cidr string) middlewareInt {
+	return &middleware{
+		token: []byte(token),
+		cidr: cidr,
+	}
 }
