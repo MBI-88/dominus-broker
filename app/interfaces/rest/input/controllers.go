@@ -16,7 +16,7 @@ type rest struct {
 //
 //Parameters
 //
-//* ctx: context fasthttp
+//-> ctx: context fasthttp
 func (r rest) local(ctx *fasthttp.RequestCtx)  {
 	inter := r.inter.NewConnection()
 	inter.RestToRest(ctx)
@@ -26,17 +26,17 @@ func (r rest) local(ctx *fasthttp.RequestCtx)  {
 //
 //Parameters
 //
-//* ctx: context fasthttp
+//-> ctx: context fasthttp
 func (r rest) remote(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewConnection()
-	inter.RestToGrp(ctx)
+	inter.RestToGrpc(ctx)
 }
 
 //Crate topic in memory and database
 //
 //Parameters
 //
-//* ctx: context fasthttp
+//-> ctx: context fasthttp
 func (r rest) managerCreate(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	inter.CreateTopic(ctx)
@@ -46,7 +46,7 @@ func (r rest) managerCreate(ctx *fasthttp.RequestCtx) {
 //
 //Parameters
 //
-//* ctx: context fasthttp
+//-> ctx: context fasthttp
 func (r rest) managerUpdate(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	inter.UpdateTopic(ctx)
@@ -56,7 +56,7 @@ func (r rest) managerUpdate(ctx *fasthttp.RequestCtx) {
 //
 //Parameters
 //
-//* ctx: context fasthttp
+//-> ctx: context fasthttp
 func (r rest) managerGet(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	inter.GetTopic(ctx)
@@ -66,7 +66,7 @@ func (r rest) managerGet(ctx *fasthttp.RequestCtx) {
 //
 //Parameters
 //
-//* ctx: context fasthttp
+//-> ctx: context fasthttp
 func (r rest) managerDelete(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	inter.DeleteTopic(ctx)

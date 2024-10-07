@@ -121,69 +121,69 @@ type RepositoryInt interface {
 	//
 	//Parameters
 	//
-	//* strCollection: string that contains collection names splited by ","
+	//-> strCollection: string that contains collection names splited by ","
 	Migrations(strCollection string)
 	//Delete an Object in the database
 	//
 	//Parameters
 	//
-	//* f: filter to use
+	//-> f: filter to use
 	//
-	//* collection: name of the collection
+	//-> collection: name of the collection
 	DeleteObject(f primitive.D, collection string) (*mongo.DeleteResult, error)
 	//Update an object in the database
 	//
 	//Parameters
 	//
-	//* filter: filter to select objects to update
+	//-> filter: filter to select objects to update
 	//
-	//* update: the object and key to update
+	//-> update: the object and key to update
 	//
-	//* collection: collection name to use
+	//-> collection: collection name to use
 	UpdateObject(filter primitive.D, updadte primitive.D ,collection string) (*mongo.UpdateResult, error)
 	//Create an object in the database
 	//
 	//Parameters
 	//
-	//* obj: the object to be updated
+	//-> obj: the object to be updated
 	//
-	//* collection: collection name to use
+	//-> collection: collection name to use
 	InsertObject(obj any, collection string) (*mongo.InsertOneResult, error)
 	//Find objects in the database
 	// 
 	//Parameters
 	//
-	//* collection: collection name to use
+	//-> collection: collection name to use
 	//
-	//* objects: array object to fill
+	//-> objects: array object to fill
 	//
-	//* filter: the filter to find objects
+	//-> filter: the filter to find objects
 	//
-	//* op: contains options to use in the query
+	//-> op: contains options to use in the query
 	FindObjects(collection string, objects any, filter bson.D, op ...*options.FindOptions) error
 	//Find and object in the database
 	//
 	//Parameters
 	//
-	//* f: filter to match with objects
+	//-> f: filter to match with objects
 	//
-	//* collection: collection name to use
+	//-> collection: collection name to use
 	//
-	//* object: the object to fill
+	//-> object: the object to fill
 	FindObject(f primitive.D, collection string, object any) error
 	//Count pages in the database
 	//
 	//Parameters
 	//
-	//* collection: collection name to use
+	//-> collection: collection name to use
 	CountPages(collection string) (int64, error)
 	//Delete objects in the database
 	//
 	//Parameters
 	//
-	//* f: filter to find objects
+	//-> f: filter to find objects
 	//
-	//* collection: collection name to use
+	//-> collection: collection name to use
 	DeleteObjects(f primitive.D, collection string) (*mongo.DeleteResult, error)
 }
 

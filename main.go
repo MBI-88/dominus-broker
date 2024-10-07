@@ -43,13 +43,17 @@ func run() {
 	switch args {
 
 	case "migrate":
-		repo := client.NewMongoClient()
+		repo := client.MongoClient()
 		repo.Migrations(env.Collection)
 
 	case "start":
 		//Instances
 		topic := topic.NewTopic()
-		events := event.NewEvent(client, topic)
+		events := event.NewEvent(
+			client.MongoClient(),
+			client.RestClient(),
+			topic,
+		)
 		events.InitialLoad()
 		inter := interactors.NewInteractor(client, topic, events)
 

@@ -3,23 +3,26 @@ package event
 import (
 	"dominus/app/domain/entities"
 	"dominus/app/domain/topic"
-	"dominus/app/interfaces/clients"
+	"dominus/app/interfaces/database"
+	"dominus/app/interfaces/rest/output"
+	
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type events struct {
-	t topic.TopicInt
-	r clients.ClientInt
+	t      topic.TopicInt
+	repo   database.RepositoryInt
+	rest   output.RestClientInt
+	status bool
 }
 
 func (e events) InitialLoad() {
 	var (
-		repo = e.r.NewMongoClient()
-		topics  []entities.TopicDB
+		topics []entities.TopicDB
 	)
 
-	if err := repo.FindObjects("topic", &topics, bson.D{}); err != nil {
+	if err := e.repo.FindObjects("topic", &topics, bson.D{}); err != nil {
 		return
 	}
 
@@ -28,23 +31,33 @@ func (e events) InitialLoad() {
 	}
 }
 
-func (e events) Resend() {
+func (e events) CheckFails(status <- chan *entities.Logs) {
+	if r, ok := <- status; ok {
+		if r != nil && !e.status {
+			go e.resend()
+		}
+	}
 
 }
 
+//if there are any pending message , resend must stop
+func (e *events) resend() {
+	e.status = true
 
-
-
+}
 
 type EventsInt interface {
 	//Initial load to feed topic,looks for information on topic collection
 	InitialLoad()
-	//Resend patter sends message failed
-	Resend()
+
+	CheckFails(status <- chan *entities.Logs)
 }
 
-
-
-func NewEvent(rep clients.ClientInt, t topic.TopicInt) EventsInt {
-	return &events{t: t, r: rep}
+func NewEvent(r database.RepositoryInt, rs output.RestClientInt, t topic.TopicInt) EventsInt {
+	return &events{
+		t:      t,
+		repo:   r,
+		rest:   rs,
+		status: false,
+	}
 }

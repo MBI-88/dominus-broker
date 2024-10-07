@@ -45,21 +45,21 @@ type TopicInt interface {
 	//
 	//Parameters
 	//
-	//* key: topic name
+	//-> key: topic name
 	//
-	//* sub: subscribers
+	//-> sub: subscribers
 	CreateTopic(key string, sub []string)
 	//Return subcribers based on a key given
 	//
 	//Parameters
 	//
-	//* key: topic name
+	//-> key: topic name
 	GetSubcribers(key string) []string
 	//Delete a topic using a selected key
 	//
 	//Parameters
 	//
-	//* key: topic name
+	//-> key: topic name
 	DeleteTopic(key string) error 
 }
 

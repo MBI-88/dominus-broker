@@ -19,12 +19,12 @@ type connection struct {
 	// resp client
 }
 
-func (c connection) RestToGrp(ctx *fasthttp.RequestCtx) {
+func (c connection) RestToGrpc(ctx *fasthttp.RequestCtx) {
 
 }
 
 func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
-
+	
 }
 
 func (i connection) GrpcToRest() {
@@ -34,8 +34,16 @@ func (i connection) GrpcToRest() {
 
 type ConnectionInt interface {
 	//RestToGrp sends information from  rest protocol receiver to  grpc protocol client
-	RestToGrp(ctx *fasthttp.RequestCtx)
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
+	RestToGrpc(ctx *fasthttp.RequestCtx)
 	//RestToRest sends information from rest protocol receiver to rest protocol client
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
 	RestToRest(ctx *fasthttp.RequestCtx)
 	//GrpcToRest sends information from grpc protocol receiver to rest protocol client
 	GrpcToRest()

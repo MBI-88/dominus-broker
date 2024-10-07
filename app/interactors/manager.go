@@ -177,11 +177,27 @@ func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
 
 type ManagerInt interface {
 	//Create a new topic in dominus
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
 	CreateTopic(ctx *fasthttp.RequestCtx)
 	//Return all topic in dominus
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
 	GetTopic(ctx *fasthttp.RequestCtx)
 	//Delete a topic using a key selected
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
 	DeleteTopic(ctx *fasthttp.RequestCtx)
 	//Update a topic in dominus
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
 	UpdateTopic(ctx *fasthttp.RequestCtx)
 }

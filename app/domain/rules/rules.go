@@ -67,19 +67,19 @@ type RuleInt interface {
 	//
 	//Parameters
 	//
-	//* client: databas client to use
+	//-> client: databas client to use
 	//
-	//* database: database name to use
+	//-> database: database name to use
 	//
-	//* name: collection name selected
+	//-> name: collection name selected
 	//
-	//* ctx: context to use in the query
+	//-> ctx: context to use in the query
 	CreateIndex(client *mongo.Client, database, name string, ctx context.Context)
 	//Validates message using bussiness logic
 	//
 	//Parameters
 	//
-	//* data: the object to validate
+	//-> data: the object to validate
 	ValidateStruct(data any) error
 }
 

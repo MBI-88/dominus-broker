@@ -31,7 +31,7 @@ func (i interactor) NewManager() ManagerInt {
 		p: jsoniter.ConfigCompatibleWithStandardLibrary,
 		r: rules.NewRule(),
 		t: i.topic,
-		repo: i.client.NewMongoClient(),
+		repo: i.client.MongoClient(),
 		collection: "topic",
 	}
 }
