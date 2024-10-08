@@ -53,12 +53,12 @@ func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
 	}
 
 	subs := c.t.GetSusbcribers(c.m.Topic)
-	ch := make(chan bool, len(subs))
+	ch := make(chan bool)
 	go c.ev.Sentinel(ch)
 
 	go func(subscribers []string, msg *entities.Message, sig chan<- bool) {
 		var wg sync.WaitGroup
-		
+
 		for _, sub := range subscribers {
 			wg.Add(1)
 			go func(addr string, msg *entities.Message, wg *sync.WaitGroup) {
@@ -78,7 +78,7 @@ func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
 
 					sig <- true
 				}
-			}(sub, msg, &wg )
+			}(sub, msg, &wg)
 
 		}
 	

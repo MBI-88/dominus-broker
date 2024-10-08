@@ -37,6 +37,9 @@ func (e events) Sentinel(status <-chan bool) {
 			if ok && r && !e.status {
 				go e.resend()
 			}
+			if ok == false {
+				break
+			}
 		}
 	}
 }
