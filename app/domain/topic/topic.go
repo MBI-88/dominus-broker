@@ -18,7 +18,7 @@ func (t *topic) CreateTopic(key string, sub []string) {
 	t.tp[key] = sub
 }
 
-func (t *topic) GetSubcribers(key string) []string {
+func (t *topic) GetSusbcribers(key string) []string {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 	if subs, ok := t.tp[key]; ok {
@@ -54,7 +54,7 @@ type TopicInt interface {
 	//Parameters
 	//
 	//-> key: topic name
-	GetSubcribers(key string) []string
+	GetSusbcribers(key string) []string
 	//Delete a topic using a selected key
 	//
 	//Parameters

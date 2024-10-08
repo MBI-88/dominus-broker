@@ -23,6 +23,8 @@ func (i interactor) NewConnection() ConnectionInt {
 		p: jsoniter.ConfigCompatibleWithStandardLibrary,
 		t: i.topic,
 		ev: i.event,
+		r: rules.NewRule(),
+		
 	}
 }
 

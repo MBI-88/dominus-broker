@@ -5,7 +5,6 @@ import (
 	"dominus/app/domain/topic"
 	"dominus/app/interfaces/database"
 	"dominus/app/interfaces/rest/output"
-	
 
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -31,16 +30,18 @@ func (e events) InitialLoad() {
 	}
 }
 
-func (e events) CheckFails(status <- chan *entities.Logs) {
-	if r, ok := <- status; ok {
-		if r != nil && !e.status {
-			go e.resend()
+func (e events) Sentinel(status <-chan bool) {
+	for {
+		select {
+		case r, ok := <-status:
+			if ok && r && !e.status {
+				go e.resend()
+			}
 		}
 	}
-
 }
 
-//if there are any pending message , resend must stop
+// if there are any pending message , resend must stop
 func (e *events) resend() {
 	e.status = true
 
@@ -49,8 +50,14 @@ func (e *events) resend() {
 type EventsInt interface {
 	//Initial load to feed topic,looks for information on topic collection
 	InitialLoad()
-
-	CheckFails(status <- chan *entities.Logs)
+	//Check client fails
+	//
+	//Parameters
+	//
+	//-> status: channel
+	//
+	//-> buffer: total gorutine alive
+	Sentinel(status <-chan bool)
 }
 
 func NewEvent(r database.RepositoryInt, rs output.RestClientInt, t topic.TopicInt) EventsInt {
