@@ -1,0 +1,9 @@
+.git/
+**/tests/
+Dockerfile
+*.md
+*.sum
+.gitignore
+.dockerignore
+*.env
+/doc
