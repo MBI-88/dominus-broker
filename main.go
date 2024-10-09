@@ -84,7 +84,12 @@ func run() {
 		//***********Rest Server****************
 		//**************************************
 
-		mid := middlewares.NewMiddleware(env.ApiToken, env.Cidr)
+		mid := middlewares.NewMiddleware()
+		apiToken := middlewares.NewMiddlewareApiToken(env.ApiToken)
+		allowedHost := middlewares.NewMiddlewareHot(env.Cidr)
+
+
+		mid.AddMiddleware(apiToken,allowedHost)
 		router := router.New()
 		input.NewRestApi(router, inter)
 
@@ -106,9 +111,13 @@ func run() {
 			CloseOnShutdown:                    env.CloseOnShutdown,
 			StreamRequestBody:                  env.StreamRequestBody,
 			Logger:                             logs,
-		}
+		}	
 
-		if env.SslCert != "" && env.KeyFile != "" {
+		_, errC := os.Stat(env.SslCert)
+		_, errK := os.Stat(env.KeyFile)
+		
+
+		if errC == nil && errK == nil {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key))
 				cancel()

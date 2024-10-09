@@ -1,69 +1,64 @@
 package middlewares
 
 import (
-	"crypto/sha256"
-	"crypto/subtle"
-	"fmt"
-	"net"
-
 	"github.com/valyala/fasthttp"
 )
 
-type Middlewares func(ctx *fasthttp.RequestCtx) *fasthttp.RequestCtx
 
 type middleware struct {
-	token    []byte
-	cidr     string
+	mids  []middlewaresInt
 }
 
-
-func (m middleware) apiMiddleware(ctx *fasthttp.RequestCtx) error {
-	token := ctx.Request.Header.Peek("API_TOKEN")
-	hashedToken := sha256.Sum256(token)
-	hashedKey := sha256.Sum256(m.token)
-	if subtle.ConstantTimeCompare(hashedKey[:], hashedToken[:]) == 0 {
-		return fmt.Errorf("Invalid token")
-	}
-	return nil 
-}
-
-func (m middleware) allowedHosts(ctx *fasthttp.RequestCtx) error {
-	_, allowNet, err := net.ParseCIDR(m.cidr)
-	if err != nil && !allowNet.Contains(ctx.RemoteIP()) {
-		return fmt.Errorf("Host not allowed")
-	}
-	return nil
-
+func (m middleware) AddMiddleware(mid ...middlewaresInt) {
+	m.mids = append(m.mids, mid...)
 }
 
 func (m middleware) Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {
-		if m.token != nil {
-			if err := m.apiMiddleware(ctx); err != nil {
-				ctx.SetStatusCode(fasthttp.StatusUnauthorized)
-				ctx.Response.SetBody([]byte(err.Error()))
+		for _, mid := range m.mids {
+			if err := mid.CheckMiddleware(ctx); err != nil {
+				ctx.Response.Header.SetStatusCode(fasthttp.StatusForbidden)
+				ctx.Response.Header.SetContentType("application/text")
+				ctx.Response.SetBodyString(err.Error())
 				return
 			}
 		}
-		if m.cidr != "" {
-			if err := m.allowedHosts(ctx); err != nil {
-				ctx.SetStatusCode(fasthttp.StatusUnauthorized)
-				ctx.Response.SetBody([]byte(err.Error()))
-				return
-			}
-		}	
 		handler(ctx)
 	}
 }
 
-
 type middlewareInt interface {
+	//Middleware wrapper for any kind of middlewares that implement middlewaresInt interface
+	//
+	//middlewareInt has an unic method CheckMiddleware
+	//
+	//Parameters
+	//
+	//-> handler: fasthttp Request handler
+	//
+	//Returns
+	//
+	//-> error
 	Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler
+	//AddMiddleware adds every instances that implement middlwaresInt interface
+	//
+	//Parameters
+	//
+	//-> mi: instance of middlewaresInt
+	AddMiddleware(mid ...middlewaresInt)
 }
 
-func NewMiddleware(token, cidr string) middlewareInt {
+type middlewaresInt interface {
+	//CheckMiddleware method for checkin any kind of condicion. It's a method declaration 
+	//
+	//Parameters
+	//
+	//-> ctx: fasthttp context
+	CheckMiddleware(ctx *fasthttp.RequestCtx) error
+}
+
+func NewMiddleware() middlewareInt {
 	return &middleware{
-		token: []byte(token),
-		cidr: cidr,
+		mids: []middlewaresInt{},
 	}
 }
