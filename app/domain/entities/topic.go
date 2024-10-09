@@ -7,7 +7,7 @@ import (
 )
 
 //Topic to serializer in the database
-type TopicDB struct {
+type Topic struct {
 	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
 	Topic       string             `bson:"topic,omitempty" json:"topic,omitempty" validate:"omitempty,min=3,max=10,alphanum"`
 	Subscribers []string           `bson:"subscribers,omitempty" json:"subscribers,omitempty" validate:"omitempty,dive,url"`

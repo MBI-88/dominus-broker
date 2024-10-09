@@ -8,49 +8,48 @@ import (
 	"dominus/app/interfaces/clients"
 
 	jsoniter "github.com/json-iterator/go"
-	
 )
 
 type interactor struct {
 	client clients.ClientInt
-	topic topic.TopicInt
-	event event.EventsInt
+	topic  topic.TopicInt
+	event  event.EventsInt
+	log    event.LogsInt
 }
 
 func (i interactor) NewConnection() ConnectionInt {
-	return  &connection{
-		m: new(entities.Message),
-		p: jsoniter.ConfigCompatibleWithStandardLibrary,
-		t: i.topic,
+	return &connection{
+		m:  new(entities.Message),
+		p:  jsoniter.ConfigCompatibleWithStandardLibrary,
+		t:  i.topic,
 		ev: i.event,
-		r: rules.NewRule(),
-		
+		r:  rules.NewRule(),
+		lg: i.log,
 	}
 }
 
 func (i interactor) NewManager() ManagerInt {
 	return &manager{
-		p: jsoniter.ConfigCompatibleWithStandardLibrary,
-		r: rules.NewRule(),
-		t: i.topic,
-		repo: i.client.MongoClient(),
+		p:          jsoniter.ConfigCompatibleWithStandardLibrary,
+		r:          rules.NewRule(),
+		t:          i.topic,
+		repo:       i.client.MongoClient(),
 		collection: "topic",
+		lg:         i.log,
 	}
 }
 
-
 type InteractorInt interface {
-	NewConnection() ConnectionInt 
+	NewConnection() ConnectionInt
 	NewManager() ManagerInt
 }
 
-
-
 // Create a new interactor instance
-func NewInteractor(ct clients.ClientInt, t topic.TopicInt, e event.EventsInt) InteractorInt {
+func NewInteractor(ct clients.ClientInt, t topic.TopicInt, e event.EventsInt, lg event.LogsInt) InteractorInt {
 	return &interactor{
-		topic: t,
-		event: e,
+		topic:  t,
+		event:  e,
 		client: ct,
+		log:    lg,
 	}
 }

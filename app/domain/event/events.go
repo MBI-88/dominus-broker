@@ -18,7 +18,7 @@ type events struct {
 
 func (e events) InitialLoad() {
 	var (
-		topics []entities.TopicDB
+		topics []entities.Topic
 	)
 
 	if err := e.repo.FindObjects("topic", &topics, bson.D{}); err != nil {

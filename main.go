@@ -25,6 +25,18 @@ import (
 var (
 	mode   *bool
 	system chan os.Signal
+	banner = `
+	
+	██████╗   ██████╗ ███╗   ███╗██╗███╗   ██╗██╗   ██╗███████╗
+    ██╔══██╗ ██╔═══██╗████╗ ████║██║████╗  ██║██║   ██║██╔════╝
+    ██║  ██║ ██║   ██║██╔████╔██║██║██╔██╗ ██║██║   ██║███████╗
+    ██║  ██║ ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║   ██║╚════██║
+    ██████╔╝ ╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║╚██████╔╝███████║
+    ╚═════╝   ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝
+ 	------------------------------------------------------------
+ 	🔧 Press CTRL+C to terminate the server
+ 	🚀 Dominus server is running...
+	`
 )
 
 func run() {
@@ -48,6 +60,7 @@ func run() {
 
 	case "start":
 		//Instances
+		logs := event.NewLogs("./logs")
 		topic := topic.NewTopic()
 		events := event.NewEvent(
 			client.MongoClient(),
@@ -55,7 +68,7 @@ func run() {
 			topic,
 		)
 		events.InitialLoad()
-		inter := interactors.NewInteractor(client, topic, events)
+		inter := interactors.NewInteractor(client, topic, events, logs)
 
 		// Signals
 		system = make(chan os.Signal, 1)
@@ -92,9 +105,9 @@ func run() {
 			KeepHijackedConns:                  env.KeepHijackedConns,
 			CloseOnShutdown:                    env.CloseOnShutdown,
 			StreamRequestBody:                  env.StreamRequestBody,
+			Logger:                             logs,
 		}
 
-		fmt.Printf("[*] Rest service running on 0.0.0.0:%d\n", env.RestPort)
 		if env.SslCert != "" && env.KeyFile != "" {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key))
@@ -110,6 +123,17 @@ func run() {
 		//********************************
 		//*********Grpc server************
 		//********************************
+
+		
+		//*********************************
+		//**********Banner*****************
+		//*********************************
+
+		if env.SslCert != "" && env.KeyFile != "" {
+			fmt.Printf("%s\nRest:https://0.0.0.0:%d\nGrp:https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
+		}else {
+			fmt.Printf("%s\nRest:http://0.0.0.0:%d\nGrp:https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
+		}
 
 		//*********************************
 		//*********Shutdown servers********
@@ -133,7 +157,7 @@ func run() {
 
 }
 
-//catches inital variables
+// catches inital variables
 func init() {
 	mode = flag.Bool("mode", false, "set operation mode")
 
@@ -146,7 +170,7 @@ func init() {
 	}
 }
 
-//Dominus entripoint
+// Dominus entripoint
 func main() {
 	run()
 }

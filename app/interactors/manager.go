@@ -2,6 +2,7 @@ package interactors
 
 import (
 	"dominus/app/domain/entities"
+	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
 	"dominus/app/interfaces/database"
@@ -17,8 +18,9 @@ type manager struct {
 	r          rules.RuleInt
 	t          topic.TopicInt
 	repo       database.RepositoryInt
-	tdb        *entities.TopicDB
+	tdb        *entities.Topic
 	collection string
+	lg         event.LogsInt
 }
 
 func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
@@ -28,6 +30,7 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 	)
 
 	if err := m.p.Unmarshal(body, m.tdb); err != nil {
+		m.lg.WriteLog("InsertObject", err.Error())
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -36,6 +39,7 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 	}
 
 	if err := m.r.ValidateStruct(m.tdb); err != nil {
+		m.lg.WriteLog("InsertObject", err.Error())
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -46,6 +50,7 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
 
 	if _, err := m.repo.InsertObject(m.tdb, m.collection); err != nil {
+		m.lg.WriteLog("InsertObject", err.Error())
 		message["message"] = err.Error()
 		b, _ := m.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
@@ -61,7 +66,7 @@ func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
 
 func (m manager) GetTopic(ctx *fasthttp.RequestCtx) {
 	var (
-		topics  []entities.TopicDB
+		topics  []entities.Topic
 		message = make(map[string]any)
 	)
 

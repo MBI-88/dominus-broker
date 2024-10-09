@@ -15,7 +15,7 @@ import (
 )
 
 type connection struct {
-	m *entities.Message // Message
+	m *entities.Message          // Message
 	// grpc struct
 	p    jsoniter.API           // Parser
 	t    topic.TopicInt         // Topic
@@ -24,6 +24,7 @@ type connection struct {
 	cr   output.RestClientInt   // Rest client
 	repo database.RepositoryInt // Repository client
 	// grpc client
+	lg event.LogsInt
 }
 
 func (c connection) RestToGrpc(ctx *fasthttp.RequestCtx) {
@@ -37,6 +38,7 @@ func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
 	)
 
 	if err := c.p.Unmarshal(body, c.m); err != nil {
+		c.lg.WriteLog("InsertObject", err.Error())
 		message["message"] = err.Error()
 		b, _ := c.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -45,6 +47,7 @@ func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
 	}
 
 	if err := c.r.ValidateStruct(c.m); err != nil {
+		c.lg.WriteLog("InsertObject", err.Error())
 		message["message"] = err.Error()
 		b, _ := c.p.Marshal(message)
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
@@ -72,7 +75,7 @@ func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
 
 					go func(log *entities.Logs) {
 						if _, err := c.repo.InsertObject(log, "watting for definition"); err != nil {
-							// Create a client log
+							c.lg.WriteLog("InsertObject", err.Error())
 						}
 					}(log)
 
