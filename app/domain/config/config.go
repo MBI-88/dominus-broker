@@ -32,7 +32,7 @@ type config struct {
 	Cidr                              string
 	ConnectionKey                     []byte
 	Database                          string
-	Collection                        string
+	Collections                        string
 }
 
 func (s *config) setEnv() {
@@ -59,7 +59,7 @@ func (s *config) setEnv() {
 	s.Cidr = viper.GetString("CIDR")
 	s.ConnectionKey = []byte(grpcConnKey)
 	s.Database = viper.GetString("DATABASE")
-	s.Collection = viper.GetString("COLLECTION")
+	s.Collections = viper.GetString("COLLECTIONS")
 }
 
 func (s config) GetEnvVar(prod bool) config {
@@ -78,7 +78,7 @@ func (s config) GetEnvVar(prod bool) config {
 	return s
 }
 
-func (s config) GetEnvVarTest() config {
+func (s *config) GetEnvVarTest() config {
 	viper.SetConfigFile("./../.env")
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
@@ -86,7 +86,8 @@ func (s config) GetEnvVarTest() config {
 		}
 	}
 	s.setEnv()
-	return s
+	s.Database = "test"
+	return *s
 }
 
 type restConfigInt interface {

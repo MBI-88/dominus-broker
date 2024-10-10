@@ -26,18 +26,32 @@ var (
 	mode   *bool
 	system chan os.Signal
 	banner = `
-	
-	██████╗   ██████╗ ███╗   ███╗██╗███╗   ██╗██╗   ██╗███████╗
-    ██╔══██╗ ██╔═══██╗████╗ ████║██║████╗  ██║██║   ██║██╔════╝
-    ██║  ██║ ██║   ██║██╔████╔██║██║██╔██╗ ██║██║   ██║███████╗
-    ██║  ██║ ██║   ██║██║╚██╔╝██║██║██║╚██╗██║██║   ██║╚════██║
-    ██████╔╝ ╚██████╔╝██║ ╚═╝ ██║██║██║ ╚████║╚██████╔╝███████║
-    ╚═════╝   ╚═════╝ ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝
- 	------------------------------------------------------------
- 	🔧 Press CTRL+C to terminate the server
- 	🚀 Dominus server is running...
-	`
+==========================================================	
+██████    ██████  ███    ██  ██ ███    ██ ██    ██ ███████
+██   ██  ██    ██ ████  ████ ██ ████   ██ ██    ██ ██
+██   ██  ██    ██ ██ ████ ██ ██ ██ ██  ██ ██    ██ ███████
+██   ██  ██    ██ ██  ██  ██ ██ ██  ██ ██ ██    ██      ██
+██████    ██████  ██      ██ ██ ██   ████  ██████  ███████
+==========================================================    
+   
+👉 Github: https://github.com/MBI-88
+🔧 Press CTRL+C to terminate the server
+
+Dominus server is running on`
 )
+
+//catches inital variables
+func init() {
+	mode = flag.Bool("prod", false, "set operation mode")
+
+	flag.Usage = func() {
+		info := fmt.Sprintf("[*] ***Dominus*** [*]\n")
+		info += "mode: boolean\n"
+		info += "args: migrate|start"
+		fmt.Fprintf(os.Stderr, "%s\n", info)
+		flag.PrintDefaults()
+	}
+}
 
 func run() {
 	//Receives commands from cli
@@ -56,7 +70,7 @@ func run() {
 
 	case "migrate":
 		repo := client.MongoClient()
-		repo.Migrations(env.Collection)
+		repo.Migrations(env.Collections)
 
 	case "start":
 		//Instances
@@ -138,10 +152,10 @@ func run() {
 		//**********Banner*****************
 		//*********************************
 
-		if env.SslCert != "" && env.KeyFile != "" {
-			fmt.Printf("%s\nRest:https://0.0.0.0:%d\nGrp:https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
+		if errC == nil && errK == nil {
+			fmt.Printf("%s 🚀 Rest: https://0.0.0.0:%d 🚀 Grpc: https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
 		}else {
-			fmt.Printf("%s\nRest:http://0.0.0.0:%d\nGrp:https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
+			fmt.Printf("%s 🚀 Rest: http://0.0.0.0:%d 🚀 Grpc: http://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
 		}
 
 		//*********************************
@@ -163,23 +177,11 @@ func run() {
 	default:
 		fmt.Println("No option selected")
 	}
-
 }
 
-// catches inital variables
-func init() {
-	mode = flag.Bool("mode", false, "set operation mode")
 
-	flag.Usage = func() {
-		info := fmt.Sprintf("[*] ***Dominus*** [*]\n")
-		info += "mode: boolean\n"
-		info += "args: migrate|start"
-		fmt.Fprintf(os.Stderr, "%s\n", info)
-		flag.PrintDefaults()
-	}
-}
 
-// Dominus entripoint
+//Dominus entripoint
 func main() {
 	run()
 }

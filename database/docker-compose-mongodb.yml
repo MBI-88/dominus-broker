@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: dominus
+    
+    deploy:
+      restart_policy:
+        condition: on-failure
+      replicas: 1
+    
+    environment:
+      - MONGO_INITDB_DATABASE=dominus
+      - MONGO_INITDB_ROOT_USERNAME=dominus
+      - MONGO_INITDB_ROOT_PASSWORD=dominus10102024@8807
+
+    volumes:
+      - ./database:/data/db
+    command: [--auth]
+
+    ports:
+      - 27017:27017
+    networks:
+      - dominus
+
+volumes:
+  database:
+
+networks:
+  dominus:
+    driver: overlay
+    attachable: true
+    external: true

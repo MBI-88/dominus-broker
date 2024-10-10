@@ -23,9 +23,8 @@ type repository struct {
 
 func (r repository) Migrations(strCollections string) {
 	collections := strings.Split(strCollections, ",")
-	
 	for _, name := range collections {
-		if name == "topic_db" {
+		if name == "topic" {
 			r.rls.CreateIndex(r.client, r.database, name, context.TODO())
 		} else {
 			if err := r.client.Database(r.database).CreateCollection(context.TODO(), name); err != nil {
@@ -33,7 +32,6 @@ func (r repository) Migrations(strCollections string) {
 			}
 		}
 	}
-
 	fmt.Println("[*] Migration successful!")
 }
 

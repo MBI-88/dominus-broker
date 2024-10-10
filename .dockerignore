@@ -7,3 +7,5 @@ Dockerfile
 .dockerignore
 *.env
 /doc
+/database
+*.yml
