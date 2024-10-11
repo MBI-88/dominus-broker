@@ -1,0 +1,246 @@
+syntax = "proto2";
+
+package validate;
+
+option go_package = "grpc/validate";
+option java_package = "io.envoyproxy.pgv.validate";
+
+import "google/protobuf/descriptor.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// Validation rules applied at the message level
+extend google.protobuf.MessageOptions {
+    // Disabled nullifies any validation rules for this message, including any
+    // message fields associated with it that do support validation.
+    optional bool disabled = 1071;
+    // Ignore skips generation of validation methods for this message.
+    optional bool ignored = 1072;
+}
+
+// Validation rules applied at the oneof level
+extend google.protobuf.OneofOptions {
+    // Required ensures that exactly one the field options in a oneof is set;
+    // validation fails if no fields in the oneof are set.
+    optional bool required = 1071;
+}
+
+// Validation rules applied at the field level
+extend google.protobuf.FieldOptions {
+    // Rules specify the validations to be performed on this field. By default,
+    // no validation is performed against a field.
+    optional FieldRules rules = 1071;
+}
+
+// FieldRules encapsulates the rules for each type of field. Depending on the
+// field, the correct set should be used to ensure proper validations.
+message FieldRules {
+    optional MessageRules message = 17;
+    oneof type {
+        // Scalar Field Types
+        FloatRules    float    = 1;
+        DoubleRules   double   = 2;
+        Int32Rules    int32    = 3;
+        Int64Rules    int64    = 4;
+        UInt32Rules   uint32   = 5;
+        UInt64Rules   uint64   = 6;
+        SInt32Rules   sint32   = 7;
+        SInt64Rules   sint64   = 8;
+        Fixed32Rules  fixed32  = 9;
+        Fixed64Rules  fixed64  = 10;
+        SFixed32Rules sfixed32 = 11;
+        SFixed64Rules sfixed64 = 12;
+        BoolRules     bool     = 13;
+        StringRules   string   = 14;
+        BytesRules    bytes    = 15;
+
+        // Complex Field Types
+        EnumRules     enum     = 16;
+        RepeatedRules repeated = 18;
+        MapRules      map      = 19;
+
+        // Well-Known Field Types
+        AnyRules       any       = 20;
+        DurationRules  duration  = 21;
+        TimestampRules timestamp = 22;
+    }
+}
+
+//StringRules describe the constraints applied to `string` values
+message StringRules {
+    // Const specifies that this field must be exactly the specified value
+    optional string const = 1;
+
+    // Len specifies that this field must be the specified number of
+    // characters (Unicode code points). Note that the number of
+    // characters may differ from the number of bytes in the string.
+    optional uint64 len = 19;
+
+    // MinLen specifies that this field must be the specified number of
+    // characters (Unicode code points) at a minimum. Note that the number of
+    // characters may differ from the number of bytes in the string.
+    optional uint64 min_len = 2;
+
+    // MaxLen specifies that this field must be the specified number of
+    // characters (Unicode code points) at a maximum. Note that the number of
+    // characters may differ from the number of bytes in the string.
+    optional uint64 max_len = 3;
+
+    // LenBytes specifies that this field must be the specified number of bytes
+    optional uint64 len_bytes = 20;
+
+    // MinBytes specifies that this field must be the specified number of bytes
+    // at a minimum
+    optional uint64 min_bytes = 4;
+
+    // MaxBytes specifies that this field must be the specified number of bytes
+    // at a maximum
+    optional uint64 max_bytes = 5;
+
+    // Pattern specifes that this field must match against the specified
+    // regular expression (RE2 syntax). The included expression should elide
+    // any delimiters.
+    optional string pattern  = 6;
+
+    // Prefix specifies that this field must have the specified substring at
+    // the beginning of the string.
+    optional string prefix   = 7;
+
+    // Suffix specifies that this field must have the specified substring at
+    // the end of the string.
+    optional string suffix   = 8;
+
+    // Contains specifies that this field must have the specified substring
+    // anywhere in the string.
+    optional string contains = 9;
+
+    // NotContains specifies that this field cannot have the specified substring
+    // anywhere in the string.
+    optional string not_contains = 23;
+
+    // In specifies that this field must be equal to one of the specified
+    // values
+    repeated string in     = 10;
+
+    // NotIn specifies that this field cannot be equal to one of the specified
+    // values
+    repeated string not_in = 11;
+
+    // WellKnown rules provide advanced constraints against common string
+    // patterns
+    oneof well_known {
+        // Email specifies that the field must be a valid email address as
+        // defined by RFC 5322
+        bool email    = 12;
+
+        // Hostname specifies that the field must be a valid hostname as
+        // defined by RFC 1034. This constraint does not support
+        // internationalized domain names (IDNs).
+        bool hostname = 13;
+
+        // Ip specifies that the field must be a valid IP (v4 or v6) address.
+        // Valid IPv6 addresses should not include surrounding square brackets.
+        bool ip       = 14;
+
+        // Ipv4 specifies that the field must be a valid IPv4 address.
+        bool ipv4     = 15;
+
+        // Ipv6 specifies that the field must be a valid IPv6 address. Valid
+        // IPv6 addresses should not include surrounding square brackets.
+        bool ipv6     = 16;
+
+        // Uri specifies that the field must be a valid, absolute URI as defined
+        // by RFC 3986
+        bool uri      = 17;
+
+        // UriRef specifies that the field must be a valid URI as defined by RFC
+        // 3986 and may be relative or absolute.
+        bool uri_ref  = 18;
+
+        // Address specifies that the field must be either a valid hostname as
+        // defined by RFC 1034 (which does not support internationalized domain
+        // names or IDNs), or it can be a valid IP (v4 or v6).
+        bool address  = 21;
+
+        // Uuid specifies that the field must be a valid UUID as defined by
+        // RFC 4122
+        bool uuid     = 22;
+
+        // WellKnownRegex specifies a common well known pattern defined as a regex.
+        KnownRegex well_known_regex = 24;
+    }
+
+  // This applies to regexes HTTP_HEADER_NAME and HTTP_HEADER_VALUE to enable
+  // strict header validation.
+  // By default, this is true, and HTTP header validations are RFC-compliant.
+  // Setting to false will enable a looser validations that only disallows
+  // \r\n\0 characters, which can be used to bypass header matching rules.
+  optional bool strict = 25 [default = true];
+
+  // IgnoreEmpty specifies that the validation rules of this field should be
+  // evaluated only if the field is not empty
+  optional bool ignore_empty = 26;
+}
+
+
+//BytesRules describe the constraints applied to `bytes` values
+message BytesRules {
+    // Const specifies that this field must be exactly the specified value
+    optional bytes const = 1;
+
+    // Len specifies that this field must be the specified number of bytes
+    optional uint64 len = 13;
+
+    // MinLen specifies that this field must be the specified number of bytes
+    // at a minimum
+    optional uint64 min_len = 2;
+
+    // MaxLen specifies that this field must be the specified number of bytes
+    // at a maximum
+    optional uint64 max_len = 3;
+
+    // Pattern specifes that this field must match against the specified
+    // regular expression (RE2 syntax). The included expression should elide
+    // any delimiters.
+    optional string pattern  = 4;
+
+    // Prefix specifies that this field must have the specified bytes at the
+    // beginning of the string.
+    optional bytes  prefix   = 5;
+
+    // Suffix specifies that this field must have the specified bytes at the
+    // end of the string.
+    optional bytes  suffix   = 6;
+
+    // Contains specifies that this field must have the specified bytes
+    // anywhere in the string.
+    optional bytes  contains = 7;
+
+    // In specifies that this field must be equal to one of the specified
+    // values
+    repeated bytes in     = 8;
+
+    // NotIn specifies that this field cannot be equal to one of the specified
+    // values
+    repeated bytes not_in = 9;
+
+    // WellKnown rules provide advanced constraints against common byte
+    // patterns
+    oneof well_known {
+        // Ip specifies that the field must be a valid IP (v4 or v6) address in
+        // byte format
+        bool ip   = 10;
+
+        // Ipv4 specifies that the field must be a valid IPv4 address in byte
+        // format
+        bool ipv4 = 11;
+
+        // Ipv6 specifies that the field must be a valid IPv6 address in byte
+        // format
+        bool ipv6 = 12;
+    }
+
+    // IgnoreEmpty specifies that the validation rules of this field should be
+    // evaluated only if the field is not empty
+    optional bool ignore_empty = 14;
+}

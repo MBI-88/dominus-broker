@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package proto;
+
+import "validate.proto";
+
+option go_package = "grpc/proto";
+
+
+//Message
+message Message {
+    string topic = 1 [(validate.rules).string.max_len = 20] ;
+    repeated bytes payload = 2 [(validate.rules).bytes.max_len = 1000];
+}
+
+
+//Response
+message Response {
+}
+
+
+//Services
+service GrpcService {
+    rpc Send(Message) returns (Response);
+    rpc SendClientStream(stream Message) returns (Response);
+    rpc SendServerStream(Message) returns (stream Message);
+    rpc SendDoubleStrea(stream Message) returns (stream Message);
+}

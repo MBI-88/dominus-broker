@@ -51,11 +51,33 @@ func NewInteractor(ct clients.ClientInt, t topic.TopicInt, e event.EventsInt, lg
 	}
 }
 
-
-
-
 type RestContextInt interface {
+	//BodyParser parses context data to struct
+	//
+	//Parameters
+	//
+	//-> obj: struct to fill
 	BodyParser(obj any) error
+	//FormFile gives a multipart body
+	//
+	//Parameters
+	//
+	//-> key: the field to find
+	//
+	//Returns
+	//
+	//-> multipart.FileHeader
+	//
+	//-> error 
 	FormFile(key string) (*multipart.FileHeader, error)
+	//FormValue gives a array byte of the key selected
+	//
+	//Parameters
+	//
+	//-> key: field to find
+	//
+	//Returns
+	//
+	//-> data: data array byte
     FormValue(key string) []byte
 }

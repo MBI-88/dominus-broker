@@ -69,7 +69,6 @@ func (r *rest) managerCreate(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	context := NewRestContext(ctx)
 	
-
 	if err := inter.CreateTopic(context); err != nil {
 		message := make(map[string]any)
 		ctx.Response.Header.Set("Content-Type", "application/json")
@@ -135,7 +134,6 @@ func (r *rest) managerGet(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.Set("Content-Type", "application/text")
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 	ctx.Response.SetBody(body)
-
 }
 
 // Deletes a topic in memory and database

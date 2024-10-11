@@ -9,11 +9,10 @@ import (
 	"dominus/app/interfaces/rest/output"
 	"sync"
 	"time"
-	
 )
 
 type connection struct {
-	m *entities.Message          // Message
+	m *entities.Message // Message
 	// grpc struct
 	t    topic.TopicInt         // Topic
 	ev   event.EventsInt        // Events
@@ -25,7 +24,9 @@ type connection struct {
 }
 
 func (c *connection) RestToGrpc(ctx RestContextInt) error {
-	return nil 
+
+
+	return nil
 }
 
 func (c *connection) RestToRest(ctx RestContextInt) error {
@@ -68,7 +69,7 @@ func (c *connection) RestToRest(ctx RestContextInt) error {
 			}(sub, msg, &wg)
 
 		}
-	
+
 		wg.Wait()
 		close(sig)
 	}(subs, c.m, ch)
@@ -77,11 +78,13 @@ func (c *connection) RestToRest(ctx RestContextInt) error {
 }
 
 func (c *connection) GrpcToRest() error {
-	return nil 
+
+	
+	return nil
 }
 
 func (c *connection) GrpcToGrpc() error {
-	return nil 
+	return nil
 }
 
 type ConnectionInt interface {
