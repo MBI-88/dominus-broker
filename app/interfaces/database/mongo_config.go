@@ -10,7 +10,7 @@ import (
 
 type mongoConfig struct{}
 
-func (m mongoConfig) CreateClient(dsn string) *mongo.Client {
+func (*mongoConfig) CreateClient(dsn string) *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 

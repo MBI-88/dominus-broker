@@ -5,18 +5,22 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
-	"dominus/app/interfaces/clients"
 	"mime/multipart"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type interactor struct {
-	client clients.ClientInt
-	topic  topic.TopicInt
-	event  event.EventsInt
-	log    event.LogsInt
+	repo  RepositoryInt
+	topic topic.TopicInt
+	event event.EventsInt
+	log   event.LogsInt
 }
 
-func (i interactor) NewConnection() ConnectionInt {
+func (i *interactor) NewConnection() ConnectionInt {
 	return &connection{
 		m:  new(entities.Message),
 		t:  i.topic,
@@ -26,11 +30,11 @@ func (i interactor) NewConnection() ConnectionInt {
 	}
 }
 
-func (i interactor) NewManager() ManagerInt {
+func (i *interactor) NewManager() ManagerInt {
 	return &manager{
 		r:          rules.NewRule(),
 		t:          i.topic,
-		repo:       i.client.MongoClient(),
+		repo:       i.repo,
 		collection: "topic",
 		lg:         i.log,
 	}
@@ -42,12 +46,12 @@ type InteractorInt interface {
 }
 
 // Create a new interactor instance
-func NewInteractor(ct clients.ClientInt, t topic.TopicInt, e event.EventsInt, lg event.LogsInt) InteractorInt {
+func NewInteractor(rp RepositoryInt, t topic.TopicInt, e event.EventsInt, lg event.LogsInt) InteractorInt {
 	return &interactor{
-		topic:  t,
-		event:  e,
-		client: ct,
-		log:    lg,
+		topic: t,
+		event: e,
+		repo:  rp,
+		log:   lg,
 	}
 }
 
@@ -68,7 +72,7 @@ type RestContextInt interface {
 	//
 	//-> multipart.FileHeader
 	//
-	//-> error 
+	//-> error
 	FormFile(key string) (*multipart.FileHeader, error)
 	//FormValue gives a array byte of the key selected
 	//
@@ -79,5 +83,89 @@ type RestContextInt interface {
 	//Returns
 	//
 	//-> data: data array byte
-    FormValue(key string) []byte
+	FormValue(key string) []byte
+}
+
+type RepositoryInt interface {
+	//Make migrations in the database
+	//
+	//Parameters
+	//
+	//-> strCollection: string that contains collection names splited by ","
+	Migrations(strCollection string)
+	//Delete an Object in the database
+	//
+	//Parameters
+	//
+	//-> f: filter to use
+	//
+	//-> collection: name of the collection
+	DeleteObject(f primitive.D, collection string) (*mongo.DeleteResult, error)
+	//Update an object in the database
+	//
+	//Parameters
+	//
+	//-> filter: filter to select objects to update
+	//
+	//-> update: the object and key to update
+	//
+	//-> collection: collection name to use
+	UpdateObject(filter primitive.D, updadte primitive.D, collection string) (*mongo.UpdateResult, error)
+	//Create an object in the database
+	//
+	//Parameters
+	//
+	//-> obj: the object to be updated
+	//
+	//-> collection: collection name to use
+	InsertObject(obj any, collection string) (*mongo.InsertOneResult, error)
+	//Find objects in the database
+	//
+	//Parameters
+	//
+	//-> collection: collection name to use
+	//
+	//-> objects: array object to fill
+	//
+	//-> filter: the filter to find objects
+	//
+	//-> op: contains options to use in the query
+	FindObjects(collection string, objects any, filter bson.D, op ...*options.FindOptions) error
+	//Find and object in the database
+	//
+	//Parameters
+	//
+	//-> f: filter to match with objects
+	//
+	//-> collection: collection name to use
+	//
+	//-> object: the object to fill
+	FindObject(f primitive.D, collection string, object any) error
+	//Count pages in the database
+	//
+	//Parameters
+	//
+	//-> collection: collection name to use
+	CountPages(collection string) (int64, error)
+	//Delete objects in the database
+	//
+	//Parameters
+	//
+	//-> f: filter to find objects
+	//
+	//-> collection: collection name to use
+	DeleteObjects(f primitive.D, collection string) (*mongo.DeleteResult, error)
+}
+
+type RestClientInt interface {
+	//Rest client
+	//
+	//Parameters
+	//
+	//-> ctx: context
+	// 
+	//-> sub: subcriber
+	//
+	//-> payload: message
+	DoJsonRequest(sub string, payload []byte) error
 }

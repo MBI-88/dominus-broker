@@ -12,7 +12,7 @@ type apiMiddleware struct {
 	token []byte
 }
 
-func (a apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
+func (a *apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	token := ctx.Request.Header.Peek("API_TOKEN")
 	hashedToken := sha256.Sum256(token)
 	hashedKey := sha256.Sum256(a.token)

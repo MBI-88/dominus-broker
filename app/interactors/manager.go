@@ -5,7 +5,6 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
-	"dominus/app/interfaces/database"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -14,7 +13,7 @@ import (
 type manager struct {
 	r          rules.RuleInt
 	t          topic.TopicInt
-	repo       database.RepositoryInt
+	repo       RepositoryInt
 	tdb        *entities.Topic
 	collection string
 	lg         event.LogsInt

@@ -11,7 +11,7 @@ type hostAllowed struct {
 	cidr string
 }
 
-func (h hostAllowed) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
+func (h *hostAllowed) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	_, allowNet, err := net.ParseCIDR(h.cidr)
 	if err != nil && !allowNet.Contains(ctx.RemoteIP()) {
 		return fmt.Errorf("Host not allowed")

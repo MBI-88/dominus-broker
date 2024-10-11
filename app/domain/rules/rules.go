@@ -20,7 +20,7 @@ type rule struct {
 	v  *validator.Validate
 }
 
-func (r rule) ValidateStruct(data any) error {
+func (r *rule) ValidateStruct(data any) error {
 	var (
 		errors  []errorResponse
 		element errorResponse
@@ -46,7 +46,7 @@ func (r rule) ValidateStruct(data any) error {
 }
 
 
-func (rule) CreateIndex(client *mongo.Client, database, name string, ctx context.Context) {
+func (*rule) CreateIndex(client *mongo.Client, database, name string, ctx context.Context) {
 	db := client.Database(database)
 	if err := db.CreateCollection(ctx, name); err != nil {
 		panic(err)

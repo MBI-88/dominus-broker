@@ -3,20 +3,19 @@ package event
 import (
 	"dominus/app/domain/entities"
 	"dominus/app/domain/topic"
-	"dominus/app/interfaces/database"
-	"dominus/app/interfaces/rest/output"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type events struct {
 	t      topic.TopicInt
-	repo   database.RepositoryInt
-	rest   output.RestClientInt
+	repo   repoInt
+	rest   restClientInt
 	status bool
 }
 
-func (e events) InitialLoad() {
+func (e *events) InitialLoad() {
 	var topics []entities.Topic
 
 	if err := e.repo.FindObjects("topic", &topics, bson.D{}); err != nil {
@@ -61,11 +60,40 @@ type EventsInt interface {
 	Sentinel(status <-chan bool)
 }
 
-func NewEvent(r database.RepositoryInt, rs output.RestClientInt, t topic.TopicInt) EventsInt {
+func NewEvent(r repoInt, rs restClientInt, t topic.TopicInt) EventsInt {
 	return &events{
 		t:      t,
 		repo:   r,
 		rest:   rs,
 		status: false,
 	}
+}
+
+
+type repoInt interface {
+	//Find objects in the database
+	//
+	//Parameters
+	//
+	//-> collection: collection name to use
+	//
+	//-> objects: array object to fill
+	//
+	//-> filter: the filter to find objects
+	//
+	//-> op: contains options to use in the query
+	FindObjects(collection string, objects any, filter bson.D, op ...*options.FindOptions) error
+}
+
+type restClientInt interface {
+	//Rest client
+	//
+	//Parameters
+	//
+	//-> ctx: context
+	// 
+	//-> sub: subcriber
+	//
+	//-> payload: message
+	DoJsonRequest(sub string, payload []byte) error
 }

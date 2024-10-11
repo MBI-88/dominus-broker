@@ -9,11 +9,11 @@ type middleware struct {
 	mids  []middlewaresInt
 }
 
-func (m middleware) AddMiddleware(mid ...middlewaresInt) {
+func (m *middleware) AddMiddleware(mid ...middlewaresInt) {
 	m.mids = append(m.mids, mid...)
 }
 
-func (m middleware) Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
+func (m *middleware) Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler {
 	return func(ctx *fasthttp.RequestCtx) {
 		for _, mid := range m.mids {
 			if err := mid.CheckMiddleware(ctx); err != nil {

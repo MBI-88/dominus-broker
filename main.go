@@ -4,12 +4,13 @@ import (
 	"context"
 	"dominus/app/domain/config"
 	"dominus/app/domain/event"
+	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
 	"dominus/app/interactors"
-	"dominus/app/interfaces/clients"
 	"dominus/app/interfaces/database"
-	"dominus/app/interfaces/rest/input"
-	"dominus/app/interfaces/rest/middlewares"
+	"dominus/app/interfaces/fasthttp/output"
+	"dominus/app/interfaces/fasthttp/input"
+	"dominus/app/interfaces/fasthttp/middlewares"
 	"flag"
 	"fmt"
 	"log"
@@ -63,13 +64,13 @@ func run() {
 	env := settings.GetEnvVar(*mode)
 	mongoConfig := database.NewMongoConfig()
 	mongoClient := mongoConfig.CreateClient(env.Dsn)
-
-	client := clients.NewClient(env.Dsn, env.Database, mongoClient)
+	rls := rules.NewRule()
+	restClient := output.NewRestClient()
+	repo := database.NewRepository(env.Dsn, env.Database, rls, mongoClient)
 
 	switch args {
 
 	case "migrate":
-		repo := client.MongoClient()
 		repo.Migrations(env.Collections)
 
 	case "start":
@@ -77,12 +78,12 @@ func run() {
 		logs := event.NewLogs("./logs")
 		topic := topic.NewTopic()
 		events := event.NewEvent(
-			client.MongoClient(),
-			client.RestClient(),
+			repo,
+			restClient,
 			topic,
 		)
 		events.InitialLoad()
-		inter := interactors.NewInteractor(client, topic, events, logs)
+		inter := interactors.NewInteractor(repo, topic, events, logs)
 
 		// Signals
 		system = make(chan os.Signal, 1)

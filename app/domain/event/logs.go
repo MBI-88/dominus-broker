@@ -10,11 +10,11 @@ type logs struct {
 	lg   *log.Logger
 }
 
-func (l logs) WriteLog(op, dsc string) {
+func (l *logs) WriteLog(op, dsc string) {
 	l.lg.Printf("%s: %s\n", op,dsc)
 }
 
-func (l logs) Printf(format string, args ...any) {
+func (l *logs) Printf(format string, args ...any) {
 	l.lg.Printf(format, args...)
 }
 

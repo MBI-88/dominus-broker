@@ -5,8 +5,6 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
-	"dominus/app/interfaces/database"
-	"dominus/app/interfaces/rest/output"
 	"sync"
 	"time"
 )
@@ -14,17 +12,16 @@ import (
 type connection struct {
 	m *entities.Message // Message
 	// grpc struct
-	t    topic.TopicInt         // Topic
-	ev   event.EventsInt        // Events
-	r    rules.RuleInt          // Rules
-	cr   output.RestClientInt   // Rest client
-	repo database.RepositoryInt // Repository client
+	t    topic.TopicInt  // Topic
+	ev   event.EventsInt // Events
+	r    rules.RuleInt   // Rules
+	cr   RestClientInt   // Rest client
+	repo RepositoryInt   // Repository client
 	// grpc client
 	lg event.LogsInt
 }
 
 func (c *connection) RestToGrpc(ctx RestContextInt) error {
-
 
 	return nil
 }
@@ -79,7 +76,6 @@ func (c *connection) RestToRest(ctx RestContextInt) error {
 
 func (c *connection) GrpcToRest() error {
 
-	
 	return nil
 }
 

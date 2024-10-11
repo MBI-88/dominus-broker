@@ -1,6 +1,7 @@
 package output
 
 import (
+	"dominus/app/interactors"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -13,7 +14,7 @@ type restclient struct {
 	c *fasthttp.Client
 }
 
-func (r restclient) DoJsonRequest(sub string, payload []byte) error {
+func (r *restclient) DoJsonRequest(sub string, payload []byte) error {
 	req := fasthttp.AcquireRequest()
 	resp := fasthttp.AcquireResponse()
 	defer fasthttp.ReleaseRequest(req)
@@ -33,20 +34,8 @@ func (r restclient) DoJsonRequest(sub string, payload []byte) error {
 
 
 
-type RestClientInt interface {
-	//Rest client
-	//
-	//Parameters
-	//
-	//-> ctx: context
-	// 
-	//-> sub: subcriber
-	//
-	//-> payload: message
-	DoJsonRequest(sub string, payload []byte) error
-}
 
-func NewRestClient() RestClientInt {
+func NewRestClient() interactors.RestClientInt {
 	return &restclient{
 		c: &fasthttp.Client{
 			Name: "Dominus",
