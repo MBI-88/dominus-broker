@@ -7,14 +7,11 @@ import (
 	"dominus/app/domain/topic"
 	"dominus/app/interfaces/database"
 
-	jsoniter "github.com/json-iterator/go"
-	"github.com/valyala/fasthttp"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type manager struct {
-	p          jsoniter.API
 	r          rules.RuleInt
 	t          topic.TopicInt
 	repo       database.RepositoryInt
@@ -23,97 +20,50 @@ type manager struct {
 	lg         event.LogsInt
 }
 
-func (m manager) CreateTopic(ctx *fasthttp.RequestCtx) {
-	var (
-		message = make(map[string]any)
-		body    = ctx.Request.Body()
-	)
+func (m *manager) CreateTopic(ctx RestContextInt) error {
 
-	if err := m.p.Unmarshal(body, m.tdb); err != nil {
+	if err := ctx.BodyParser(m.tdb); err != nil {
 		m.lg.WriteLog("InsertObject", err.Error())
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	if err := m.r.ValidateStruct(m.tdb); err != nil {
 		m.lg.WriteLog("InsertObject", err.Error())
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
 
 	if _, err := m.repo.InsertObject(m.tdb, m.collection); err != nil {
 		m.lg.WriteLog("InsertObject", err.Error())
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
-
-	message["message"] = "topic created successful!"
-	b, _ := m.p.Marshal(message)
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-	ctx.Response.SetBody(b)
+	
+	return nil 
 }
 
-func (m manager) GetTopic(ctx *fasthttp.RequestCtx) {
+func (m *manager) GetTopic(ctx RestContextInt) (map[string]any, error) {
 	var (
 		topics  []entities.Topic
 		message = make(map[string]any)
 	)
 
 	if err := m.repo.FindObjects(m.collection, &topics, bson.D{}); err != nil {
-		message["message"] = err.Error()
-		body, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.Response.SetBody(body)
-		return
+		return nil, err
 	}
 
 	message["topics"] = topics
-
-	body, err := m.p.Marshal(message)
-	if err != nil {
-		delete(message, "topics")
-		message["message"] = err.Error()
-		body, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.Response.SetBody(body)
-		return
-	}
-
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusOK)
-	ctx.Response.SetBody(body)
+	return message, nil
 }
 
-func (m manager) UpdateTopic(ctx *fasthttp.RequestCtx) {
-	var (
-		message = make(map[string]string)
-		body    = ctx.Request.Body()
-	)
+func (m *manager) UpdateTopic(ctx RestContextInt) error {
 
-	if err := m.p.Unmarshal(body, m.tdb); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+	if err := ctx.BodyParser(m.tdb); err != nil {
+		return err
 	}
 
 	if err := m.r.ValidateStruct(m.tdb); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
@@ -121,63 +71,33 @@ func (m manager) UpdateTopic(ctx *fasthttp.RequestCtx) {
 	update := primitive.D{primitive.E{Key: "$set", Value: m.tdb}}
 
 	if _, err := m.repo.UpdateObject(filter, update, m.collection); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
-	message["message"] = "topic updated successful!"
-	b, _ := m.p.Marshal(message)
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-	ctx.Response.SetBody(b)
+	return nil 
 }
 
-func (m manager) DeleteTopic(ctx *fasthttp.RequestCtx) {
-	var (
-		message = make(map[string]string)
-		body    = ctx.Request.Body()
-	)
+func (m *manager) DeleteTopic(ctx RestContextInt) error {
 
-	if err := m.p.Unmarshal(body, m.tdb); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+	if err := ctx.BodyParser(m.tdb); err != nil {
+		return err
 	}
 
 	if err := m.r.ValidateStruct(m.tdb); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	if err := m.t.DeleteTopic(m.tdb.Topic); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	filter := primitive.D{primitive.E{Key: "topic", Value: m.tdb.Topic}}
 
 	if _, err := m.repo.DeleteObject(filter, m.collection); err != nil {
-		message["message"] = err.Error()
-		b, _ := m.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusInternalServerError)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
-	message["message"] = "topic deleted successful!"
-	b, _ := m.p.Marshal(message)
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-	ctx.Response.SetBody(b)
+	return nil 
 }
 
 type ManagerInt interface {
@@ -186,23 +106,23 @@ type ManagerInt interface {
 	//Parameters
 	//
 	//-> ctx: fasthttp context
-	CreateTopic(ctx *fasthttp.RequestCtx)
+	CreateTopic(ctx RestContextInt) error
 	//Return all topic in dominus
 	//
 	//Parameters
 	//
 	//-> ctx: fasthttp context
-	GetTopic(ctx *fasthttp.RequestCtx)
+	GetTopic(ctx RestContextInt) (map[string]any, error)
 	//Delete a topic using a key selected
 	//
 	//Parameters
 	//
 	//-> ctx: fasthttp context
-	DeleteTopic(ctx *fasthttp.RequestCtx)
+	DeleteTopic(ctx RestContextInt) error
 	//Update a topic in dominus
 	//
 	//Parameters
 	//
 	//-> ctx: fasthttp context
-	UpdateTopic(ctx *fasthttp.RequestCtx)
+	UpdateTopic(ctx RestContextInt) error
 }

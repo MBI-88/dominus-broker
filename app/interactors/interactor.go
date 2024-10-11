@@ -6,8 +6,7 @@ import (
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
 	"dominus/app/interfaces/clients"
-
-	jsoniter "github.com/json-iterator/go"
+	"mime/multipart"
 )
 
 type interactor struct {
@@ -20,7 +19,6 @@ type interactor struct {
 func (i interactor) NewConnection() ConnectionInt {
 	return &connection{
 		m:  new(entities.Message),
-		p:  jsoniter.ConfigCompatibleWithStandardLibrary,
 		t:  i.topic,
 		ev: i.event,
 		r:  rules.NewRule(),
@@ -30,7 +28,6 @@ func (i interactor) NewConnection() ConnectionInt {
 
 func (i interactor) NewManager() ManagerInt {
 	return &manager{
-		p:          jsoniter.ConfigCompatibleWithStandardLibrary,
 		r:          rules.NewRule(),
 		t:          i.topic,
 		repo:       i.client.MongoClient(),
@@ -52,4 +49,13 @@ func NewInteractor(ct clients.ClientInt, t topic.TopicInt, e event.EventsInt, lg
 		client: ct,
 		log:    lg,
 	}
+}
+
+
+
+
+type RestContextInt interface {
+	BodyParser(obj any) error
+	FormFile(key string) (*multipart.FileHeader, error)
+    FormValue(key string) []byte
 }

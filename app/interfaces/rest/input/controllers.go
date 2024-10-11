@@ -4,86 +4,174 @@ import (
 	"dominus/app/interactors"
 
 	"github.com/fasthttp/router"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
 )
 
 type rest struct {
 	router *router.Router
-	inter interactors.InteractorInt
+	inter  interactors.InteractorInt
+	js     jsoniter.API
 }
 
-//Works with connections rest to rest
+// Works with connections rest to rest
 //
-//Parameters
+// # Parameters
 //
-//-> ctx: context fasthttp
-func (r rest) local(ctx *fasthttp.RequestCtx)  {
+// -> ctx: context fasthttp
+func (r *rest) local(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewConnection()
-	inter.RestToRest(ctx)
+	context := NewRestContext(ctx)
+
+	if err := inter.RestToRest(context); err != nil {
+		message := make(map[string]any)
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		message["message"] = err.Error()
+		b, _ := r.js.Marshal(message)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 }
 
-//Works with connections rest to rpc
+// Works with connections rest to rpc
 //
-//Parameters
+// # Parameters
 //
-//-> ctx: context fasthttp
-func (r rest) remote(ctx *fasthttp.RequestCtx) {
+// -> ctx: context fasthttp
+func (r *rest) remote(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewConnection()
-	inter.RestToGrpc(ctx)
+	context := NewRestContext(ctx)
+
+	if err := inter.RestToGrpc(context); err != nil {
+		message := make(map[string]any)
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		message["message"] = err.Error()
+		b, _ := r.js.Marshal(message)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 }
 
-//Crate topic in memory and database
+// Crate topic in memory and database
 //
-//Parameters
+// # Parameters
 //
-//-> ctx: context fasthttp
-func (r rest) managerCreate(ctx *fasthttp.RequestCtx) {
+// -> ctx: context fasthttp
+func (r *rest) managerCreate(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
-	inter.CreateTopic(ctx)
+	context := NewRestContext(ctx)
+	
+
+	if err := inter.CreateTopic(context); err != nil {
+		message := make(map[string]any)
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		message["message"] = err.Error()
+		b, _ := r.js.Marshal(message)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 }
 
-//Update topic in memory and database
+// Update topic in memory and database
 //
-//Parameters
+// # Parameters
 //
-//-> ctx: context fasthttp
-func (r rest) managerUpdate(ctx *fasthttp.RequestCtx) {
+// -> ctx: context fasthttp
+func (r *rest) managerUpdate(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
-	inter.UpdateTopic(ctx)
+	context := NewRestContext(ctx)
+
+	if err := inter.UpdateTopic(context); err != nil {
+		message := make(map[string]any)
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		message["message"] = err.Error()
+		b, _ := r.js.Marshal(message)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 }
 
-//Returns topics in the database
+// Returns topics in the database
 //
-//Parameters
+// # Parameters
 //
-//-> ctx: context fasthttp
-func (r rest) managerGet(ctx *fasthttp.RequestCtx) {
+// -> ctx: context fasthttp
+func (r *rest) managerGet(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
-	inter.GetTopic(ctx)
+	context := NewRestContext(ctx)
+	
+	message, err := inter.GetTopic(context)
+	if err != nil {
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		message["message"] = err.Error()
+		b, _ := r.js.Marshal(message)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	body, err := r.js.Marshal(message)
+	if err != nil {
+		delete(message, "topic")
+		message["message"] = err.Error()
+	}
+
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
+	ctx.Response.SetBody(body)
+
 }
 
-//Deletes a topic in memory and database
+// Deletes a topic in memory and database
 //
-//Parameters
+// # Parameters
 //
-//-> ctx: context fasthttp
-func (r rest) managerDelete(ctx *fasthttp.RequestCtx) {
+// -> ctx: context fasthttp
+func (r *rest) managerDelete(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
-	inter.DeleteTopic(ctx)
+	context := NewRestContext(ctx)
+
+	if err := inter.DeleteTopic(context); err != nil {
+		message := make(map[string]any)
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		message["message"] = err.Error()
+		b, _ := r.js.Marshal(message)
+		ctx.Response.SetBody(b)
+	}
+
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 }
 
-//Path connects handler with the router
-func (r rest) path() {
+// Path connects handler with the router
+func (r *rest) path() {
 	r.router.POST("/local-shipping", r.local)
 	r.router.POST("/remote-shipping", r.remote)
 	r.router.POST("/manager", r.managerCreate)
 	r.router.PATCH("/manager", r.managerUpdate)
 	r.router.GET("/manager", r.managerGet)
-	r.router.DELETE("/manager",r.managerDelete)
+	r.router.DELETE("/manager", r.managerDelete)
 }
 
-//Create a new Rest api service
+// Create a new Rest api service
 func NewRestApi(r *router.Router, i interactors.InteractorInt) {
-	re := &rest{router: r, inter: i}
+	re := &rest{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }

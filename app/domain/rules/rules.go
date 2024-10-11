@@ -83,6 +83,11 @@ type RuleInt interface {
 	ValidateStruct(data any) error
 }
 
+
 func NewRule() RuleInt {
 	return &rule{v: validator.New()}
 }
+
+
+
+

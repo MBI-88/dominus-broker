@@ -9,15 +9,12 @@ import (
 	"dominus/app/interfaces/rest/output"
 	"sync"
 	"time"
-
-	jsoniter "github.com/json-iterator/go"
-	"github.com/valyala/fasthttp"
+	
 )
 
 type connection struct {
 	m *entities.Message          // Message
 	// grpc struct
-	p    jsoniter.API           // Parser
 	t    topic.TopicInt         // Topic
 	ev   event.EventsInt        // Events
 	r    rules.RuleInt          // Rules
@@ -27,32 +24,19 @@ type connection struct {
 	lg event.LogsInt
 }
 
-func (c connection) RestToGrpc(ctx *fasthttp.RequestCtx) {
-
+func (c *connection) RestToGrpc(ctx RestContextInt) error {
+	return nil 
 }
 
-func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
-	var (
-		message = make(map[string]any)
-		body    = ctx.Request.Body()
-	)
-
-	if err := c.p.Unmarshal(body, c.m); err != nil {
+func (c *connection) RestToRest(ctx RestContextInt) error {
+	if err := ctx.BodyParser(c.m); err != nil {
 		c.lg.WriteLog("InsertObject", err.Error())
-		message["message"] = err.Error()
-		b, _ := c.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	if err := c.r.ValidateStruct(c.m); err != nil {
 		c.lg.WriteLog("InsertObject", err.Error())
-		message["message"] = err.Error()
-		b, _ := c.p.Marshal(message)
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusNotAcceptable)
-		ctx.Response.SetBody(b)
-		return
+		return err
 	}
 
 	subs := c.t.GetSusbcribers(c.m.Topic)
@@ -89,18 +73,15 @@ func (c connection) RestToRest(ctx *fasthttp.RequestCtx) {
 		close(sig)
 	}(subs, c.m, ch)
 
-	message["message"] = "Accepted"
-	b, _ := c.p.Marshal(message)
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-	ctx.Response.SetBody(b)
+	return nil
 }
 
-func (c connection) GrpcToRest() {
-
+func (c *connection) GrpcToRest() error {
+	return nil 
 }
 
-func (c connection) GrpcToGrpc() {
-
+func (c *connection) GrpcToGrpc() error {
+	return nil 
 }
 
 type ConnectionInt interface {
@@ -108,14 +89,14 @@ type ConnectionInt interface {
 	//
 	//Parameters
 	//
-	//-> ctx: fasthttp context
-	RestToGrpc(ctx *fasthttp.RequestCtx)
+	//-> ctx: RestContexInt
+	RestToGrpc(ctx RestContextInt) error
 	//RestToRest sends information from rest protocol receiver to rest protocol client
 	//
 	//Parameters
 	//
-	//-> ctx: fasthttp context
-	RestToRest(ctx *fasthttp.RequestCtx)
+	//-> ctx: RestContexInt
+	RestToRest(ctx RestContextInt) error
 	//GrpcToRest sends information from grpc protocol receiver to rest protocol client
-	GrpcToRest()
+	GrpcToRest() error
 }
