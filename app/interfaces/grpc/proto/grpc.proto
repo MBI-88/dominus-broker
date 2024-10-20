@@ -16,6 +16,8 @@ message Message {
 
 //Response
 message Response {
+    uint32  status = 1;
+    string  message = 2;
 }
 
 
@@ -24,5 +26,5 @@ service GrpcService {
     rpc Send(Message) returns (Response);
     rpc SendClientStream(stream Message) returns (Response);
     rpc SendServerStream(Message) returns (stream Message);
-    rpc SendDoubleStrea(stream Message) returns (stream Message);
+    rpc SendStream(stream Message) returns (stream Message);
 }
