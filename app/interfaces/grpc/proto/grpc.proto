@@ -1,16 +1,19 @@
 syntax = "proto3";
 
-package proto;
+package builder;
 
 import "validate.proto";
 
-option go_package = "grpc/proto";
+option go_package = "dominus/app/interfaces/grpc/proto/builder";
 
 
 //Message
 message Message {
-    string topic = 1 [(validate.rules).string.max_len = 20] ;
-    repeated bytes payload = 2 [(validate.rules).bytes.max_len = 1000];
+    string topic = 1 [(validate.rules).string.max_len = 20];
+    bytes payload = 2 [(validate.rules).bytes = {
+        min_len: 1,          
+        max_len: 65535         
+    }];
 }
 
 
@@ -22,9 +25,14 @@ message Response {
 
 
 //Services
-service GrpcService {
-    rpc Send(Message) returns (Response);
-    rpc SendClientStream(stream Message) returns (Response);
-    rpc SendServerStream(Message) returns (stream Message);
-    rpc SendStream(stream Message) returns (stream Message);
+service API {
+    rpc SendRemote(Message) returns (Response);
+    rpc SendClientStreamRemote(stream Message) returns (Response);
+    rpc SendServerStreamRemote(Message) returns (stream Message);
+    rpc SendStreamRemote(stream Message) returns (stream Message);
+
+    rpc SendLocal(Message) returns (Response);
+    rpc SendClientStreamLocal(stream Message) returns (Response);
+    rpc SendServerStreamLocal(Message) returns (stream Message);
+    rpc SendStreamLocal(stream Message) returns (stream Message);
 }

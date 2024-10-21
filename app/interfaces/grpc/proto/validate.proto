@@ -2,7 +2,7 @@ syntax = "proto2";
 
 package validate;
 
-option go_package = "grpc/validate";
+option go_package = "dominus/app/interfaces/grpc/proto/validate";
 option java_package = "io.envoyproxy.pgv.validate";
 
 import "google/protobuf/descriptor.proto";
@@ -35,34 +35,10 @@ extend google.protobuf.FieldOptions {
 // FieldRules encapsulates the rules for each type of field. Depending on the
 // field, the correct set should be used to ensure proper validations.
 message FieldRules {
-    optional MessageRules message = 17;
     oneof type {
         // Scalar Field Types
-        FloatRules    float    = 1;
-        DoubleRules   double   = 2;
-        Int32Rules    int32    = 3;
-        Int64Rules    int64    = 4;
-        UInt32Rules   uint32   = 5;
-        UInt64Rules   uint64   = 6;
-        SInt32Rules   sint32   = 7;
-        SInt64Rules   sint64   = 8;
-        Fixed32Rules  fixed32  = 9;
-        Fixed64Rules  fixed64  = 10;
-        SFixed32Rules sfixed32 = 11;
-        SFixed64Rules sfixed64 = 12;
-        BoolRules     bool     = 13;
         StringRules   string   = 14;
         BytesRules    bytes    = 15;
-
-        // Complex Field Types
-        EnumRules     enum     = 16;
-        RepeatedRules repeated = 18;
-        MapRules      map      = 19;
-
-        // Well-Known Field Types
-        AnyRules       any       = 20;
-        DurationRules  duration  = 21;
-        TimestampRules timestamp = 22;
     }
 }
 
@@ -182,6 +158,16 @@ message StringRules {
   optional bool ignore_empty = 26;
 }
 
+// WellKnownRegex contain some well-known patterns.
+enum KnownRegex {
+  UNKNOWN = 0;
+
+  // HTTP header name as defined by RFC 7230.
+  HTTP_HEADER_NAME = 1;
+
+  // HTTP header value as defined by RFC 7230.
+  HTTP_HEADER_VALUE = 2;
+}
 
 //BytesRules describe the constraints applied to `bytes` values
 message BytesRules {
