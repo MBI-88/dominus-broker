@@ -16,52 +16,26 @@ type grpc struct {
 }
 
 //Receives simple messages from client
-func (s *grpc) SendLocal(_ context.Context, ms *pb.Message) (*pb.Response, error) {
+func (s *grpc) Send(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
 	var response *pb.Response
 
 	return response, nil
 }
 
 //Receives array messages from client
-func (s *grpc) SendClientStreamLocal(stream pb.API_SendClientStreamLocalClient) error {
+func (s *grpc) SendClientStream(stream pb.API_SendServerStreamClient) error {
 
 	return nil
 }
 
 //Sends array messages to client
-func (s *grpc) SendServerStreamLocal(ms *pb.Message, stream pb.API_SendServerStreamLocalServer) error {
+func (s *grpc) RxClientStream(stream pb.API_SendClientStreamServer) error {
 
 	return nil
 }
 
 //Receives and sends messages from server to client
-func (s *grpc) SendStreamLocal(stream pb.API_SendStreamLocalServer) error {
+func (s *grpc) SendfullStream(stream pb.API_SendFullDuplexStreamServer) error {
 
 	return nil
 }
-
-
-
-func (s *grpc) SendRemote(_ context.Context, ms *pb.Message) (*pb.Response, error) {
-	var response *pb.Response
-
-	return response, nil
-}
-
-func (s *grpc) SendClientStreamRemote(stream pb.API_SendClientStreamRemoteClient) error {
-
-	return nil
-}
-
-
-func (s *grpc) SendServerStreamRemote(ms *pb.Message, stream pb.API_SendServerStreamRemoteServer) error {
-
-	return nil
-}
-
-
-func (s *grpc) SendStreamRemote(stream pb.API_SendStreamRemoteServer) error {
-
-	return nil
-}
-

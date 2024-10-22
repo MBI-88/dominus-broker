@@ -19,28 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	API_SendRemote_FullMethodName             = "/builder.API/SendRemote"
-	API_SendClientStreamRemote_FullMethodName = "/builder.API/SendClientStreamRemote"
-	API_SendServerStreamRemote_FullMethodName = "/builder.API/SendServerStreamRemote"
-	API_SendStreamRemote_FullMethodName       = "/builder.API/SendStreamRemote"
-	API_SendLocal_FullMethodName              = "/builder.API/SendLocal"
-	API_SendClientStreamLocal_FullMethodName  = "/builder.API/SendClientStreamLocal"
-	API_SendServerStreamLocal_FullMethodName  = "/builder.API/SendServerStreamLocal"
-	API_SendStreamLocal_FullMethodName        = "/builder.API/SendStreamLocal"
+	API_Send_FullMethodName                 = "/builder.API/Send"
+	API_SendClientStream_FullMethodName     = "/builder.API/SendClientStream"
+	API_SendServerStream_FullMethodName     = "/builder.API/SendServerStream"
+	API_SendFullDuplexStream_FullMethodName = "/builder.API/SendFullDuplexStream"
 )
 
 // APIClient is the client API for API service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type APIClient interface {
-	SendRemote(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Response, error)
-	SendClientStreamRemote(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamRemoteClient, error)
-	SendServerStreamRemote(ctx context.Context, in *Message, opts ...grpc.CallOption) (API_SendServerStreamRemoteClient, error)
-	SendStreamRemote(ctx context.Context, opts ...grpc.CallOption) (API_SendStreamRemoteClient, error)
-	SendLocal(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Response, error)
-	SendClientStreamLocal(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamLocalClient, error)
-	SendServerStreamLocal(ctx context.Context, in *Message, opts ...grpc.CallOption) (API_SendServerStreamLocalClient, error)
-	SendStreamLocal(ctx context.Context, opts ...grpc.CallOption) (API_SendStreamLocalClient, error)
+	Send(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (*Response, error)
+	SendClientStream(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamClient, error)
+	SendServerStream(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (API_SendServerStreamClient, error)
+	SendFullDuplexStream(ctx context.Context, opts ...grpc.CallOption) (API_SendFullDuplexStreamClient, error)
 }
 
 type aPIClient struct {
@@ -51,39 +43,39 @@ func NewAPIClient(cc grpc.ClientConnInterface) APIClient {
 	return &aPIClient{cc}
 }
 
-func (c *aPIClient) SendRemote(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Response, error) {
+func (c *aPIClient) Send(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, API_SendRemote_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, API_Send_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *aPIClient) SendClientStreamRemote(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamRemoteClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], API_SendClientStreamRemote_FullMethodName, opts...)
+func (c *aPIClient) SendClientStream(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], API_SendClientStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISendClientStreamRemoteClient{stream}
+	x := &aPISendClientStreamClient{stream}
 	return x, nil
 }
 
-type API_SendClientStreamRemoteClient interface {
-	Send(*Message) error
+type API_SendClientStreamClient interface {
+	Send(*RequestMessage) error
 	CloseAndRecv() (*Response, error)
 	grpc.ClientStream
 }
 
-type aPISendClientStreamRemoteClient struct {
+type aPISendClientStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISendClientStreamRemoteClient) Send(m *Message) error {
+func (x *aPISendClientStreamClient) Send(m *RequestMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *aPISendClientStreamRemoteClient) CloseAndRecv() (*Response, error) {
+func (x *aPISendClientStreamClient) CloseAndRecv() (*Response, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -94,12 +86,12 @@ func (x *aPISendClientStreamRemoteClient) CloseAndRecv() (*Response, error) {
 	return m, nil
 }
 
-func (c *aPIClient) SendServerStreamRemote(ctx context.Context, in *Message, opts ...grpc.CallOption) (API_SendServerStreamRemoteClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], API_SendServerStreamRemote_FullMethodName, opts...)
+func (c *aPIClient) SendServerStream(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (API_SendServerStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], API_SendServerStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISendServerStreamRemoteClient{stream}
+	x := &aPISendServerStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -109,154 +101,48 @@ func (c *aPIClient) SendServerStreamRemote(ctx context.Context, in *Message, opt
 	return x, nil
 }
 
-type API_SendServerStreamRemoteClient interface {
-	Recv() (*Message, error)
+type API_SendServerStreamClient interface {
+	Recv() (*ResponseMessage, error)
 	grpc.ClientStream
 }
 
-type aPISendServerStreamRemoteClient struct {
+type aPISendServerStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISendServerStreamRemoteClient) Recv() (*Message, error) {
-	m := new(Message)
+func (x *aPISendServerStreamClient) Recv() (*ResponseMessage, error) {
+	m := new(ResponseMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func (c *aPIClient) SendStreamRemote(ctx context.Context, opts ...grpc.CallOption) (API_SendStreamRemoteClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[2], API_SendStreamRemote_FullMethodName, opts...)
+func (c *aPIClient) SendFullDuplexStream(ctx context.Context, opts ...grpc.CallOption) (API_SendFullDuplexStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[2], API_SendFullDuplexStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISendStreamRemoteClient{stream}
+	x := &aPISendFullDuplexStreamClient{stream}
 	return x, nil
 }
 
-type API_SendStreamRemoteClient interface {
-	Send(*Message) error
-	Recv() (*Message, error)
+type API_SendFullDuplexStreamClient interface {
+	Send(*RequestMessage) error
+	Recv() (*ResponseMessage, error)
 	grpc.ClientStream
 }
 
-type aPISendStreamRemoteClient struct {
+type aPISendFullDuplexStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISendStreamRemoteClient) Send(m *Message) error {
+func (x *aPISendFullDuplexStreamClient) Send(m *RequestMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *aPISendStreamRemoteClient) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *aPIClient) SendLocal(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, API_SendLocal_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *aPIClient) SendClientStreamLocal(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamLocalClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[3], API_SendClientStreamLocal_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &aPISendClientStreamLocalClient{stream}
-	return x, nil
-}
-
-type API_SendClientStreamLocalClient interface {
-	Send(*Message) error
-	CloseAndRecv() (*Response, error)
-	grpc.ClientStream
-}
-
-type aPISendClientStreamLocalClient struct {
-	grpc.ClientStream
-}
-
-func (x *aPISendClientStreamLocalClient) Send(m *Message) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *aPISendClientStreamLocalClient) CloseAndRecv() (*Response, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(Response)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *aPIClient) SendServerStreamLocal(ctx context.Context, in *Message, opts ...grpc.CallOption) (API_SendServerStreamLocalClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[4], API_SendServerStreamLocal_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &aPISendServerStreamLocalClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type API_SendServerStreamLocalClient interface {
-	Recv() (*Message, error)
-	grpc.ClientStream
-}
-
-type aPISendServerStreamLocalClient struct {
-	grpc.ClientStream
-}
-
-func (x *aPISendServerStreamLocalClient) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *aPIClient) SendStreamLocal(ctx context.Context, opts ...grpc.CallOption) (API_SendStreamLocalClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[5], API_SendStreamLocal_FullMethodName, opts...)
-	if err != nil {
-		return nil, err
-	}
-	x := &aPISendStreamLocalClient{stream}
-	return x, nil
-}
-
-type API_SendStreamLocalClient interface {
-	Send(*Message) error
-	Recv() (*Message, error)
-	grpc.ClientStream
-}
-
-type aPISendStreamLocalClient struct {
-	grpc.ClientStream
-}
-
-func (x *aPISendStreamLocalClient) Send(m *Message) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *aPISendStreamLocalClient) Recv() (*Message, error) {
-	m := new(Message)
+func (x *aPISendFullDuplexStreamClient) Recv() (*ResponseMessage, error) {
+	m := new(ResponseMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -267,14 +153,10 @@ func (x *aPISendStreamLocalClient) Recv() (*Message, error) {
 // All implementations must embed UnimplementedAPIServer
 // for forward compatibility
 type APIServer interface {
-	SendRemote(context.Context, *Message) (*Response, error)
-	SendClientStreamRemote(API_SendClientStreamRemoteServer) error
-	SendServerStreamRemote(*Message, API_SendServerStreamRemoteServer) error
-	SendStreamRemote(API_SendStreamRemoteServer) error
-	SendLocal(context.Context, *Message) (*Response, error)
-	SendClientStreamLocal(API_SendClientStreamLocalServer) error
-	SendServerStreamLocal(*Message, API_SendServerStreamLocalServer) error
-	SendStreamLocal(API_SendStreamLocalServer) error
+	Send(context.Context, *RequestMessage) (*Response, error)
+	SendClientStream(API_SendClientStreamServer) error
+	SendServerStream(*RequestMessage, API_SendServerStreamServer) error
+	SendFullDuplexStream(API_SendFullDuplexStreamServer) error
 	mustEmbedUnimplementedAPIServer()
 }
 
@@ -282,29 +164,17 @@ type APIServer interface {
 type UnimplementedAPIServer struct {
 }
 
-func (UnimplementedAPIServer) SendRemote(context.Context, *Message) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendRemote not implemented")
+func (UnimplementedAPIServer) Send(context.Context, *RequestMessage) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
-func (UnimplementedAPIServer) SendClientStreamRemote(API_SendClientStreamRemoteServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendClientStreamRemote not implemented")
+func (UnimplementedAPIServer) SendClientStream(API_SendClientStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendClientStream not implemented")
 }
-func (UnimplementedAPIServer) SendServerStreamRemote(*Message, API_SendServerStreamRemoteServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendServerStreamRemote not implemented")
+func (UnimplementedAPIServer) SendServerStream(*RequestMessage, API_SendServerStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendServerStream not implemented")
 }
-func (UnimplementedAPIServer) SendStreamRemote(API_SendStreamRemoteServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendStreamRemote not implemented")
-}
-func (UnimplementedAPIServer) SendLocal(context.Context, *Message) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendLocal not implemented")
-}
-func (UnimplementedAPIServer) SendClientStreamLocal(API_SendClientStreamLocalServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendClientStreamLocal not implemented")
-}
-func (UnimplementedAPIServer) SendServerStreamLocal(*Message, API_SendServerStreamLocalServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendServerStreamLocal not implemented")
-}
-func (UnimplementedAPIServer) SendStreamLocal(API_SendStreamLocalServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendStreamLocal not implemented")
+func (UnimplementedAPIServer) SendFullDuplexStream(API_SendFullDuplexStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method SendFullDuplexStream not implemented")
 }
 func (UnimplementedAPIServer) mustEmbedUnimplementedAPIServer() {}
 
@@ -319,182 +189,91 @@ func RegisterAPIServer(s grpc.ServiceRegistrar, srv APIServer) {
 	s.RegisterService(&API_ServiceDesc, srv)
 }
 
-func _API_SendRemote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
+func _API_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIServer).SendRemote(ctx, in)
+		return srv.(APIServer).Send(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: API_SendRemote_FullMethodName,
+		FullMethod: API_Send_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).SendRemote(ctx, req.(*Message))
+		return srv.(APIServer).Send(ctx, req.(*RequestMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _API_SendClientStreamRemote_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(APIServer).SendClientStreamRemote(&aPISendClientStreamRemoteServer{stream})
+func _API_SendClientStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(APIServer).SendClientStream(&aPISendClientStreamServer{stream})
 }
 
-type API_SendClientStreamRemoteServer interface {
+type API_SendClientStreamServer interface {
 	SendAndClose(*Response) error
-	Recv() (*Message, error)
+	Recv() (*RequestMessage, error)
 	grpc.ServerStream
 }
 
-type aPISendClientStreamRemoteServer struct {
+type aPISendClientStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISendClientStreamRemoteServer) SendAndClose(m *Response) error {
+func (x *aPISendClientStreamServer) SendAndClose(m *Response) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *aPISendClientStreamRemoteServer) Recv() (*Message, error) {
-	m := new(Message)
+func (x *aPISendClientStreamServer) Recv() (*RequestMessage, error) {
+	m := new(RequestMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func _API_SendServerStreamRemote_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Message)
+func _API_SendServerStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RequestMessage)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(APIServer).SendServerStreamRemote(m, &aPISendServerStreamRemoteServer{stream})
+	return srv.(APIServer).SendServerStream(m, &aPISendServerStreamServer{stream})
 }
 
-type API_SendServerStreamRemoteServer interface {
-	Send(*Message) error
+type API_SendServerStreamServer interface {
+	Send(*ResponseMessage) error
 	grpc.ServerStream
 }
 
-type aPISendServerStreamRemoteServer struct {
+type aPISendServerStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISendServerStreamRemoteServer) Send(m *Message) error {
+func (x *aPISendServerStreamServer) Send(m *ResponseMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _API_SendStreamRemote_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(APIServer).SendStreamRemote(&aPISendStreamRemoteServer{stream})
+func _API_SendFullDuplexStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(APIServer).SendFullDuplexStream(&aPISendFullDuplexStreamServer{stream})
 }
 
-type API_SendStreamRemoteServer interface {
-	Send(*Message) error
-	Recv() (*Message, error)
+type API_SendFullDuplexStreamServer interface {
+	Send(*ResponseMessage) error
+	Recv() (*RequestMessage, error)
 	grpc.ServerStream
 }
 
-type aPISendStreamRemoteServer struct {
+type aPISendFullDuplexStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISendStreamRemoteServer) Send(m *Message) error {
+func (x *aPISendFullDuplexStreamServer) Send(m *ResponseMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *aPISendStreamRemoteServer) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _API_SendLocal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Message)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(APIServer).SendLocal(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: API_SendLocal_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).SendLocal(ctx, req.(*Message))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _API_SendClientStreamLocal_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(APIServer).SendClientStreamLocal(&aPISendClientStreamLocalServer{stream})
-}
-
-type API_SendClientStreamLocalServer interface {
-	SendAndClose(*Response) error
-	Recv() (*Message, error)
-	grpc.ServerStream
-}
-
-type aPISendClientStreamLocalServer struct {
-	grpc.ServerStream
-}
-
-func (x *aPISendClientStreamLocalServer) SendAndClose(m *Response) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *aPISendClientStreamLocalServer) Recv() (*Message, error) {
-	m := new(Message)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func _API_SendServerStreamLocal_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Message)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(APIServer).SendServerStreamLocal(m, &aPISendServerStreamLocalServer{stream})
-}
-
-type API_SendServerStreamLocalServer interface {
-	Send(*Message) error
-	grpc.ServerStream
-}
-
-type aPISendServerStreamLocalServer struct {
-	grpc.ServerStream
-}
-
-func (x *aPISendServerStreamLocalServer) Send(m *Message) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func _API_SendStreamLocal_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(APIServer).SendStreamLocal(&aPISendStreamLocalServer{stream})
-}
-
-type API_SendStreamLocalServer interface {
-	Send(*Message) error
-	Recv() (*Message, error)
-	grpc.ServerStream
-}
-
-type aPISendStreamLocalServer struct {
-	grpc.ServerStream
-}
-
-func (x *aPISendStreamLocalServer) Send(m *Message) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *aPISendStreamLocalServer) Recv() (*Message, error) {
-	m := new(Message)
+func (x *aPISendFullDuplexStreamServer) Recv() (*RequestMessage, error) {
+	m := new(RequestMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -509,44 +288,24 @@ var API_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*APIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SendRemote",
-			Handler:    _API_SendRemote_Handler,
-		},
-		{
-			MethodName: "SendLocal",
-			Handler:    _API_SendLocal_Handler,
+			MethodName: "Send",
+			Handler:    _API_Send_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "SendClientStreamRemote",
-			Handler:       _API_SendClientStreamRemote_Handler,
+			StreamName:    "SendClientStream",
+			Handler:       _API_SendClientStream_Handler,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "SendServerStreamRemote",
-			Handler:       _API_SendServerStreamRemote_Handler,
+			StreamName:    "SendServerStream",
+			Handler:       _API_SendServerStream_Handler,
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "SendStreamRemote",
-			Handler:       _API_SendStreamRemote_Handler,
-			ServerStreams: true,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "SendClientStreamLocal",
-			Handler:       _API_SendClientStreamLocal_Handler,
-			ClientStreams: true,
-		},
-		{
-			StreamName:    "SendServerStreamLocal",
-			Handler:       _API_SendServerStreamLocal_Handler,
-			ServerStreams: true,
-		},
-		{
-			StreamName:    "SendStreamLocal",
-			Handler:       _API_SendStreamLocal_Handler,
+			StreamName:    "SendFullDuplexStream",
+			Handler:       _API_SendFullDuplexStream_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

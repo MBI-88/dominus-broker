@@ -8,9 +8,16 @@ option go_package = "dominus/app/interfaces/grpc/proto/builder";
 
 
 //Message
-message Message {
+message RequestMessage {
     string topic = 1 [(validate.rules).string.max_len = 20];
     bytes payload = 2 [(validate.rules).bytes = {
+        min_len: 1,          
+        max_len: 65535         
+    }];
+}
+
+message ResponseMessage {
+    bytes payload = 1 [(validate.rules).bytes = {
         min_len: 1,          
         max_len: 65535         
     }];
@@ -26,13 +33,8 @@ message Response {
 
 //Services
 service API {
-    rpc SendRemote(Message) returns (Response);
-    rpc SendClientStreamRemote(stream Message) returns (Response);
-    rpc SendServerStreamRemote(Message) returns (stream Message);
-    rpc SendStreamRemote(stream Message) returns (stream Message);
-
-    rpc SendLocal(Message) returns (Response);
-    rpc SendClientStreamLocal(stream Message) returns (Response);
-    rpc SendServerStreamLocal(Message) returns (stream Message);
-    rpc SendStreamLocal(stream Message) returns (stream Message);
+    rpc Send(RequestMessage) returns (Response);
+    rpc SendClientStream(stream RequestMessage) returns (Response);
+    rpc SendServerStream(RequestMessage) returns (stream ResponseMessage);
+    rpc SendFullDuplexStream(stream RequestMessage) returns (stream ResponseMessage);
 }

@@ -35,21 +35,22 @@ var (
 	_ = sort.Sort
 )
 
-// Validate checks the field values on Message with the rules defined in the
-// proto definition for this message. If any rules are violated, the first
+// Validate checks the field values on RequestMessage with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *Message) Validate() error {
+func (m *RequestMessage) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Message with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in MessageMultiError, or nil if none found.
-func (m *Message) ValidateAll() error {
+// ValidateAll checks the field values on RequestMessage with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in RequestMessageMultiError,
+// or nil if none found.
+func (m *RequestMessage) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Message) validate(all bool) error {
+func (m *RequestMessage) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -57,7 +58,7 @@ func (m *Message) validate(all bool) error {
 	var errors []error
 
 	if utf8.RuneCountInString(m.GetTopic()) > 20 {
-		err := MessageValidationError{
+		err := RequestMessageValidationError{
 			field:  "Topic",
 			reason: "value length must be at most 20 runes",
 		}
@@ -68,7 +69,7 @@ func (m *Message) validate(all bool) error {
 	}
 
 	if l := len(m.GetPayload()); l < 1 || l > 65535 {
-		err := MessageValidationError{
+		err := RequestMessageValidationError{
 			field:  "Payload",
 			reason: "value length must be between 1 and 65535 bytes, inclusive",
 		}
@@ -79,18 +80,19 @@ func (m *Message) validate(all bool) error {
 	}
 
 	if len(errors) > 0 {
-		return MessageMultiError(errors)
+		return RequestMessageMultiError(errors)
 	}
 
 	return nil
 }
 
-// MessageMultiError is an error wrapping multiple validation errors returned
-// by Message.ValidateAll() if the designated constraints aren't met.
-type MessageMultiError []error
+// RequestMessageMultiError is an error wrapping multiple validation errors
+// returned by RequestMessage.ValidateAll() if the designated constraints
+// aren't met.
+type RequestMessageMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m MessageMultiError) Error() string {
+func (m RequestMessageMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -99,11 +101,11 @@ func (m MessageMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m MessageMultiError) AllErrors() []error { return m }
+func (m RequestMessageMultiError) AllErrors() []error { return m }
 
-// MessageValidationError is the validation error returned by Message.Validate
-// if the designated constraints aren't met.
-type MessageValidationError struct {
+// RequestMessageValidationError is the validation error returned by
+// RequestMessage.Validate if the designated constraints aren't met.
+type RequestMessageValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -111,22 +113,22 @@ type MessageValidationError struct {
 }
 
 // Field function returns field value.
-func (e MessageValidationError) Field() string { return e.field }
+func (e RequestMessageValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e MessageValidationError) Reason() string { return e.reason }
+func (e RequestMessageValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e MessageValidationError) Cause() error { return e.cause }
+func (e RequestMessageValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e MessageValidationError) Key() bool { return e.key }
+func (e RequestMessageValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e MessageValidationError) ErrorName() string { return "MessageValidationError" }
+func (e RequestMessageValidationError) ErrorName() string { return "RequestMessageValidationError" }
 
 // Error satisfies the builtin error interface
-func (e MessageValidationError) Error() string {
+func (e RequestMessageValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -138,14 +140,14 @@ func (e MessageValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sMessage.%s: %s%s",
+		"invalid %sRequestMessage.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = MessageValidationError{}
+var _ error = RequestMessageValidationError{}
 
 var _ interface {
 	Field() string
@@ -153,7 +155,118 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = MessageValidationError{}
+} = RequestMessageValidationError{}
+
+// Validate checks the field values on ResponseMessage with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *ResponseMessage) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ResponseMessage with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ResponseMessageMultiError, or nil if none found.
+func (m *ResponseMessage) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ResponseMessage) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if l := len(m.GetPayload()); l < 1 || l > 65535 {
+		err := ResponseMessageValidationError{
+			field:  "Payload",
+			reason: "value length must be between 1 and 65535 bytes, inclusive",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	if len(errors) > 0 {
+		return ResponseMessageMultiError(errors)
+	}
+
+	return nil
+}
+
+// ResponseMessageMultiError is an error wrapping multiple validation errors
+// returned by ResponseMessage.ValidateAll() if the designated constraints
+// aren't met.
+type ResponseMessageMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ResponseMessageMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ResponseMessageMultiError) AllErrors() []error { return m }
+
+// ResponseMessageValidationError is the validation error returned by
+// ResponseMessage.Validate if the designated constraints aren't met.
+type ResponseMessageValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ResponseMessageValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ResponseMessageValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ResponseMessageValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ResponseMessageValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ResponseMessageValidationError) ErrorName() string { return "ResponseMessageValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ResponseMessageValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sResponseMessage.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ResponseMessageValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ResponseMessageValidationError{}
 
 // Validate checks the field values on Response with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
