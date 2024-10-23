@@ -32,9 +32,9 @@ message Response {
 
 
 //Services
-service API {
-    rpc Send(RequestMessage) returns (Response);
-    rpc SendClientStream(stream RequestMessage) returns (Response);
-    rpc SendServerStream(RequestMessage) returns (stream ResponseMessage);
-    rpc SendFullDuplexStream(stream RequestMessage) returns (stream ResponseMessage);
+service Grpc {
+    rpc Simple(RequestMessage) returns (Response);
+    rpc ClientStream(stream RequestMessage) returns (Response);
+    rpc ServerStream(RequestMessage) returns (stream ResponseMessage);
+    rpc BidirectionalStream(stream RequestMessage) returns (stream ResponseMessage);
 }

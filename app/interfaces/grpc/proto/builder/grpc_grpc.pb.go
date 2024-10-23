@@ -19,63 +19,63 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	API_Send_FullMethodName                 = "/builder.API/Send"
-	API_SendClientStream_FullMethodName     = "/builder.API/SendClientStream"
-	API_SendServerStream_FullMethodName     = "/builder.API/SendServerStream"
-	API_SendFullDuplexStream_FullMethodName = "/builder.API/SendFullDuplexStream"
+	Grpc_Simple_FullMethodName              = "/builder.Grpc/Simple"
+	Grpc_ClientStream_FullMethodName        = "/builder.Grpc/ClientStream"
+	Grpc_ServerStream_FullMethodName        = "/builder.Grpc/ServerStream"
+	Grpc_BidirectionalStream_FullMethodName = "/builder.Grpc/BidirectionalStream"
 )
 
-// APIClient is the client API for API service.
+// GrpcClient is the client API for Grpc service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type APIClient interface {
-	Send(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (*Response, error)
-	SendClientStream(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamClient, error)
-	SendServerStream(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (API_SendServerStreamClient, error)
-	SendFullDuplexStream(ctx context.Context, opts ...grpc.CallOption) (API_SendFullDuplexStreamClient, error)
+type GrpcClient interface {
+	Simple(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (*Response, error)
+	ClientStream(ctx context.Context, opts ...grpc.CallOption) (Grpc_ClientStreamClient, error)
+	ServerStream(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (Grpc_ServerStreamClient, error)
+	BidirectionalStream(ctx context.Context, opts ...grpc.CallOption) (Grpc_BidirectionalStreamClient, error)
 }
 
-type aPIClient struct {
+type grpcClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewAPIClient(cc grpc.ClientConnInterface) APIClient {
-	return &aPIClient{cc}
+func NewGrpcClient(cc grpc.ClientConnInterface) GrpcClient {
+	return &grpcClient{cc}
 }
 
-func (c *aPIClient) Send(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (*Response, error) {
+func (c *grpcClient) Simple(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
-	err := c.cc.Invoke(ctx, API_Send_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Grpc_Simple_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *aPIClient) SendClientStream(ctx context.Context, opts ...grpc.CallOption) (API_SendClientStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[0], API_SendClientStream_FullMethodName, opts...)
+func (c *grpcClient) ClientStream(ctx context.Context, opts ...grpc.CallOption) (Grpc_ClientStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Grpc_ServiceDesc.Streams[0], Grpc_ClientStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISendClientStreamClient{stream}
+	x := &grpcClientStreamClient{stream}
 	return x, nil
 }
 
-type API_SendClientStreamClient interface {
+type Grpc_ClientStreamClient interface {
 	Send(*RequestMessage) error
 	CloseAndRecv() (*Response, error)
 	grpc.ClientStream
 }
 
-type aPISendClientStreamClient struct {
+type grpcClientStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISendClientStreamClient) Send(m *RequestMessage) error {
+func (x *grpcClientStreamClient) Send(m *RequestMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *aPISendClientStreamClient) CloseAndRecv() (*Response, error) {
+func (x *grpcClientStreamClient) CloseAndRecv() (*Response, error) {
 	if err := x.ClientStream.CloseSend(); err != nil {
 		return nil, err
 	}
@@ -86,12 +86,12 @@ func (x *aPISendClientStreamClient) CloseAndRecv() (*Response, error) {
 	return m, nil
 }
 
-func (c *aPIClient) SendServerStream(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (API_SendServerStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[1], API_SendServerStream_FullMethodName, opts...)
+func (c *grpcClient) ServerStream(ctx context.Context, in *RequestMessage, opts ...grpc.CallOption) (Grpc_ServerStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Grpc_ServiceDesc.Streams[1], Grpc_ServerStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISendServerStreamClient{stream}
+	x := &grpcServerStreamClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -101,16 +101,16 @@ func (c *aPIClient) SendServerStream(ctx context.Context, in *RequestMessage, op
 	return x, nil
 }
 
-type API_SendServerStreamClient interface {
+type Grpc_ServerStreamClient interface {
 	Recv() (*ResponseMessage, error)
 	grpc.ClientStream
 }
 
-type aPISendServerStreamClient struct {
+type grpcServerStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISendServerStreamClient) Recv() (*ResponseMessage, error) {
+func (x *grpcServerStreamClient) Recv() (*ResponseMessage, error) {
 	m := new(ResponseMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -118,30 +118,30 @@ func (x *aPISendServerStreamClient) Recv() (*ResponseMessage, error) {
 	return m, nil
 }
 
-func (c *aPIClient) SendFullDuplexStream(ctx context.Context, opts ...grpc.CallOption) (API_SendFullDuplexStreamClient, error) {
-	stream, err := c.cc.NewStream(ctx, &API_ServiceDesc.Streams[2], API_SendFullDuplexStream_FullMethodName, opts...)
+func (c *grpcClient) BidirectionalStream(ctx context.Context, opts ...grpc.CallOption) (Grpc_BidirectionalStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Grpc_ServiceDesc.Streams[2], Grpc_BidirectionalStream_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &aPISendFullDuplexStreamClient{stream}
+	x := &grpcBidirectionalStreamClient{stream}
 	return x, nil
 }
 
-type API_SendFullDuplexStreamClient interface {
+type Grpc_BidirectionalStreamClient interface {
 	Send(*RequestMessage) error
 	Recv() (*ResponseMessage, error)
 	grpc.ClientStream
 }
 
-type aPISendFullDuplexStreamClient struct {
+type grpcBidirectionalStreamClient struct {
 	grpc.ClientStream
 }
 
-func (x *aPISendFullDuplexStreamClient) Send(m *RequestMessage) error {
+func (x *grpcBidirectionalStreamClient) Send(m *RequestMessage) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *aPISendFullDuplexStreamClient) Recv() (*ResponseMessage, error) {
+func (x *grpcBidirectionalStreamClient) Recv() (*ResponseMessage, error) {
 	m := new(ResponseMessage)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -149,83 +149,83 @@ func (x *aPISendFullDuplexStreamClient) Recv() (*ResponseMessage, error) {
 	return m, nil
 }
 
-// APIServer is the server API for API service.
-// All implementations must embed UnimplementedAPIServer
+// GrpcServer is the server API for Grpc service.
+// All implementations must embed UnimplementedGrpcServer
 // for forward compatibility
-type APIServer interface {
-	Send(context.Context, *RequestMessage) (*Response, error)
-	SendClientStream(API_SendClientStreamServer) error
-	SendServerStream(*RequestMessage, API_SendServerStreamServer) error
-	SendFullDuplexStream(API_SendFullDuplexStreamServer) error
-	mustEmbedUnimplementedAPIServer()
+type GrpcServer interface {
+	Simple(context.Context, *RequestMessage) (*Response, error)
+	ClientStream(Grpc_ClientStreamServer) error
+	ServerStream(*RequestMessage, Grpc_ServerStreamServer) error
+	BidirectionalStream(Grpc_BidirectionalStreamServer) error
+	mustEmbedUnimplementedGrpcServer()
 }
 
-// UnimplementedAPIServer must be embedded to have forward compatible implementations.
-type UnimplementedAPIServer struct {
+// UnimplementedGrpcServer must be embedded to have forward compatible implementations.
+type UnimplementedGrpcServer struct {
 }
 
-func (UnimplementedAPIServer) Send(context.Context, *RequestMessage) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
+func (UnimplementedGrpcServer) Simple(context.Context, *RequestMessage) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Simple not implemented")
 }
-func (UnimplementedAPIServer) SendClientStream(API_SendClientStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendClientStream not implemented")
+func (UnimplementedGrpcServer) ClientStream(Grpc_ClientStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method ClientStream not implemented")
 }
-func (UnimplementedAPIServer) SendServerStream(*RequestMessage, API_SendServerStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendServerStream not implemented")
+func (UnimplementedGrpcServer) ServerStream(*RequestMessage, Grpc_ServerStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method ServerStream not implemented")
 }
-func (UnimplementedAPIServer) SendFullDuplexStream(API_SendFullDuplexStreamServer) error {
-	return status.Errorf(codes.Unimplemented, "method SendFullDuplexStream not implemented")
+func (UnimplementedGrpcServer) BidirectionalStream(Grpc_BidirectionalStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method BidirectionalStream not implemented")
 }
-func (UnimplementedAPIServer) mustEmbedUnimplementedAPIServer() {}
+func (UnimplementedGrpcServer) mustEmbedUnimplementedGrpcServer() {}
 
-// UnsafeAPIServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to APIServer will
+// UnsafeGrpcServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GrpcServer will
 // result in compilation errors.
-type UnsafeAPIServer interface {
-	mustEmbedUnimplementedAPIServer()
+type UnsafeGrpcServer interface {
+	mustEmbedUnimplementedGrpcServer()
 }
 
-func RegisterAPIServer(s grpc.ServiceRegistrar, srv APIServer) {
-	s.RegisterService(&API_ServiceDesc, srv)
+func RegisterGrpcServer(s grpc.ServiceRegistrar, srv GrpcServer) {
+	s.RegisterService(&Grpc_ServiceDesc, srv)
 }
 
-func _API_Send_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Grpc_Simple_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RequestMessage)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIServer).Send(ctx, in)
+		return srv.(GrpcServer).Simple(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: API_Send_FullMethodName,
+		FullMethod: Grpc_Simple_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIServer).Send(ctx, req.(*RequestMessage))
+		return srv.(GrpcServer).Simple(ctx, req.(*RequestMessage))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _API_SendClientStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(APIServer).SendClientStream(&aPISendClientStreamServer{stream})
+func _Grpc_ClientStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GrpcServer).ClientStream(&grpcClientStreamServer{stream})
 }
 
-type API_SendClientStreamServer interface {
+type Grpc_ClientStreamServer interface {
 	SendAndClose(*Response) error
 	Recv() (*RequestMessage, error)
 	grpc.ServerStream
 }
 
-type aPISendClientStreamServer struct {
+type grpcClientStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISendClientStreamServer) SendAndClose(m *Response) error {
+func (x *grpcClientStreamServer) SendAndClose(m *Response) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *aPISendClientStreamServer) Recv() (*RequestMessage, error) {
+func (x *grpcClientStreamServer) Recv() (*RequestMessage, error) {
 	m := new(RequestMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -233,46 +233,46 @@ func (x *aPISendClientStreamServer) Recv() (*RequestMessage, error) {
 	return m, nil
 }
 
-func _API_SendServerStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Grpc_ServerStream_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(RequestMessage)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(APIServer).SendServerStream(m, &aPISendServerStreamServer{stream})
+	return srv.(GrpcServer).ServerStream(m, &grpcServerStreamServer{stream})
 }
 
-type API_SendServerStreamServer interface {
+type Grpc_ServerStreamServer interface {
 	Send(*ResponseMessage) error
 	grpc.ServerStream
 }
 
-type aPISendServerStreamServer struct {
+type grpcServerStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISendServerStreamServer) Send(m *ResponseMessage) error {
+func (x *grpcServerStreamServer) Send(m *ResponseMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func _API_SendFullDuplexStream_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(APIServer).SendFullDuplexStream(&aPISendFullDuplexStreamServer{stream})
+func _Grpc_BidirectionalStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GrpcServer).BidirectionalStream(&grpcBidirectionalStreamServer{stream})
 }
 
-type API_SendFullDuplexStreamServer interface {
+type Grpc_BidirectionalStreamServer interface {
 	Send(*ResponseMessage) error
 	Recv() (*RequestMessage, error)
 	grpc.ServerStream
 }
 
-type aPISendFullDuplexStreamServer struct {
+type grpcBidirectionalStreamServer struct {
 	grpc.ServerStream
 }
 
-func (x *aPISendFullDuplexStreamServer) Send(m *ResponseMessage) error {
+func (x *grpcBidirectionalStreamServer) Send(m *ResponseMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *aPISendFullDuplexStreamServer) Recv() (*RequestMessage, error) {
+func (x *grpcBidirectionalStreamServer) Recv() (*RequestMessage, error) {
 	m := new(RequestMessage)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -280,32 +280,32 @@ func (x *aPISendFullDuplexStreamServer) Recv() (*RequestMessage, error) {
 	return m, nil
 }
 
-// API_ServiceDesc is the grpc.ServiceDesc for API service.
+// Grpc_ServiceDesc is the grpc.ServiceDesc for Grpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var API_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "builder.API",
-	HandlerType: (*APIServer)(nil),
+var Grpc_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "builder.Grpc",
+	HandlerType: (*GrpcServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Send",
-			Handler:    _API_Send_Handler,
+			MethodName: "Simple",
+			Handler:    _Grpc_Simple_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "SendClientStream",
-			Handler:       _API_SendClientStream_Handler,
+			StreamName:    "ClientStream",
+			Handler:       _Grpc_ClientStream_Handler,
 			ClientStreams: true,
 		},
 		{
-			StreamName:    "SendServerStream",
-			Handler:       _API_SendServerStream_Handler,
+			StreamName:    "ServerStream",
+			Handler:       _Grpc_ServerStream_Handler,
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "SendFullDuplexStream",
-			Handler:       _API_SendFullDuplexStream_Handler,
+			StreamName:    "BidirectionalStream",
+			Handler:       _Grpc_BidirectionalStream_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

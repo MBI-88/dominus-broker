@@ -14,51 +14,8 @@ type rest struct {
 	js     jsoniter.API
 }
 
-// Works with connections rest to rest
-//
-// # Parameters
-//
-// -> ctx: context fasthttp
-func (r *rest) local(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewConnection()
-	context := NewRestContext(ctx)
 
-	if err := inter.RestToRest(context); err != nil {
-		message := make(map[string]any)
-		ctx.Response.Header.Set("Content-Type", "application/json")
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
-		message["message"] = err.Error()
-		b, _ := r.js.Marshal(message)
-		ctx.Response.SetBody(b)
-		return
-	}
 
-	ctx.Response.Header.Set("Content-Type", "application/text")
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-}
-
-// Works with connections rest to rpc
-//
-// # Parameters
-//
-// -> ctx: context fasthttp
-func (r *rest) remote(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewConnection()
-	context := NewRestContext(ctx)
-
-	if err := inter.RestToGrpc(context); err != nil {
-		message := make(map[string]any)
-		ctx.Response.Header.Set("Content-Type", "application/json")
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
-		message["message"] = err.Error()
-		b, _ := r.js.Marshal(message)
-		ctx.Response.SetBody(b)
-		return
-	}
-
-	ctx.Response.Header.Set("Content-Type", "application/text")
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-}
 
 // Crate topic in memory and database
 //
@@ -160,8 +117,6 @@ func (r *rest) managerDelete(ctx *fasthttp.RequestCtx) {
 
 // Path connects handler with the router
 func (r *rest) path() {
-	r.router.POST("/local-shipping", r.local)
-	r.router.POST("/remote-shipping", r.remote)
 	r.router.POST("/manager", r.managerCreate)
 	r.router.PATCH("/manager", r.managerUpdate)
 	r.router.GET("/manager", r.managerGet)

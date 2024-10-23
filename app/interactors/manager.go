@@ -5,6 +5,7 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -32,6 +33,7 @@ func (m *manager) CreateTopic(ctx RestContextInt) error {
 	}
 
 	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
+	m.tdb.CreatedAt = time.Now()
 
 	if _, err := m.repo.InsertObject(m.tdb, m.collection); err != nil {
 		m.lg.WriteLog("InsertObject", err.Error())
@@ -68,7 +70,8 @@ func (m *manager) UpdateTopic(ctx RestContextInt) error {
 	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
 	filter := primitive.D{primitive.E{Key: "topic", Value: m.tdb.Topic}}
 	update := primitive.D{primitive.E{Key: "$set", Value: m.tdb}}
-
+	m.tdb.UpdatedAt = time.Now()
+	
 	if _, err := m.repo.UpdateObject(filter, update, m.collection); err != nil {
 		return err
 	}

@@ -10,32 +10,53 @@ import (
 
 
 type grpc struct {
-	pb.UnimplementedAPIServer
+	pb.UnimplementedGrpcServer
 	inter interactors.InteractorInt
 	js    jsoniter.API
 }
 
 //Receives simple messages from client
-func (s *grpc) Send(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
-	var response *pb.Response
+func (s *grpc) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
+	inter := s.inter.NewConnection()
 
-	return response, nil
+	if err  := inter.SimpleConn(ms); err != nil {
+		return &pb.Response{Status: uint32(406),Message: err.Error()}, err
+	}
+
+	return &pb.Response{Status: uint32(406),Message: "Accepted"}, nil
 }
 
 //Receives array messages from client
-func (s *grpc) SendClientStream(stream pb.API_SendServerStreamClient) error {
+func (s *grpc) ClientStream(stream pb.Grpc_ClientStreamServer) error {
+	inter := s.inter.NewConnection()
+	ctx := newClientStreamContext(stream)
 
+	if err := inter.StreamClientConn(ctx); err != nil {
+		stream.SendAndClose(&pb.Response{
+			Status: uint32(500),
+			Message: err.Error(),
+		})
+		return err
+	}
 	return nil
 }
 
 //Sends array messages to client
-func (s *grpc) RxClientStream(stream pb.API_SendClientStreamServer) error {
-
+func (s *grpc) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
+	inter := s.inter.NewConnection()
+	ctx := newServerStreamContext(stream)
+	if err := inter.StreamServerConn(ms,ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
 //Receives and sends messages from server to client
-func (s *grpc) SendfullStream(stream pb.API_SendFullDuplexStreamServer) error {
-
+func (s *grpc) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
+	inter := s.inter.NewConnection()
+	ctx := newBiStreamConn(stream)
+	if err := inter.StreamBiConn(ctx); err != nil {
+		return err
+	}
 	return nil
 }

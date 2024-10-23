@@ -21,10 +21,8 @@ type connection struct {
 	lg event.LogsInt
 }
 
-func (c *connection) RestToGrpc(ctx RestContextInt) error {
 
-	return nil
-}
+// Firt iteration
 
 func (c *connection) RestToRest(ctx RestContextInt) error {
 	if err := ctx.BodyParser(c.m); err != nil {
@@ -74,28 +72,33 @@ func (c *connection) RestToRest(ctx RestContextInt) error {
 	return nil
 }
 
-func (c *connection) GrpcToRest() error {
+
+
+func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 
 	return nil
 }
 
-func (c *connection) GrpcToGrpc() error {
+func (c *connection) StreamClientConn(stream StreamClientInt) error {
+
 	return nil
 }
+
+func (c *connection) StreamServerConn(req GrpRequestMessageInt, stream StreamServerInt) error {
+	
+	return nil
+}
+
+func (c *connection) StreamBiConn(stream StreamBiInt) error {
+
+	return nil
+}
+
+
 
 type ConnectionInt interface {
-	//RestToGrp sends information from  rest protocol receiver to  grpc protocol client
-	//
-	//Parameters
-	//
-	//-> ctx: RestContexInt
-	RestToGrpc(ctx RestContextInt) error
-	//RestToRest sends information from rest protocol receiver to rest protocol client
-	//
-	//Parameters
-	//
-	//-> ctx: RestContexInt
-	RestToRest(ctx RestContextInt) error
-	//GrpcToRest sends information from grpc protocol receiver to rest protocol client
-	GrpcToRest() error
+	SimpleConn(ms GrpRequestMessageInt) error
+	StreamClientConn(stream StreamClientInt) error
+	StreamServerConn(req GrpRequestMessageInt, stream StreamServerInt) error
+	StreamBiConn(stream StreamBiInt) error
 }

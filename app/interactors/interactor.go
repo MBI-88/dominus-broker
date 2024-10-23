@@ -1,6 +1,7 @@
 package interactors
 
 import (
+	"context"
 	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
@@ -163,9 +164,45 @@ type RestClientInt interface {
 	//Parameters
 	//
 	//-> ctx: context
-	// 
+	//
 	//-> sub: subcriber
 	//
 	//-> payload: message
 	DoJsonRequest(sub string, payload []byte) error
+}
+
+type GrpRequestMessageInt interface {
+	Descriptor() ([]byte, []int)
+	GetPayload() []byte
+	GetTopic() string
+	Reset()
+	String() string
+	Validate() error
+	ValidateAll() error
+}
+
+type StreamClientInt interface {
+	Recv() (GrpRequestMessageInt, error)
+}
+
+type StreamServerInt interface {
+	Send(payload []byte) error
+	Context() context.Context
+}
+
+type StreamBiInt interface {
+	Recv() (GrpRequestMessageInt, error)
+	Send(msg []byte) error
+
+}
+
+type GrpResponseInt interface {
+	Descriptor() ([]byte, []int)
+	GetMessage() string
+	GetStatus() uint32
+	ProtoMessage()
+	Reset()
+	String() string
+	Validate() error
+	ValidateAll() error
 }
