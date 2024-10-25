@@ -8,25 +8,34 @@ import (
 	"dominus/app/domain/topic"
 	"dominus/app/interactors"
 	"dominus/app/interfaces/database"
+	f "dominus/app/interfaces/fasthttp/input"
+	fm "dominus/app/interfaces/fasthttp/middlewares"
 	"dominus/app/interfaces/fasthttp/output"
-	"dominus/app/interfaces/fasthttp/input"
-	"dominus/app/interfaces/fasthttp/middlewares"
+	g "dominus/app/interfaces/grpc/input"
+	gf "dominus/app/interfaces/grpc/middlewares"
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 var (
-	mode   *bool
-	system chan os.Signal
-	banner = `
+	mode       *bool
+	system     chan os.Signal
+	showBanner *bool
+	banner     = `
 ==========================================================	
 ██████    ██████  ███    ██  ██ ███    ██ ██    ██ ███████
 ██   ██  ██    ██ ████  ████ ██ ████   ██ ██    ██ ██
@@ -41,13 +50,15 @@ var (
 Dominus server is running on`
 )
 
-//catches inital variables
+// catches inital variables
 func init() {
 	mode = flag.Bool("prod", false, "set operation mode")
+	showBanner = flag.Bool("banner", true, "show banner")
 
 	flag.Usage = func() {
 		info := fmt.Sprintf("[*] ***Dominus*** [*]\n")
 		info += "mode: boolean\n"
+		info += "banner: boolean\n"
 		info += "args: migrate|start"
 		fmt.Fprintf(os.Stderr, "%s\n", info)
 		flag.PrintDefaults()
@@ -99,17 +110,16 @@ func run() {
 		//***********Rest Server****************
 		//**************************************
 
-		mid := middlewares.NewMiddleware()
-		apiToken := middlewares.NewMiddlewareApiToken(env.ApiToken)
-		allowedHost := middlewares.NewMiddlewareHot(env.Cidr)
+		midF := fm.NewMiddleware()
+		apiToken := fm.NewMiddlewareApiToken(env.ApiToken)
+		allowedHost := fm.NewMiddlewareHot(env.Cidr)
 
-
-		mid.AddMiddleware(apiToken,allowedHost)
+		midF.AddMiddleware(apiToken, allowedHost)
 		router := router.New()
-		input.NewRestApi(router, inter)
+		f.NewRestApi(router, inter)
 
 		r := fasthttp.Server{
-			Handler:                            mid.Middlewares(router.Handler),
+			Handler:                            midF.Middlewares(router.Handler),
 			Name:                               "Dominus",
 			ReadTimeout:                        time.Duration(env.ReadTimeout) * time.Second,
 			WriteTimeout:                       time.Duration(env.WriteTimeout) * time.Second,
@@ -126,11 +136,10 @@ func run() {
 			CloseOnShutdown:                    env.CloseOnShutdown,
 			StreamRequestBody:                  env.StreamRequestBody,
 			Logger:                             logs,
-		}	
+		}
 
 		_, errC := os.Stat(env.SslCert)
 		_, errK := os.Stat(env.KeyFile)
-		
 
 		if errC == nil && errK == nil {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
@@ -147,15 +156,56 @@ func run() {
 		//********************************
 		//*********Grpc server************
 		//********************************
+		var opts []grpc.ServerOption
 
-		
+		midG := gf.NewMiddleware(env.ApiToken, logs)
+
+		if errC == nil && errK == nil {
+			creds, err := credentials.NewServerTLSFromFile(env.SslCert, env.KeyFile)
+			if err != nil {
+				cancel()
+				panic(err)
+			}
+			opts = append(opts,
+				grpc.Creds(creds),
+				grpc.ChainUnaryInterceptor(
+					auth.UnaryServerInterceptor(midG.ApiToken),
+					logging.UnaryServerInterceptor(midG.LogErrors()),
+				),
+				grpc.ChainStreamInterceptor(
+					auth.StreamServerInterceptor(midG.ApiToken),
+					logging.StreamServerInterceptor(midG.LogErrors()),
+				),
+			)
+
+		} else {
+			opts = append(opts,
+				grpc.ChainUnaryInterceptor(
+					midG.UnaryLog,
+					logging.UnaryServerInterceptor(midG.LogErrors()),
+				),
+				grpc.ChainStreamInterceptor(
+					midG.StreamLog,
+					logging.StreamServerInterceptor(midG.LogErrors()),
+				),
+			)
+		}
+
+		server := g.NewGrpcServe(opts, inter)
+		listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", env.GrpcPort))
+
+		go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
+			log.Fatal(sr.Serve(list))
+			cancel()
+		}(server, listener, cancel)
+
 		//*********************************
 		//**********Banner*****************
 		//*********************************
 
-		if errC == nil && errK == nil {
+		if errC == nil && errK == nil && *showBanner {
 			fmt.Printf("%s 🚀 Rest: https://0.0.0.0:%d 🚀 Grpc: https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
-		}else {
+		} else {
 			fmt.Printf("%s 🚀 Rest: http://0.0.0.0:%d 🚀 Grpc: http://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
 		}
 
@@ -180,9 +230,7 @@ func run() {
 	}
 }
 
-
-
-//Dominus entripoint
+// Dominus entripoint
 func main() {
 	run()
 }

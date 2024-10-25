@@ -5,18 +5,17 @@ import (
 	"dominus/app/interactors"
 	pb "dominus/app/interfaces/grpc/proto/builder"
 
-	jsoniter "github.com/json-iterator/go"
+	"google.golang.org/grpc"
 )
 
 
-type grpc struct {
+type grpcController struct {
 	pb.UnimplementedGrpcServer
 	inter interactors.InteractorInt
-	js    jsoniter.API
 }
 
 //Receives simple messages from client
-func (s *grpc) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
+func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
 	inter := s.inter.NewConnection()
 
 	if err  := inter.SimpleConn(ms); err != nil {
@@ -27,7 +26,7 @@ func (s *grpc) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, e
 }
 
 //Receives array messages from client
-func (s *grpc) ClientStream(stream pb.Grpc_ClientStreamServer) error {
+func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 	inter := s.inter.NewConnection()
 	ctx := newClientStreamContext(stream)
 
@@ -42,7 +41,7 @@ func (s *grpc) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 }
 
 //Sends array messages to client
-func (s *grpc) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
+func (s *grpcController) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
 	inter := s.inter.NewConnection()
 	ctx := newServerStreamContext(stream)
 	if err := inter.StreamServerConn(ms,ctx); err != nil {
@@ -52,11 +51,18 @@ func (s *grpc) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamSe
 }
 
 //Receives and sends messages from server to client
-func (s *grpc) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
+func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
 	inter := s.inter.NewConnection()
 	ctx := newBiStreamConn(stream)
 	if err := inter.StreamBiConn(ctx); err != nil {
 		return err
 	}
 	return nil
+}
+
+
+func NewGrpcServe(opts []grpc.ServerOption, i interactors.InteractorInt) *grpc.Server {
+	s := grpc.NewServer(opts...)
+	pb.RegisterGrpcServer(s, &grpcController{inter:i})
+	return s
 }
