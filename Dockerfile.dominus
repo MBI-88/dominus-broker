@@ -46,7 +46,7 @@ ENV STREAM_REQUEST_BODY=1
 ENV DSN=${DSN}
 ENV CIDR=${CIDR}
 ENV DATABASE="prod"
-ENV COLLECTIONS="topic,logs,message"
+ENV COLLECTIONS="topic,logs"
 
 
 COPY --from=builder /app/dominus ./dominus  

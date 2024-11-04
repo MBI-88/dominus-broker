@@ -48,7 +48,7 @@ func (m *manager) CreateTopic(ctx RestContextInt) error {
 
 func (m *manager) GetTopic(ctx RestContextInt) (map[string]any, error) {
 	var (
-		topics  []entities.Topic
+		topics  = make([]entities.Topic, 0, 100)
 		message = make(map[string]any)
 	)
 
