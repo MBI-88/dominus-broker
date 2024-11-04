@@ -2,11 +2,15 @@ package entities
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-//Log saves messages failed
+// Log saves messages failed
 type Logs struct {
-	Log       Message            `bson:"inline"`
+	ID        primitive.ObjectID `bson:"_id,omitemtpy" json:"id,omitempty"`
+	Desc      string             `bson:"description" json:"description"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
-	Status    string             `bson:"status" json:"status"`          // sent | pending
-} 
+	Status    uint32             `bson:"status" json:"status"`
+	Sub       string             `bson:"sub" josn:"sub"`
+}

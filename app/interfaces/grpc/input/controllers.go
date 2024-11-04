@@ -22,7 +22,7 @@ func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.R
 		return &pb.Response{Status: uint32(406),Message: err.Error()}, err
 	}
 
-	return &pb.Response{Status: uint32(406),Message: "Accepted"}, nil
+	return &pb.Response{Status: uint32(202),Message: "Accepted"}, nil
 }
 
 //Receives array messages from client

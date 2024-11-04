@@ -2,7 +2,6 @@ package interactors
 
 import (
 	"context"
-	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
@@ -23,7 +22,6 @@ type interactor struct {
 
 func (i *interactor) NewConnection() ConnectionInt {
 	return &connection{
-		m:  new(entities.Message),
 		t:  i.topic,
 		ev: i.event,
 		r:  rules.NewRule(),
@@ -205,4 +203,12 @@ type GrpResponseInt interface {
 	String() string
 	Validate() error
 	ValidateAll() error
+}
+
+
+type GrpClientInt interface {
+	Simple(url string, body []byte) (GrpResponseInt, error)
+	ClientStream(url string)
+	ServerStream(url string)
+	BidirectionalStream(url string)
 }

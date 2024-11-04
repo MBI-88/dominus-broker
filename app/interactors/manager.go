@@ -32,7 +32,10 @@ func (m *manager) CreateTopic(ctx RestContextInt) error {
 		return err
 	}
 
-	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
+	if err := m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers); err != nil {
+		m.lg.WriteLog("CreateTopic", err.Error())
+		return err
+	}
 	m.tdb.CreatedAt = time.Now()
 
 	if _, err := m.repo.InsertObject(m.tdb, m.collection); err != nil {
@@ -50,6 +53,7 @@ func (m *manager) GetTopic(ctx RestContextInt) (map[string]any, error) {
 	)
 
 	if err := m.repo.FindObjects(m.collection, &topics, bson.D{}); err != nil {
+		m.lg.WriteLog("FindObjects", err.Error())
 		return nil, err
 	}
 
@@ -60,19 +64,26 @@ func (m *manager) GetTopic(ctx RestContextInt) (map[string]any, error) {
 func (m *manager) UpdateTopic(ctx RestContextInt) error {
 
 	if err := ctx.BodyParser(m.tdb); err != nil {
+		m.lg.WriteLog("BodyParser", err.Error())
 		return err
 	}
 
 	if err := m.r.ValidateStruct(m.tdb); err != nil {
+		m.lg.WriteLog("ValidateStruct", err.Error())
 		return err
 	}
 
-	m.t.CreateTopic(m.tdb.Topic, m.tdb.Subscribers)
+	if err := m.t.UpdateTopic(m.tdb.Topic, m.tdb.Subscribers); err != nil {
+		m.lg.WriteLog("UpdateTopic", err.Error())
+		return err
+	}
+
 	filter := primitive.D{primitive.E{Key: "topic", Value: m.tdb.Topic}}
 	update := primitive.D{primitive.E{Key: "$set", Value: m.tdb}}
 	m.tdb.UpdatedAt = time.Now()
 	
 	if _, err := m.repo.UpdateObject(filter, update, m.collection); err != nil {
+		m.lg.WriteLog("UpdateObject", err.Error())
 		return err
 	}
 
@@ -82,20 +93,24 @@ func (m *manager) UpdateTopic(ctx RestContextInt) error {
 func (m *manager) DeleteTopic(ctx RestContextInt) error {
 
 	if err := ctx.BodyParser(m.tdb); err != nil {
+		m.lg.WriteLog("BodyParser", err.Error())
 		return err
 	}
 
 	if err := m.r.ValidateStruct(m.tdb); err != nil {
+		m.lg.WriteLog("ValidateStruct", err.Error())
 		return err
 	}
 
 	if err := m.t.DeleteTopic(m.tdb.Topic); err != nil {
+		m.lg.WriteLog("DeleteTopic", err.Error())
 		return err
 	}
 
 	filter := primitive.D{primitive.E{Key: "topic", Value: m.tdb.Topic}}
 
 	if _, err := m.repo.DeleteObject(filter, m.collection); err != nil {
+		m.lg.WriteLog("DeleteObject", err.Error())
 		return err
 	}
 

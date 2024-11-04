@@ -224,6 +224,7 @@ func run() {
 		if err := r.Shutdown(); err != nil {
 			log.Fatal(err)
 		}
+		
 
 	default:
 		fmt.Println("No option selected")

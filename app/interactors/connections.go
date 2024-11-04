@@ -5,76 +5,51 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/domain/topic"
-	"sync"
+	"fmt"
 	"time"
 )
 
 type connection struct {
-	m *entities.Message // Message
-	// grpc struct
-	t    topic.TopicInt  // Topic
-	ev   event.EventsInt // Events
-	r    rules.RuleInt   // Rules
-	cr   RestClientInt   // Rest client
-	repo RepositoryInt   // Repository client
-	// grpc client
-	lg event.LogsInt
+	t      topic.TopicInt  // Topic
+	ev     event.EventsInt // Events
+	r      rules.RuleInt   // Rules
+	cr     RestClientInt   // Rest client
+	repo   RepositoryInt   // Repository client
+	client GrpClientInt
+	lg     event.LogsInt
 }
-
-
-// Firt iteration
-
-func (c *connection) RestToRest(ctx RestContextInt) error {
-	if err := ctx.BodyParser(c.m); err != nil {
-		c.lg.WriteLog("InsertObject", err.Error())
-		return err
-	}
-
-	if err := c.r.ValidateStruct(c.m); err != nil {
-		c.lg.WriteLog("InsertObject", err.Error())
-		return err
-	}
-
-	subs := c.t.GetSusbcribers(c.m.Topic)
-	ch := make(chan bool)
-	go c.ev.Sentinel(ch)
-
-	go func(subscribers []string, msg *entities.Message, sig chan<- bool) {
-		var wg sync.WaitGroup
-
-		for _, sub := range subscribers {
-			wg.Add(1)
-			go func(addr string, msg *entities.Message, wg *sync.WaitGroup) {
-				defer wg.Done()
-				if err := c.cr.DoJsonRequest(sub, msg.Payload); err != nil {
-					log := &entities.Logs{
-						Log:       *msg,
-						CreatedAt: time.Now(),
-						Status:    "pending",
-					}
-
-					go func(log *entities.Logs) {
-						if _, err := c.repo.InsertObject(log, "watting for definition"); err != nil {
-							c.lg.WriteLog("InsertObject", err.Error())
-						}
-					}(log)
-
-					sig <- true
-				}
-			}(sub, msg, &wg)
-
-		}
-
-		wg.Wait()
-		close(sig)
-	}(subs, c.m, ch)
-
-	return nil
-}
-
-
 
 func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
+	topic := ms.GetTopic()
+
+	if topic == "" {
+		return fmt.Errorf("Not topic found")
+	}
+
+	subs := c.t.GetSusbcribers(topic)
+	if len(subs) == 0 {
+		return fmt.Errorf("Subscribers emtpy")
+	}
+
+	body := ms.GetPayload()
+	for _, sub := range subs {
+		go func(url string, body []byte) {
+			resp, err := c.client.Simple(url, body)
+			if err != nil {
+				logs := entities.Logs{
+					Desc:      err.Error(),
+					CreatedAt: time.Now(),
+					Status:    resp.GetStatus(),
+					Sub:       sub,
+				}
+
+				if _, err := c.repo.InsertObject(&logs, "logs"); err != nil {
+					c.lg.WriteLog("InsertObject", err.Error())
+				}
+			}
+
+		}(sub, body)
+	}
 
 	return nil
 }
@@ -85,7 +60,7 @@ func (c *connection) StreamClientConn(stream StreamClientInt) error {
 }
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, stream StreamServerInt) error {
-	
+
 	return nil
 }
 
@@ -93,8 +68,6 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 
 	return nil
 }
-
-
 
 type ConnectionInt interface {
 	SimpleConn(ms GrpRequestMessageInt) error
