@@ -12,5 +12,6 @@ type Logs struct {
 	Desc      string             `bson:"description" json:"description"`
 	CreatedAt time.Time          `bson:"created_at" json:"created_at"`
 	Status    uint32             `bson:"status" json:"status"`
-	Sub       string             `bson:"sub" josn:"sub"`
+	Sub       string             `bson:"sub" json:"sub"`
+	Topic     string             `bson:"topic" json:"topic"`
 }

@@ -33,7 +33,7 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 
 	body := ms.GetPayload()
 	for _, sub := range subs {
-		go func(url string, body []byte) {
+		go func(url,tp string, body []byte) {
 			resp, err := c.client.Simple(url, body)
 			if err != nil {
 				logs := entities.Logs{
@@ -41,6 +41,7 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 					CreatedAt: time.Now(),
 					Status:    resp.GetStatus(),
 					Sub:       sub,
+					Topic: tp,
 				}
 
 				if _, err := c.repo.InsertObject(&logs, "logs"); err != nil {
@@ -48,7 +49,7 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 				}
 			}
 
-		}(sub, body)
+		}(sub,topic, body)
 	}
 
 	return nil
