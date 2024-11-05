@@ -5,14 +5,16 @@ import (
 	"dominus/app/domain/config"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
-	"dominus/app/domain/topic"
 	"dominus/app/interactors"
 	"dominus/app/interfaces/database"
-	f "dominus/app/interfaces/fasthttp/input"
+
+	"google.golang.org/grpc/encoding/gzip"
+
+	//fi "dominus/app/interfaces/fasthttp/input"
 	fm "dominus/app/interfaces/fasthttp/middlewares"
-	"dominus/app/interfaces/fasthttp/output"
-	g "dominus/app/interfaces/grpc/input"
-	gf "dominus/app/interfaces/grpc/middlewares"
+	gt "dominus/app/interfaces/grpc/output"
+	gi "dominus/app/interfaces/grpc/input"
+	gm "dominus/app/interfaces/grpc/middlewares"
 	"flag"
 	"fmt"
 	"log"
@@ -20,13 +22,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+
+	//"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 
-	"github.com/fasthttp/router"
-	"github.com/valyala/fasthttp"
+	//"github.com/fasthttp/router"
+	//"github.com/valyala/fasthttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -76,7 +79,6 @@ func run() {
 	mongoConfig := database.NewMongoConfig()
 	mongoClient := mongoConfig.CreateClient(env.Dsn)
 	rls := rules.NewRule()
-	restClient := output.NewRestClient()
 	repo := database.NewRepository(env.Dsn, env.Database, rls, mongoClient)
 
 	switch args {
@@ -87,14 +89,12 @@ func run() {
 	case "start":
 		//Instances
 		logs := event.NewLogs("./logs")
-		topic := topic.NewTopic()
+		/*
 		events := event.NewEvent(
 			repo,
 			restClient,
-			topic,
-		)
-		events.InitialLoad()
-		inter := interactors.NewInteractor(repo, topic, events, logs)
+		)**/
+		inter := interactors.NewInteractor(repo, logs)
 
 		// Signals
 		system = make(chan os.Signal, 1)
@@ -115,9 +115,9 @@ func run() {
 		allowedHost := fm.NewMiddlewareHot(env.Cidr)
 
 		midF.AddMiddleware(apiToken, allowedHost)
-		router := router.New()
-		f.NewRestApi(router, inter)
-
+		//router := router.New()
+		//fi.NewRestApi(router, inter)
+		/*
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
 			Name:                               "Dominus",
@@ -137,10 +137,11 @@ func run() {
 			StreamRequestBody:                  env.StreamRequestBody,
 			Logger:                             logs,
 		}
-
+		**/
 		_, errC := os.Stat(env.SslCert)
 		_, errK := os.Stat(env.KeyFile)
 
+		/*
 		if errC == nil && errK == nil {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key))
@@ -152,52 +153,81 @@ func run() {
 				cancel()
 			}(env.RestPort, cancel)
 		}
+		**/
 
 		//********************************
 		//*********Grpc server************
 		//********************************
-		var opts []grpc.ServerOption
+		var (
+			optsS []grpc.ServerOption
+			optsD []grpc.DialOption
+		)
 
-		midG := gf.NewMiddleware(env.ApiToken, logs)
+		midGs := gm.NewMiddleware(env.ApiToken, logs)
+		midGc := gm.NewInterceptor(env.ApiToken)
 
 		if errC == nil && errK == nil {
-			creds, err := credentials.NewServerTLSFromFile(env.SslCert, env.KeyFile)
+			credsS, err := credentials.NewServerTLSFromFile(env.SslCert, env.KeyFile)
 			if err != nil {
 				cancel()
 				panic(err)
 			}
-			opts = append(opts,
-				grpc.Creds(creds),
+			optsS = append(optsS,
+				grpc.Creds(credsS),
 				grpc.ChainUnaryInterceptor(
-					auth.UnaryServerInterceptor(midG.ApiToken),
-					logging.UnaryServerInterceptor(midG.LogErrors()),
+					auth.UnaryServerInterceptor(midGs.ApiToken),
+					logging.UnaryServerInterceptor(midGs.LogErrors()),
 				),
 				grpc.ChainStreamInterceptor(
-					auth.StreamServerInterceptor(midG.ApiToken),
-					logging.StreamServerInterceptor(midG.LogErrors()),
+					auth.StreamServerInterceptor(midGs.ApiToken),
+					logging.StreamServerInterceptor(midGs.LogErrors()),
 				),
+			)
+
+			credsD, err := credentials.NewClientTLSFromFile(env.SslCaCert, "dominus.com")
+			if err != nil {
+				cancel()
+				panic(err)
+			}
+
+			optsD = append(optsD, 
+				grpc.WithTransportCredentials(credsD),
+				grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
+				grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
+				grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
+				grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
 			)
 
 		} else {
-			opts = append(opts,
+			optsS = append(optsS,
 				grpc.ChainUnaryInterceptor(
-					midG.UnaryLog,
-					logging.UnaryServerInterceptor(midG.LogErrors()),
+					midGs.UnaryLog,
+					logging.UnaryServerInterceptor(midGs.LogErrors()),
 				),
 				grpc.ChainStreamInterceptor(
-					midG.StreamLog,
-					logging.StreamServerInterceptor(midG.LogErrors()),
+					midGs.StreamLog,
+					logging.StreamServerInterceptor(midGs.LogErrors()),
 				),
+			)
+
+			optsD = append(optsD, 
+				grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
+				grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
+				grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
+				grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
 			)
 		}
 
-		server := g.NewGrpcServe(opts, inter)
+
+		gclient := gt.NewGrpClient(optsD)
+		inter = inter.Set(gclient)
+		srG := gi.NewGrpcServe(optsS, inter)
 		listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", env.GrpcPort))
 
 		go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
 			log.Fatal(sr.Serve(list))
 			cancel()
-		}(server, listener, cancel)
+		}(srG, listener, cancel)
 
 		//*********************************
 		//**********Banner*****************
@@ -221,10 +251,12 @@ func run() {
 			break
 		}
 
+		/*
 		if err := r.Shutdown(); err != nil {
 			log.Fatal(err)
 		}
-		
+		**/
+		srG.GracefulStop()
 
 	default:
 		fmt.Println("No option selected")

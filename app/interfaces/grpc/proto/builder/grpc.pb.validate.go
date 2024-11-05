@@ -57,17 +57,6 @@ func (m *RequestMessage) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetTopic()) > 20 {
-		err := RequestMessageValidationError{
-			field:  "Topic",
-			reason: "value length must be at most 20 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	if l := len(m.GetPayload()); l < 1 || l > 65535 {
 		err := RequestMessageValidationError{
 			field:  "Payload",

@@ -5,7 +5,7 @@ import (
 
 	"github.com/fasthttp/router"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/valyala/fasthttp"
+	//"github.com/valyala/fasthttp"
 )
 
 type rest struct {
@@ -16,7 +16,7 @@ type rest struct {
 
 
 
-
+/*
 // Crate topic in memory and database
 //
 // # Parameters
@@ -128,3 +128,5 @@ func NewRestApi(r *router.Router, i interactors.InteractorInt) {
 	re := &rest{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }
+
+**/

@@ -3,6 +3,7 @@ package rules
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"github.com/go-playground/validator/v10"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,6 +19,7 @@ type errorResponse struct {
 
 type rule struct {
 	v  *validator.Validate
+	re  *regexp.Regexp
 }
 
 func (r *rule) ValidateStruct(data any) error {
@@ -62,6 +64,10 @@ func (*rule) CreateIndex(client *mongo.Client, database, name string, ctx contex
 	}
 }
 
+func (r *rule) CheckURI(uri string) bool {
+	return r.re.MatchString(uri)
+}
+
 type RuleInt interface {
 	//Create index respect to business logic
 	//
@@ -81,11 +87,20 @@ type RuleInt interface {
 	//
 	//-> data: the object to validate
 	ValidateStruct(data any) error
+	//Validates uri
+	//
+	//Parameters
+	//
+	//-> uri: uri to validate
+	CheckURI(uri string) bool
 }
 
 
 func NewRule() RuleInt {
-	return &rule{v: validator.New()}
+	return &rule{
+		v: validator.New(),
+		re: regexp.MustCompile(`^(https?:\/\/[a-zA-Z0-9.-]+)(:\d{1,5})?(\/[^\s]*)?$`),
+	}
 }
 
 

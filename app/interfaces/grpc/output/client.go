@@ -15,7 +15,7 @@ type grpcClient struct {
 }
 
 
-func (g *grpcClient) Simple(url string, body []byte ) (interactors.GrpResponseInt, error) {
+func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt, error) {
 	conn, err := grpc.NewClient(url, g.opts...)
 	if err != nil  {
 		return nil, err
@@ -25,7 +25,7 @@ func (g *grpcClient) Simple(url string, body []byte ) (interactors.GrpResponseIn
 	ctx := context.Background()
 
 	msg := &pb.RequestMessage{
-		Topic: "", Payload: body,
+		Subscribers: []string{}, Payload: body,
 	}
 
 	resp, err := client.Simple(ctx, msg)
@@ -52,7 +52,7 @@ func (g *grpcClient) BidirectionalStream(url string) {
 
 
 func NewGrpClient(opts []grpc.DialOption) interactors.GrpClientInt {
-	
-
-	return &grpcClient{}
+	return &grpcClient{
+		opts: opts,
+	}
 }

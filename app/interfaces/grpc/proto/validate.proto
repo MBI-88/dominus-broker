@@ -39,7 +39,13 @@ message FieldRules {
         // Scalar Field Types
         StringRules   string   = 14;
         BytesRules    bytes    = 15;
+        RepeatedRules repeated = 18;
     }
+}
+
+
+message RepeatedRules {
+    optional FieldRules items = 1; // Rules for every element in the repeated field
 }
 
 //StringRules describe the constraints applied to `string` values

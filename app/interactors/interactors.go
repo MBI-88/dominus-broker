@@ -4,7 +4,6 @@ import (
 	"context"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
-	"dominus/app/domain/topic"
 	"mime/multipart"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,40 +14,42 @@ import (
 
 type interactor struct {
 	repo  RepositoryInt
-	topic topic.TopicInt
-	event event.EventsInt
 	log   event.LogsInt
+	gclient GrpClientInt
 }
 
 func (i *interactor) NewConnection() ConnectionInt {
 	return &connection{
-		t:  i.topic,
-		ev: i.event,
 		r:  rules.NewRule(),
 		lg: i.log,
 	}
 }
 
+/*
 func (i *interactor) NewManager() ManagerInt {
 	return &manager{
 		r:          rules.NewRule(),
-		t:          i.topic,
 		repo:       i.repo,
 		collection: "topic",
 		lg:         i.log,
 	}
 }
+**/
+
+func (i *interactor) Set(c GrpClientInt) InteractorInt {
+	i.gclient = c
+	return i
+}
 
 type InteractorInt interface {
 	NewConnection() ConnectionInt
-	NewManager() ManagerInt
+	//NewManager() ManagerInt
+	Set(cl GrpClientInt) InteractorInt
 }
 
 // Create a new interactor instance
-func NewInteractor(rp RepositoryInt, t topic.TopicInt, e event.EventsInt, lg event.LogsInt) InteractorInt {
+func NewInteractor(rp RepositoryInt, lg event.LogsInt) InteractorInt {
 	return &interactor{
-		topic: t,
-		event: e,
 		repo:  rp,
 		log:   lg,
 	}
@@ -172,7 +173,7 @@ type RestClientInt interface {
 type GrpRequestMessageInt interface {
 	Descriptor() ([]byte, []int)
 	GetPayload() []byte
-	GetTopic() string
+	GetSubscribers() []string
 	Reset()
 	String() string
 	Validate() error

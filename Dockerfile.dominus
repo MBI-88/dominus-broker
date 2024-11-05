@@ -11,6 +11,7 @@ WORKDIR /app
 ARG REST_PORT=8000 
 ARG GRPC_PORT=5000
 ARG SSL_CERT="./certs/cert.pem"
+ARG SSL_CA="./certs/ca_cert.pem"
 ARG KEY_FILE="./certs/cert.key"
 ARG DSN="mongodb://dominus:dominus10102024%408807@localhost:27017/admin"
 ARG API_TOKEN=dominus_example_@10102024KeyServerToken
@@ -28,6 +29,7 @@ ENV API_TOKEN=${API_TOKEN}
 ENV REST_PORT=${REST_PORT}
 ENV GRPC_PORT=${GRPC_PORT}
 ENV SSL_CERT=${SSL_CERT}
+ENV SSL_CA=${SSL_CA}
 ENV KEY_FILE=${KEY_FILE}
 ENV WRITE_TIMEOUT=${WRITE_TIMEOUT}
 ENV READ_TIMEOUT=${READ_TIMEOUT}
@@ -46,7 +48,7 @@ ENV STREAM_REQUEST_BODY=1
 ENV DSN=${DSN}
 ENV CIDR=${CIDR}
 ENV DATABASE="prod"
-ENV COLLECTIONS="topic,logs"
+ENV COLLECTIONS="logs"
 
 
 COPY --from=builder /app/dominus ./dominus  

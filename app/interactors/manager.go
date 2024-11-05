@@ -1,10 +1,11 @@
 package interactors
 
+
+/*
 import (
 	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
-	"dominus/app/domain/topic"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,7 +14,6 @@ import (
 
 type manager struct {
 	r          rules.RuleInt
-	t          topic.TopicInt
 	repo       RepositoryInt
 	tdb        *entities.Topic
 	collection string
@@ -143,3 +143,5 @@ type ManagerInt interface {
 	//-> ctx: fasthttp context
 	UpdateTopic(ctx RestContextInt) error
 }
+
+**/

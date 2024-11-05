@@ -13,6 +13,7 @@ type config struct {
 	RestPort                          uint16
 	GrpcPort                          uint16
 	SslCert                           string
+	SslCaCert						  string
 	KeyFile                           string
 	WriteTimeout                      int
 	ReadTimeout                       int
@@ -40,6 +41,7 @@ func (s *config) setEnv() {
 	s.RestPort = viper.GetUint16("REST_PORT")
 	s.GrpcPort = viper.GetUint16("GRPC_PORT")
 	s.SslCert = viper.GetString("SSL_CERT")
+	s.SslCaCert = viper.GetString("SSL_CA")
 	s.KeyFile = viper.GetString("KEY_FILE")
 	s.WriteTimeout = viper.GetInt("WRITE_TIMEOUT")
 	s.ReadTimeout = viper.GetInt("READ_TIMEOUT")

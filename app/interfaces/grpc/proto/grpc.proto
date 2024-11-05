@@ -9,7 +9,7 @@ option go_package = "dominus/app/interfaces/grpc/proto/builder";
 
 //Message
 message RequestMessage {
-    string topic = 1 [(validate.rules).string.max_len = 20];
+    repeated string subscribers = 1 [(validate.rules).repeated = {items: {string: {uri:true}}}];
     bytes payload = 2 [(validate.rules).bytes = {
         min_len: 1,          
         max_len: 65535         
