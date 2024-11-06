@@ -47,14 +47,72 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 	return nil
 }
 
-func (c *connection) StreamClientConn(stream StreamClientInt) error {
+func (c *connection) StreamClientConn(st StreamClientInt) error {
+	stream := make(chan []byte)
+	errMsg := make(chan *entities.Logs)
+	req, err := st.Recv()
+	if err != nil {
+		return err
+	}
 
-	return nil
+	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg)
+	go func(sig <-chan *entities.Logs) {
+		for {
+			select {
+			case val, ok := <-sig:
+				if ok {
+					if _, err := c.repo.InsertObject(val, "logs"); err != nil {
+						c.lg.WriteLog("InsertObject", err.Error())
+					}
+				} else {
+					break
+				}
+			}
+		}
+
+	}(errMsg)
+
+	stream <- req.GetPayload()
+	for {
+		req, err := st.Recv()
+		if err != nil {
+			close(stream)
+			close(errMsg)
+			return err
+		}
+
+		stream <- req.GetPayload()
+	}
 }
 
-func (c *connection) StreamServerConn(req GrpRequestMessageInt, stream StreamServerInt) error {
+func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
+	stream := make(chan []byte, len(req.GetSubscribers()))
+	errMsg := make(chan *entities.Logs)
+	initialRequest := req.GetPayload()
 
-	return nil
+	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg)
+
+	for {
+		select {
+		case body, ok := <-stream:
+			if ok {
+				if err := st.Send(body); err != nil {
+					log := &entities.Logs{
+						Desc: err.Error(),
+						CreatedAt: time.Now(),
+						Subscribers: "",
+						Status: uint32(500),
+					}
+					if _, err := c.repo.InsertObject(log, "logs"); err != nil {
+						c.lg.WriteLog("InsertObject", err.Error())
+					}
+				}
+			} else {
+				return fmt.Errorf("Connection closed")
+			}
+
+		}
+	}
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
@@ -64,7 +122,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 
 type ConnectionInt interface {
 	SimpleConn(ms GrpRequestMessageInt) error
-	StreamClientConn(stream StreamClientInt) error
-	StreamServerConn(req GrpRequestMessageInt, stream StreamServerInt) error
-	StreamBiConn(stream StreamBiInt) error
+	StreamClientConn(st StreamClientInt) error
+	StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error
+	StreamBiConn(st StreamBiInt) error
 }

@@ -2,6 +2,7 @@ package interactors
 
 import (
 	"context"
+	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"mime/multipart"
@@ -13,8 +14,8 @@ import (
 )
 
 type interactor struct {
-	repo  RepositoryInt
-	log   event.LogsInt
+	repo    RepositoryInt
+	log     event.LogsInt
 	gclient GrpClientInt
 }
 
@@ -50,8 +51,8 @@ type InteractorInt interface {
 // Create a new interactor instance
 func NewInteractor(rp RepositoryInt, lg event.LogsInt) InteractorInt {
 	return &interactor{
-		repo:  rp,
-		log:   lg,
+		repo: rp,
+		log:  lg,
 	}
 }
 
@@ -192,7 +193,6 @@ type StreamServerInt interface {
 type StreamBiInt interface {
 	Recv() (GrpRequestMessageInt, error)
 	Send(msg []byte) error
-
 }
 
 type GrpResponseInt interface {
@@ -206,10 +206,9 @@ type GrpResponseInt interface {
 	ValidateAll() error
 }
 
-
 type GrpClientInt interface {
-	Simple(url string, body []byte) (GrpResponseInt, error)
-	ClientStream(url string)
-	ServerStream(url string)
+	Simple(url string, msg []byte) (GrpResponseInt, error)
+	ClientStream(urls []string, msg <-chan []byte, sig chan<- *entities.Logs)
+	ServerStream(urls []string, initalMsg []byte,msg chan<- []byte, sig chan<- *entities.Logs)
 	BidirectionalStream(url string)
 }
