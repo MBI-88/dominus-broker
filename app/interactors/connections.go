@@ -28,10 +28,10 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 				resp, err := c.client.Simple(url, body)
 				if err != nil {
 					logs := entities.Logs{
-						Desc:        err.Error(),
-						CreatedAt:   time.Now(),
-						Status:      resp.GetStatus(),
-						Subscribers: sub,
+						Desc:      err.Error(),
+						CreatedAt: time.Now(),
+						Status:    resp.GetStatus(),
+						Stage:     "SimpleConn",
 					}
 
 					if _, err := c.repo.InsertObject(&logs, "logs"); err != nil {
@@ -92,27 +92,30 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 
 	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg)
 
+loop:
 	for {
 		select {
 		case body, ok := <-stream:
 			if ok {
 				if err := st.Send(body); err != nil {
 					log := &entities.Logs{
-						Desc: err.Error(),
+						Desc:      err.Error(),
 						CreatedAt: time.Now(),
-						Subscribers: "",
-						Status: uint32(500),
+						Stage:     "StreamServerConn Send to provider",
+						Status:    uint32(500),
 					}
 					if _, err := c.repo.InsertObject(log, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				}
 			} else {
-				return fmt.Errorf("Connection closed")
+				break loop
 			}
 
 		}
 	}
+	
+	return fmt.Errorf("Connection closed")
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {

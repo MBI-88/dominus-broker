@@ -54,6 +54,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- *
 	}
 
 	if len(g.clientStream) > 0 {
+	loop:
 		for {
 			select {
 			case payload, ok := <-msg:
@@ -65,17 +66,18 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- *
 								Payload:     payload}); err != nil {
 
 								sig <- &entities.Logs{
-									CreatedAt:   time.Now(),
-									Desc:        err.Error(),
-									Status:      uint32(500),
-									Subscribers: urls[i],
+									CreatedAt:  time.Now(),
+									Desc:       err.Error(),
+									Status:     uint32(500),
+									Stage:      "ClientStream send to subscribers",
+									Subscriber: urls[i],
 								}
 							}
 						}(c, i)
 					}
 
 				} else {
-					break
+					break loop
 				}
 
 			}
