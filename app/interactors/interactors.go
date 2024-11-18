@@ -6,11 +6,6 @@ import (
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"mime/multipart"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type interactor struct {
@@ -88,30 +83,6 @@ type RestContextInt interface {
 }
 
 type RepositoryInt interface {
-	//Make migrations in the database
-	//
-	//Parameters
-	//
-	//-> strCollection: string that contains collection names splited by ","
-	Migrations(strCollection string)
-	//Delete an Object in the database
-	//
-	//Parameters
-	//
-	//-> f: filter to use
-	//
-	//-> collection: name of the collection
-	DeleteObject(f primitive.D, collection string) (*mongo.DeleteResult, error)
-	//Update an object in the database
-	//
-	//Parameters
-	//
-	//-> filter: filter to select objects to update
-	//
-	//-> update: the object and key to update
-	//
-	//-> collection: collection name to use
-	UpdateObject(filter primitive.D, updadte primitive.D, collection string) (*mongo.UpdateResult, error)
 	//Create an object in the database
 	//
 	//Parameters
@@ -119,7 +90,7 @@ type RepositoryInt interface {
 	//-> obj: the object to be updated
 	//
 	//-> collection: collection name to use
-	InsertObject(obj any, collection string) (*mongo.InsertOneResult, error)
+	InsertObject(obj any, collection string) error
 	//Find objects in the database
 	//
 	//Parameters
@@ -130,8 +101,10 @@ type RepositoryInt interface {
 	//
 	//-> filter: the filter to find objects
 	//
-	//-> op: contains options to use in the query
-	FindObjects(collection string, objects any, filter bson.D, op ...*options.FindOptions) error
+	//-> page: page seletected
+	//
+	//-> size: total elements in the page
+	FindObjects(collection string, objects any, filter any, page, size int ) error
 	//Find and object in the database
 	//
 	//Parameters
@@ -141,13 +114,7 @@ type RepositoryInt interface {
 	//-> collection: collection name to use
 	//
 	//-> object: the object to fill
-	FindObject(f primitive.D, collection string, object any) error
-	//Count pages in the database
-	//
-	//Parameters
-	//
-	//-> collection: collection name to use
-	CountPages(collection string) (int64, error)
+	FindObject(f any, collection string, object any) error
 	//Delete objects in the database
 	//
 	//Parameters
@@ -155,7 +122,7 @@ type RepositoryInt interface {
 	//-> f: filter to find objects
 	//
 	//-> collection: collection name to use
-	DeleteObjects(f primitive.D, collection string) (*mongo.DeleteResult, error)
+	DeleteObjects(f any, collection string) error
 }
 
 type RestClientInt interface {
@@ -209,6 +176,6 @@ type GrpResponseInt interface {
 type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
 	ClientStream(urls []string, msg <-chan []byte, sig chan<- *entities.Logs)
-	ServerStream(urls []string, initalMsg []byte,msg chan<- []byte, sig chan<- *entities.Logs)
-	BidirectionalStream(url string)
+	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- *entities.Logs)
+	BidirectionalStream(url []string)
 }

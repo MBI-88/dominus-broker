@@ -143,7 +143,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(url string) {
+func (g *grpcClient) BidirectionalStream(url []string) {
 
 }
 

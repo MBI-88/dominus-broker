@@ -133,6 +133,9 @@ loop:
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
+	//subscribers := make(chan []byte, 0)
+	//stream.Recv()
+	//stream.Send(msg []byte)
 
 	return nil
 }

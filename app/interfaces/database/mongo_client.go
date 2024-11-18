@@ -73,31 +73,31 @@ func (r *repository) InsertObject(object any, collection string) (*mongo.InsertO
 }
 
 
-func (r *repository) UpdateObject(filter primitive.D, updadte primitive.D ,collection string) (*mongo.UpdateResult, error) {
+func (r *repository) UpdateObject(filter primitive.D, updadte primitive.D ,collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
-	result, err := cl.UpdateOne(context.TODO(), filter, updadte)
+	_, err := cl.UpdateOne(context.TODO(), filter, updadte)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result, nil
+	return nil
 }
 
-func (r *repository) DeleteObject(f primitive.D, collection string) (*mongo.DeleteResult, error) {
+func (r *repository) DeleteObject(f primitive.D, collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
-	result, err := cl.DeleteOne(context.TODO(), f)
+	_, err := cl.DeleteOne(context.TODO(), f)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result, nil
+	return nil
 }
 
-func (r *repository) DeleteObjects(f primitive.D, collection string) (*mongo.DeleteResult, error) {
+func (r *repository) DeleteObjects(f primitive.D, collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
-	result, err := cl.DeleteMany(context.TODO(), f)
+	_, err := cl.DeleteMany(context.TODO(), f)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result, nil
+	return nil
 }
 
 
