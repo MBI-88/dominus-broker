@@ -19,7 +19,7 @@ type errorResponse struct {
 
 type rule struct {
 	v  *validator.Validate
-	re  *regexp.Regexp
+	re *regexp.Regexp
 }
 
 func (r *rule) ValidateStruct(data any) error {
@@ -47,7 +47,6 @@ func (r *rule) ValidateStruct(data any) error {
 	return nil
 }
 
-
 func (*rule) CreateIndex(client *mongo.Client, database, name string, ctx context.Context) {
 	db := client.Database(database)
 	if err := db.CreateCollection(ctx, name); err != nil {
@@ -55,7 +54,7 @@ func (*rule) CreateIndex(client *mongo.Client, database, name string, ctx contex
 	}
 	collection := db.Collection(name)
 	indexModel := mongo.IndexModel{
-		Keys: map[string]int{"topic": 1},
+		Keys:    map[string]int{"topic": 1},
 		Options: options.Index().SetUnique(true),
 	}
 
@@ -95,14 +94,9 @@ type RuleInt interface {
 	CheckURI(uri string) bool
 }
 
-
 func NewRule() RuleInt {
 	return &rule{
-		v: validator.New(),
+		v:  validator.New(),
 		re: regexp.MustCompile(`^(https?:\/\/[a-zA-Z0-9.-]+)(:\d{1,5})?(\/[^\s]*)?$`),
 	}
 }
-
-
-
-

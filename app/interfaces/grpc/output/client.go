@@ -40,46 +40,64 @@ func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt
 }
 
 func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- *entities.Logs) {
-	for _, url := range urls {
-		if ok := g.rls.CheckURI(url); ok {
-			conn, err := grpc.NewClient(url, g.opts...)
-			if err == nil {
-				client := pb.NewGrpcClient(conn)
-				stream, err := client.ClientStream(context.Background())
+	arrayMsg := make([]chan []byte, 0, len(urls))
+	for p, url := range urls {
+		ch := make(chan []byte, 0)
+		arrayMsg = append(arrayMsg, ch)
+		go func(url string, ch chan []byte, p int) {
+			if ok := g.rls.CheckURI(url); ok {
+				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
-					g.clientStream = append(g.clientStream, stream)
-				}
-			}
-		}
-	}
+					client := pb.NewGrpcClient(conn)
+					stream, err := client.ClientStream(context.Background())
+					if err == nil {
+						go func(client pb.Grpc_ClientStreamClient, p int) {
+						loop:
+							for {
+								select {
+								case payload, ok := <-ch:
+									if ok {
+										if err := client.Send(&pb.RequestMessage{
+											Subscribers: urls,
+											Payload:     payload}); err != nil {
 
-	if len(g.clientStream) > 0 {
-	loop:
-		for {
-			select {
-			case payload, ok := <-msg:
-				if ok {
-					for i, c := range g.clientStream {
-						go func(client pb.Grpc_ClientStreamClient, cnumber int) {
-							if err := client.Send(&pb.RequestMessage{
-								Subscribers: urls,
-								Payload:     payload}); err != nil {
+											sig <- &entities.Logs{
+												CreatedAt:  time.Now(),
+												Desc:       err.Error(),
+												Status:     uint32(500),
+												Stage:      "ClientStream sends to subscribers",
+												Subscriber: urls[p],
+											}
+											return
+										}
+									} else {
+										break loop
+									}
 
-								sig <- &entities.Logs{
-									CreatedAt:  time.Now(),
-									Desc:       err.Error(),
-									Status:     uint32(500),
-									Stage:      "ClientStream send to subscribers",
-									Subscriber: urls[i],
 								}
 							}
-						}(c, i)
+
+						}(stream, p)
 					}
-
-				} else {
-					break loop
 				}
+			}
+		}(url, ch, p)
 
+	}
+
+loop:
+	for {
+		select {
+		case payload, ok := <-msg:
+			if ok {
+				for _, ch := range arrayMsg {
+					ch <- payload
+				}
+			} else {
+				for _, ch := range arrayMsg {
+					close(ch)
+				}
+				break loop
 			}
 		}
 	}
@@ -87,27 +105,42 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- *
 }
 
 func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- *entities.Logs) {
-	for _, url := range urls {
-		if ok := g.rls.CheckURI(url); ok {
-			conn, err := grpc.NewClient(url, g.opts...)
-			if err == nil {
-				client := pb.NewGrpcClient(conn)
-				reqMsg := &pb.RequestMessage{
-					Subscribers: urls,
-					Payload:     initalMsg,
-				}
-				stream, err := client.ServerStream(context.Background(), reqMsg)
+	for p, url := range urls {
+		go func(url string, p int) {
+			if ok := g.rls.CheckURI(url); ok {
+				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
-					g.serverStream = append(g.serverStream, stream)
+					client := pb.NewGrpcClient(conn)
+					reqMsg := &pb.RequestMessage{
+						Subscribers: urls,
+						Payload:     initalMsg,
+					}
+					stream, err := client.ServerStream(context.Background(), reqMsg)
+					if err == nil {
+						go func(client pb.Grpc_ServerStreamClient, p int) {
+							for {
+								resp, err := client.Recv()
+								if err != nil {
+									sig <- &entities.Logs{
+										Desc:       err.Error(),
+										CreatedAt:  time.Now(),
+										Status:     uint32(500),
+										Subscriber: urls[p],
+										Stage:      "ServerStream receives from subscribers",
+									}
+									return
+								} else {
+									msg <- resp.Payload
+								}
+							}
+						}(stream, p)
+
+					}
 				}
 			}
-		}
-	}
-
-	if len(g.serverStream) > 0 {
+		}(url, p)
 
 	}
-
 }
 
 func (g *grpcClient) BidirectionalStream(url string) {

@@ -41,9 +41,7 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 
 			}(sub, body)
 		}
-
 	}
-
 	return nil
 }
 
@@ -57,6 +55,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 
 	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg)
 	go func(sig <-chan *entities.Logs) {
+	loop:
 		for {
 			select {
 			case val, ok := <-sig:
@@ -65,11 +64,10 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
-					break
+					break loop
 				}
 			}
 		}
-
 	}(errMsg)
 
 	stream <- req.GetPayload()
@@ -80,7 +78,6 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 			close(errMsg)
 			return err
 		}
-
 		stream <- req.GetPayload()
 	}
 }
@@ -91,6 +88,22 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 	initialRequest := req.GetPayload()
 
 	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg)
+
+	go func(sig <-chan *entities.Logs) {
+	loop:
+		for {
+			select {
+			case val, ok := <-sig:
+				if ok {
+					if _, err := c.repo.InsertObject(val, "logs"); err != nil {
+						c.lg.WriteLog("InsertObject", err.Error())
+					}
+				} else {
+					break loop
+				}
+			}
+		}
+	}(errMsg)
 
 loop:
 	for {
@@ -107,6 +120,8 @@ loop:
 					if _, err := c.repo.InsertObject(log, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
+					close(stream)
+					close(errMsg)
 				}
 			} else {
 				break loop
@@ -114,7 +129,6 @@ loop:
 
 		}
 	}
-	
 	return fmt.Errorf("Connection closed")
 }
 
