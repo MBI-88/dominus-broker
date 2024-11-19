@@ -104,7 +104,7 @@ type RepositoryInt interface {
 	//-> page: page seletected
 	//
 	//-> size: total elements in the page
-	FindObjects(collection string, objects any, filter any, page, size int ) error
+	FindObjects(collection string, objects any, filter any, page, size int) error
 	//Find and object in the database
 	//
 	//Parameters
@@ -177,5 +177,5 @@ type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
 	ClientStream(urls []string, msg <-chan []byte, sig chan<- *entities.Logs)
 	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- *entities.Logs)
-	BidirectionalStream(url []string)
+	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- *entities.Logs)
 }

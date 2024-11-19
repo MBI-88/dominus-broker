@@ -7,10 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type repository struct {
@@ -37,7 +35,7 @@ func (r *repository) Migrations(strCollections string) {
 }
 
 
-func (r *repository) FindObject(f primitive.D, collection string, object any) error {
+func (r *repository) FindObject(f any, collection string, object any) error {
 	cl := r.client.Database(r.database).Collection(collection)
 	cursor := cl.FindOne(context.TODO(), f)
 	
@@ -48,9 +46,9 @@ func (r *repository) FindObject(f primitive.D, collection string, object any) er
 	return nil
 }
 
-func (r *repository) FindObjects(collection string, objects any, filter bson.D, op ...*options.FindOptions) error {
+func (r *repository) FindObjects(collection string, objects any, filter any, page, sizze int) error {
 	cl := r.client.Database(r.database).Collection(collection)
-	cursor, err := cl.Find(context.TODO(), filter , op...)
+	cursor, err := cl.Find(context.TODO(), filter)
 	defer cursor.Close(context.TODO())
 
 	if err != nil {
@@ -63,17 +61,17 @@ func (r *repository) FindObjects(collection string, objects any, filter bson.D, 
 	return nil
 }
 
-func (r *repository) InsertObject(object any, collection string) (*mongo.InsertOneResult, error) {
+func (r *repository) InsertObject(object any, collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
-	result, err := cl.InsertOne(context.TODO(), object)
+	_, err := cl.InsertOne(context.TODO(), object)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result, nil
+	return nil
 }
 
 
-func (r *repository) UpdateObject(filter primitive.D, updadte primitive.D ,collection string) error {
+func (r *repository) UpdateObject(filter any, updadte any ,collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
 	_, err := cl.UpdateOne(context.TODO(), filter, updadte)
 	if err != nil {
@@ -82,7 +80,7 @@ func (r *repository) UpdateObject(filter primitive.D, updadte primitive.D ,colle
 	return nil
 }
 
-func (r *repository) DeleteObject(f primitive.D, collection string) error {
+func (r *repository) DeleteObject(f any, collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
 	_, err := cl.DeleteOne(context.TODO(), f)
 	if err != nil {
@@ -91,7 +89,7 @@ func (r *repository) DeleteObject(f primitive.D, collection string) error {
 	return nil
 }
 
-func (r *repository) DeleteObjects(f primitive.D, collection string) error {
+func (r *repository) DeleteObjects(f any, collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
 	_, err := cl.DeleteMany(context.TODO(), f)
 	if err != nil {

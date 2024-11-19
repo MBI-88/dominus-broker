@@ -34,7 +34,7 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 						Stage:     "SimpleConn",
 					}
 
-					if _, err := c.repo.InsertObject(&logs, "logs"); err != nil {
+					if err := c.repo.InsertObject(&logs, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				}
@@ -46,8 +46,8 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 }
 
 func (c *connection) StreamClientConn(st StreamClientInt) error {
-	stream := make(chan []byte)
-	errMsg := make(chan *entities.Logs)
+	stream := make(chan []byte, 0)
+	errMsg := make(chan *entities.Logs, 0)
 	req, err := st.Recv()
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 			select {
 			case val, ok := <-sig:
 				if ok {
-					if _, err := c.repo.InsertObject(val, "logs"); err != nil {
+					if err := c.repo.InsertObject(val, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
@@ -84,7 +84,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
 	stream := make(chan []byte, len(req.GetSubscribers()))
-	errMsg := make(chan *entities.Logs)
+	errMsg := make(chan *entities.Logs, 0)
 	initialRequest := req.GetPayload()
 
 	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg)
@@ -95,7 +95,7 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 			select {
 			case val, ok := <-sig:
 				if ok {
-					if _, err := c.repo.InsertObject(val, "logs"); err != nil {
+					if err := c.repo.InsertObject(val, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
@@ -115,9 +115,9 @@ loop:
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamServerConn Send to provider",
-						Status:    uint32(500),
+						Status:    uint32(444),
 					}
-					if _, err := c.repo.InsertObject(log, "logs"); err != nil {
+					if err := c.repo.InsertObject(log, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 					close(stream)
@@ -133,11 +133,83 @@ loop:
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
-	//subscribers := make(chan []byte, 0)
-	//stream.Recv()
-	//stream.Send(msg []byte)
+	request, err := stream.Recv()
+	subscribers := request.GetSubscribers()
+	streamProv := make(chan []byte, 0)
+	streamSub := make(chan []byte, len(subscribers))
+	errMsg := make(chan *entities.Logs, 0)
 
-	return nil
+	if err != nil {
+		return err
+	}
+	go func(sig <-chan *entities.Logs) {
+	loop:
+		for {
+			select {
+			case val, ok := <-sig:
+				if ok {
+					if err := c.repo.InsertObject(val, "logs"); err != nil {
+						c.lg.WriteLog("InsertObject", err.Error())
+					}
+				} else {
+					break loop
+				}
+			}
+		}
+	}(errMsg)
+
+	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg)
+	streamProv <- request.GetPayload()
+
+	//Receives from provider
+	go func() {
+		for {
+			req, err := stream.Recv()
+			if err != nil {
+				log := &entities.Logs{
+					Desc:      err.Error(),
+					CreatedAt: time.Now(),
+					Stage:     "StreamBiConn Recv from provider",
+					Status:    uint32(444),
+				}
+				if err := c.repo.InsertObject(log, "logs"); err != nil {
+					c.lg.WriteLog("InsertObject", err.Error())
+				}
+				close(streamProv)
+				close(streamSub)
+				close(errMsg)
+				return
+			}
+			streamProv <- req.GetPayload()
+		}
+	}()
+
+	//Receives from subscribers
+loop:
+	for {
+		select {
+		case payload, ok := <-streamSub:
+			if ok {
+				if err := stream.Send(payload); err != nil {
+					log := &entities.Logs{
+						Desc:      err.Error(),
+						CreatedAt: time.Now(),
+						Stage:     "StreamBiConn Send to provider",
+						Status:    uint32(444),
+					}
+					if err := c.repo.InsertObject(log, "logs"); err != nil {
+						c.lg.WriteLog("InsertObject", err.Error())
+					}
+					close(streamProv)
+					close(streamSub)
+					close(errMsg)
+				}
+			} else {
+				break loop
+			}
+		}
+	}
+	return fmt.Errorf("Connection closed")
 }
 
 type ConnectionInt interface {

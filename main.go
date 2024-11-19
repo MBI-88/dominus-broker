@@ -83,9 +83,6 @@ func run() {
 
 	switch args {
 
-	case "migrate":
-		repo.Migrations(env.Collections)
-
 	case "start":
 		//Instances
 		logs := event.NewLogs("./logs")
