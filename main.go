@@ -79,18 +79,15 @@ func run() {
 	mongoConfig := database.NewMongoConfig()
 	mongoClient := mongoConfig.CreateClient(env.Dsn)
 	rls := rules.NewRule()
-	repo := database.NewRepository(env.Dsn, env.Database, rls, mongoClient)
+	repo := database.NewRepository(env.Dsn, env.Database, env.Collections, rls, mongoClient)
 
 	switch args {
-
+	case "migrate":
+		repo.Migrations()
 	case "start":
 		//Instances
 		logs := event.NewLogs("./logs")
-		/*
-		events := event.NewEvent(
-			repo,
-			restClient,
-		)**/
+		
 		inter := interactors.NewInteractor(repo, logs)
 
 		// Signals

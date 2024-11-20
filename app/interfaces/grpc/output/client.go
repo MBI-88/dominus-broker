@@ -36,7 +36,7 @@ func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt
 	return resp, nil
 }
 
-func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- *entities.Logs) {
+func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs) {
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -58,10 +58,9 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- *
 											Subscribers: urls,
 											Payload:     payload}); err != nil {
 
-											sig <- &entities.Logs{
+											sig <- entities.Logs{
 												CreatedAt:  time.Now(),
 												Desc:       err.Error(),
-												Status:     uint32(444),
 												Stage:      "ClientStream sends to subscribers",
 												Subscriber: urls[p],
 											}
@@ -101,7 +100,7 @@ loop:
 
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- *entities.Logs) {
+func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs) {
 	for p, url := range urls {
 		go func(url string, p int) {
 			if ok := g.rls.CheckURI(url); ok {
@@ -118,10 +117,9 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 							for {
 								resp, err := client.Recv()
 								if err != nil {
-									sig <- &entities.Logs{
+									sig <- entities.Logs{
 										Desc:       err.Error(),
 										CreatedAt:  time.Now(),
-										Status:     uint32(444),
 										Subscriber: urls[p],
 										Stage:      "ServerStream receives from subscribers",
 									}
@@ -139,7 +137,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- *entities.Logs) {
+func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs) {
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -162,10 +160,10 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 											Subscribers: urls,
 											Payload:     payload}); err != nil {
 
-											errMsg <- &entities.Logs{
+											errMsg <- entities.Logs{
 												CreatedAt:  time.Now(),
 												Desc:       err.Error(),
-												Status:     uint32(444),
+												
 												Stage:      "BidirectionalStream sends to subscribers",
 												Subscriber: urls[p],
 											}
@@ -185,12 +183,11 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 								if err != nil {
 									log := entities.Logs{
 										CreatedAt: time.Now(),
-										Status: uint32(444),
 										Stage: "BidirectionalStream Recv from subscribers",
 										Subscriber: urls[p],
 										Desc: err.Error(),
 									}
-									errMsg <- &log
+									errMsg <- log
 									return
 								}
 								subMsg <- resp.GetPayload()

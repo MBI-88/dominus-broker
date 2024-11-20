@@ -25,16 +25,15 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 	for _, sub := range subs {
 		if ok := c.r.CheckURI(sub); ok {
 			go func(url string, body []byte) {
-				resp, err := c.client.Simple(url, body)
+				_, err := c.client.Simple(url, body)
 				if err != nil {
 					logs := entities.Logs{
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
-						Status:    resp.GetStatus(),
 						Stage:     "SimpleConn",
 					}
 
-					if err := c.repo.InsertObject(&logs, "logs"); err != nil {
+					if err := c.repo.InsertObject(logs, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				}
@@ -47,14 +46,14 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 
 func (c *connection) StreamClientConn(st StreamClientInt) error {
 	stream := make(chan []byte, 0)
-	errMsg := make(chan *entities.Logs, 0)
+	errMsg := make(chan entities.Logs, 0)
 	req, err := st.Recv()
 	if err != nil {
 		return err
 	}
 
 	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg)
-	go func(sig <-chan *entities.Logs) {
+	go func(sig <-chan entities.Logs) {
 	loop:
 		for {
 			select {
@@ -84,12 +83,12 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
 	stream := make(chan []byte, len(req.GetSubscribers()))
-	errMsg := make(chan *entities.Logs, 0)
+	errMsg := make(chan entities.Logs, 0)
 	initialRequest := req.GetPayload()
 
 	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg)
 
-	go func(sig <-chan *entities.Logs) {
+	go func(sig <-chan entities.Logs) {
 	loop:
 		for {
 			select {
@@ -111,11 +110,10 @@ loop:
 		case body, ok := <-stream:
 			if ok {
 				if err := st.Send(body); err != nil {
-					log := &entities.Logs{
+					log := entities.Logs{
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamServerConn Send to provider",
-						Status:    uint32(444),
 					}
 					if err := c.repo.InsertObject(log, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
@@ -137,12 +135,12 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 	subscribers := request.GetSubscribers()
 	streamProv := make(chan []byte, 0)
 	streamSub := make(chan []byte, len(subscribers))
-	errMsg := make(chan *entities.Logs, 0)
+	errMsg := make(chan entities.Logs, 0)
 
 	if err != nil {
 		return err
 	}
-	go func(sig <-chan *entities.Logs) {
+	go func(sig <-chan entities.Logs) {
 	loop:
 		for {
 			select {
@@ -166,11 +164,11 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 		for {
 			req, err := stream.Recv()
 			if err != nil {
-				log := &entities.Logs{
+				log := entities.Logs{
 					Desc:      err.Error(),
 					CreatedAt: time.Now(),
 					Stage:     "StreamBiConn Recv from provider",
-					Status:    uint32(444),
+					
 				}
 				if err := c.repo.InsertObject(log, "logs"); err != nil {
 					c.lg.WriteLog("InsertObject", err.Error())
@@ -191,11 +189,11 @@ loop:
 		case payload, ok := <-streamSub:
 			if ok {
 				if err := stream.Send(payload); err != nil {
-					log := &entities.Logs{
+					log := entities.Logs{
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamBiConn Send to provider",
-						Status:    uint32(444),
+						
 					}
 					if err := c.repo.InsertObject(log, "logs"); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
