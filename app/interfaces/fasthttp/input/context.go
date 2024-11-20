@@ -2,7 +2,6 @@ package input
 
 import (
 	"dominus/app/interactors"
-	"mime/multipart"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
@@ -21,12 +20,26 @@ func (r *restContext) BodyParser(obj any) error {
 	return nil
 }
 
-func (r *restContext) FormFile(key string) (*multipart.FileHeader, error) {
-	return r.context.FormFile(key)
+func (r *restContext) Queries() map[string]string {
+	parameters := make(map[string]string)
+	args := r.context.QueryArgs()
+	args.VisitAll(func(key, value []byte) {
+		parameters[string(key)] = string(value)
+	})
+	return parameters
 }
 
-func (r *restContext) FormValue(key string) []byte {
-	return r.context.FormValue(key)
+func (r *restContext) Params(key string) string {
+	return r.context.UserValue(key).(string)
+}
+
+func (r *restContext) QueryInt(key string) uint64 {
+	args := r.context.QueryArgs()
+	result, err := args.GetUint(key)
+	if err != nil {
+		return 0
+	}
+	return uint64(result)
 }
 
 func NewRestContext(ctx *fasthttp.RequestCtx) interactors.RestContextInt {

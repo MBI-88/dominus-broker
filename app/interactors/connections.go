@@ -9,11 +9,11 @@ import (
 )
 
 type connection struct {
-	r      rules.RuleInt // Rules
-	cr     RestClientInt // Rest client
+	r      rules.RulesInt // Rules
 	repo   RepositoryInt // Repository client
 	client GrpClientInt
 	lg     event.LogsInt
+	collection string
 }
 
 func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
@@ -33,7 +33,7 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 						Stage:     "SimpleConn",
 					}
 
-					if err := c.repo.InsertObject(logs, "logs"); err != nil {
+					if err := c.repo.InsertObject(logs, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				}
@@ -59,7 +59,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 			select {
 			case val, ok := <-sig:
 				if ok {
-					if err := c.repo.InsertObject(val, "logs"); err != nil {
+					if err := c.repo.InsertObject(val, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
@@ -94,7 +94,7 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 			select {
 			case val, ok := <-sig:
 				if ok {
-					if err := c.repo.InsertObject(val, "logs"); err != nil {
+					if err := c.repo.InsertObject(val, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
@@ -115,7 +115,7 @@ loop:
 						CreatedAt: time.Now(),
 						Stage:     "StreamServerConn Send to provider",
 					}
-					if err := c.repo.InsertObject(log, "logs"); err != nil {
+					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 					close(stream)
@@ -146,7 +146,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 			select {
 			case val, ok := <-sig:
 				if ok {
-					if err := c.repo.InsertObject(val, "logs"); err != nil {
+					if err := c.repo.InsertObject(val, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
@@ -170,7 +170,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 					Stage:     "StreamBiConn Recv from provider",
 					
 				}
-				if err := c.repo.InsertObject(log, "logs"); err != nil {
+				if err := c.repo.InsertObject(log, c.collection); err != nil {
 					c.lg.WriteLog("InsertObject", err.Error())
 				}
 				close(streamProv)
@@ -195,7 +195,7 @@ loop:
 						Stage:     "StreamBiConn Send to provider",
 						
 					}
-					if err := c.repo.InsertObject(log, "logs"); err != nil {
+					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 					close(streamProv)

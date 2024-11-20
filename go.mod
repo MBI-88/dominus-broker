@@ -4,7 +4,6 @@ go 1.23.0
 
 require (
 	github.com/fasthttp/router v1.5.2
-	github.com/go-playground/validator/v10 v10.22.1
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.1.0
 	github.com/json-iterator/go v1.1.12
 	github.com/spf13/viper v1.19.0
@@ -17,13 +16,9 @@ require (
 require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.5 // indirect
-	github.com/go-playground/locales v0.14.1 // indirect
-	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.10 // indirect
-	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

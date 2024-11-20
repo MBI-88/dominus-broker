@@ -10,7 +10,7 @@ import (
 
 	"google.golang.org/grpc/encoding/gzip"
 
-	//fi "dominus/app/interfaces/fasthttp/input"
+	fi "dominus/app/interfaces/fasthttp/input"
 	fm "dominus/app/interfaces/fasthttp/middlewares"
 	gt "dominus/app/interfaces/grpc/output"
 	gi "dominus/app/interfaces/grpc/input"
@@ -23,13 +23,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	//"time"
+	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 
-	//"github.com/fasthttp/router"
-	//"github.com/valyala/fasthttp"
+	"github.com/fasthttp/router"
+	"github.com/valyala/fasthttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -109,9 +109,9 @@ func run() {
 		allowedHost := fm.NewMiddlewareHot(env.Cidr)
 
 		midF.AddMiddleware(apiToken, allowedHost)
-		//router := router.New()
-		//fi.NewRestApi(router, inter)
-		/*
+		router := router.New()
+		fi.NewRestApi(router, inter)
+		
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
 			Name:                               "Dominus",
@@ -131,11 +131,11 @@ func run() {
 			StreamRequestBody:                  env.StreamRequestBody,
 			Logger:                             logs,
 		}
-		**/
+		
 		_, errC := os.Stat(env.SslCert)
 		_, errK := os.Stat(env.KeyFile)
 
-		/*
+		
 		if errC == nil && errK == nil {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key))
@@ -147,7 +147,7 @@ func run() {
 				cancel()
 			}(env.RestPort, cancel)
 		}
-		**/
+		
 
 		//********************************
 		//*********Grpc server************
@@ -245,11 +245,10 @@ func run() {
 			break
 		}
 
-		/*
+		
 		if err := r.Shutdown(); err != nil {
 			log.Fatal(err)
 		}
-		**/
 		srG.GracefulStop()
 
 	default:

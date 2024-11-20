@@ -8,13 +8,14 @@ import (
 	"strings"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type repository struct {
 	client      *mongo.Client
 	database    string
 	dsn         string
-	rls         rules.RuleInt
+	rls         rules.RulesInt
 	collections string
 }
 
@@ -92,16 +93,36 @@ func (r *repository) DeleteObjects(f any, collection string) error {
 	return nil
 }
 
-func (r *repository) CountPages(collection string) (int64, error) {
+func (r *repository) CountPages(collection string) (uint64, error) {
 	cl := r.client.Database(r.database).Collection(collection)
 	total, err := cl.EstimatedDocumentCount(context.TODO())
 	if err != nil {
 		return 0, err
 	}
-	return total, nil
+	return uint64(total), nil
 }
 
-func NewRepository(dsn, database, cols string, r rules.RuleInt, c *mongo.Client) interactors.RepositoryInt {
+func (r *repository) Filter(filter any, object any, collection string) error {
+	allowDiskUse := true
+	options := &options.AggregateOptions{
+		AllowDiskUse: &allowDiskUse,
+	}
+
+	cl := r.client.Database(r.database).Collection(collection)
+	cursor, err := cl.Aggregate(context.TODO(), filter, options)
+	defer cursor.Close(context.TODO())
+	if err != nil {
+		return err
+	}
+
+	if err := cursor.All(context.TODO(), object); err != nil {
+		return err
+	}
+	return nil
+}
+
+
+func NewRepository(dsn, database, cols string, r rules.RulesInt, c *mongo.Client) interactors.RepositoryInt {
 	return &repository{
 		dsn:         dsn,
 		database:    database,

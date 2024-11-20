@@ -13,7 +13,7 @@ import (
 
 type grpcClient struct {
 	opts         []grpc.DialOption
-	rls          rules.RuleInt
+	rls          rules.RulesInt
 }
 
 func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt, error) {

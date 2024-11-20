@@ -5,7 +5,7 @@ import (
 
 	"github.com/fasthttp/router"
 	jsoniter "github.com/json-iterator/go"
-	//"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttp"
 )
 
 type rest struct {
@@ -16,117 +16,109 @@ type rest struct {
 
 
 
-/*
-// Crate topic in memory and database
-//
-// # Parameters
-//
-// -> ctx: context fasthttp
-func (r *rest) managerCreate(ctx *fasthttp.RequestCtx) {
+func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	context := NewRestContext(ctx)
 	
-	if err := inter.CreateTopic(context); err != nil {
-		message := make(map[string]any)
-		ctx.Response.Header.Set("Content-Type", "application/json")
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
-		message["message"] = err.Error()
-		b, _ := r.js.Marshal(message)
-		ctx.Response.SetBody(b)
-		return
-	}
-
-	ctx.Response.Header.Set("Content-Type", "application/text")
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-}
-
-// Update topic in memory and database
-//
-// # Parameters
-//
-// -> ctx: context fasthttp
-func (r *rest) managerUpdate(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
-	context := NewRestContext(ctx)
-
-	if err := inter.UpdateTopic(context); err != nil {
-		message := make(map[string]any)
-		ctx.Response.Header.Set("Content-Type", "application/json")
-		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
-		message["message"] = err.Error()
-		b, _ := r.js.Marshal(message)
-		ctx.Response.SetBody(b)
-		return
-	}
-
-	ctx.Response.Header.Set("Content-Type", "application/text")
-	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
-}
-
-// Returns topics in the database
-//
-// # Parameters
-//
-// -> ctx: context fasthttp
-func (r *rest) managerGet(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
-	context := NewRestContext(ctx)
-	
-	message, err := inter.GetTopic(context)
+	result, err := inter.GetLogs(context)
 	if err != nil {
 		ctx.Response.Header.Set("Content-Type", "application/json")
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
-		message["message"] = err.Error()
-		b, _ := r.js.Marshal(message)
+		msg := make(map[string]string)
+		msg["message"] = err.Error()
+		b, _ := r.js.Marshal(msg)
 		ctx.Response.SetBody(b)
 		return
 	}
 
-	body, err := r.js.Marshal(message)
+	msg := make(map[string]any)
+	msg["logs"] = result
+	body, err := r.js.Marshal(msg)
 	if err != nil {
-		delete(message, "topic")
-		message["message"] = err.Error()
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		msg := make(map[string]string)
+		msg["message"] = err.Error()
+		b, _ := r.js.Marshal(msg)
+		ctx.Response.SetBody(b)
+		return
 	}
-
 	ctx.Response.Header.Set("Content-Type", "application/text")
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
 	ctx.Response.SetBody(body)
 }
 
-// Deletes a topic in memory and database
-//
-// # Parameters
-//
-// -> ctx: context fasthttp
-func (r *rest) managerDelete(ctx *fasthttp.RequestCtx) {
+func (r *rest) getPages(ctx *fasthttp.RequestCtx) {
 	inter := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
-	if err := inter.DeleteTopic(context); err != nil {
-		message := make(map[string]any)
+	result, err := inter.GetTotalPages(context)
+	if err != nil {
 		ctx.Response.Header.Set("Content-Type", "application/json")
 		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
-		message["message"] = err.Error()
-		b, _ := r.js.Marshal(message)
+		msg := make(map[string]string)
+		msg["message"] = err.Error()
+		b, _ := r.js.Marshal(msg)
 		ctx.Response.SetBody(b)
+		return
 	}
 
+	msg := make(map[string]any)
+	msg["total"] = result
+	body, err := r.js.Marshal(msg)
+	if err != nil {
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		msg := make(map[string]string)
+		msg["message"] = err.Error()
+		b, _ := r.js.Marshal(msg)
+		ctx.Response.SetBody(b)
+		return
+	}
 	ctx.Response.Header.Set("Content-Type", "application/text")
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
+	ctx.Response.SetBody(body)
 }
 
-// Path connects handler with the router
+func (r *rest) deleteAll(ctx *fasthttp.RequestCtx) {
+	inter := r.inter.NewManager()
+	context := NewRestContext(ctx)
+
+	if err := inter.DelectLogs(context); err != nil {
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		msg := make(map[string]string)
+		msg["message"] = err.Error()
+		b, _ := r.js.Marshal(msg)
+		ctx.Response.SetBody(b)
+		return
+	}
+
+	msg := make(map[string]string)
+	msg["message"] = "Operation successful!"
+	body, err := r.js.Marshal(msg)
+	if err != nil {
+		ctx.Response.Header.Set("Content-Type", "application/json")
+		ctx.Response.Header.SetStatusCode(fasthttp.StatusExpectationFailed)
+		msg := make(map[string]string)
+		msg["message"] = err.Error()
+		b, _ := r.js.Marshal(msg)
+		ctx.Response.SetBody(b)
+		return
+	}
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusAccepted)
+	ctx.Response.SetBody(body)
+}
+
 func (r *rest) path() {
-	r.router.POST("/manager", r.managerCreate)
-	r.router.PATCH("/manager", r.managerUpdate)
-	r.router.GET("/manager", r.managerGet)
-	r.router.DELETE("/manager", r.managerDelete)
+	r.router.GET("/manager", r.getLogs)
+	r.router.GET("/manager-pages", r.getPages)
+	r.router.DELETE("/manager", r.deleteAll)
 }
 
-// Create a new Rest api service
+
 func NewRestApi(r *router.Router, i interactors.InteractorInt) {
 	re := &rest{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }
-
-**/
