@@ -30,7 +30,7 @@ func (r *repository) Migrations() {
 				panic(err)
 			}
 			if _, err := db.Collection(name).Indexes().
-			CreateOne(context.TODO(), index); err != nil {
+			CreateMany(context.TODO(), index); err != nil {
 				panic(err)
 			}
 		} else {

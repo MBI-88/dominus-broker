@@ -15,10 +15,14 @@ type rules struct {
 	re *regexp.Regexp
 }
 
-func (*rules) CreateIndex() mongo.IndexModel {
-	indexModel := mongo.IndexModel{
-		Keys:    map[string]int{"created_at": 1, "stage": 1, "subscriber": 1},
-		Options: options.Index().SetName("logsindex"),
+func (*rules) CreateIndex() []mongo.IndexModel {
+	var indexModel []mongo.IndexModel
+	for _, key := range []string{"created_at", "stage", "subscriber"} {
+		index := mongo.IndexModel{
+			Keys:    map[string]int{key: 1},
+			Options: options.Index().SetName(key),
+		}
+		indexModel = append(indexModel, index)
 	}
 	return indexModel
 }
@@ -143,7 +147,7 @@ func (*rules) MakeBackupFilter(filters map[string]string) []bson.D {
 }
 
 type RulesInt interface {
-	CreateIndex() mongo.IndexModel
+	CreateIndex() []mongo.IndexModel
 	CheckURI(uri string) bool
 	MakeLogFiter(filters map[string]string, page, size uint64) []bson.D
 	Paginator(page, size uint64) *options.FindOptions
