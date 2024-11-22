@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -22,8 +23,16 @@ type repository struct {
 func (r *repository) Migrations() {
 	collections := strings.Split(r.collections, ",")
 	for _, name := range collections {
-		if name == "topic" {
-			r.rls.CreateIndex(r.client, r.database, name, context.TODO())
+		if name == "logs" {
+			index := r.rls.CreateIndex()
+			db := r.client.Database(name)
+			if err := db.CreateCollection(context.TODO(), name); err != nil {
+				panic(err)
+			}
+			if _, err := db.Collection(name).Indexes().
+			CreateOne(context.TODO(), index); err != nil {
+				panic(err)
+			}
 		} else {
 			if err := r.client.Database(r.database).CreateCollection(context.TODO(), name); err != nil {
 				panic(err)
@@ -119,6 +128,16 @@ func (r *repository) Filter(filter any, object any, collection string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *repository) Stats() (any, error) {
+	var result bson.M 
+	if err := r.client.Database(r.database).
+	RunCommand(context.TODO(), bson.D{{Key:"dbStats",Value: 1}}).
+	Decode(&result); err != nil {
+		return nil, err
+	}
+	return result, nil 
 }
 
 

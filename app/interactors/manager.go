@@ -48,9 +48,32 @@ func (m *manager) DelectLogs(ctx RestContextInt) error {
 	return nil 
 }
 
+func (m *manager) GetStats() (any, error) {
+	result, err := m.repo.Stats()
+	if err != nil {
+		return nil, err
+	}
+	return result, nil 
+}
+
+func (m *manager) GetBackup(ctx RestContextInt) ([]entities.Logs, error) {
+	var (
+		logs []entities.Logs
+		filters = ctx.Queries()
+	)
+	arrfilter := m.rls.MakeBackupFilter(filters)
+	if err := m.repo.Filter(arrfilter, &logs, m.collection); err != nil {
+		go m.lg.WriteLog("GetBackup Filter", err.Error())
+		return nil, err
+	}
+	return logs, nil 
+}
+
 
 type ManagerInt interface {
 	GetLogs(ctx RestContextInt) ([]entities.Logs, error)
 	GetTotalPages(ctx RestContextInt) (uint64, error)
 	DelectLogs(ctx RestContextInt) error
+	GetStats() (any, error)
+	GetBackup(ctx RestContextInt) ([]entities.Logs, error)
 }
