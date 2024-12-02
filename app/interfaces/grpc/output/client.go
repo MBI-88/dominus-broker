@@ -12,8 +12,8 @@ import (
 )
 
 type grpcClient struct {
-	opts         []grpc.DialOption
-	rls          rules.RulesInt
+	opts []grpc.DialOption
+	rls  rules.RulesInt
 }
 
 func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt, error) {
@@ -23,13 +23,11 @@ func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt
 	}
 
 	client := pb.NewGrpcClient(conn)
-	ctx := context.Background()
-
 	msg := &pb.RequestMessage{
-		Subscribers: []string{}, Payload: body,
+		Subscribers: nil, Payload: body,
 	}
 
-	resp, err := client.Simple(ctx, msg)
+	resp, err := client.Simple(context.Background(), msg)
 	if err != nil {
 		return nil, err
 	}
@@ -57,28 +55,25 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 										if err := client.Send(&pb.RequestMessage{
 											Subscribers: urls,
 											Payload:     payload}); err != nil {
-
 											sig <- entities.Logs{
 												CreatedAt:  time.Now(),
 												Desc:       err.Error(),
 												Stage:      "ClientStream sends to subscribers",
 												Subscriber: urls[p],
 											}
-											return
 										}
 									} else {
+										client.CloseSend()
 										break loop
 									}
 
 								}
 							}
-
 						}(stream, p)
 					}
 				}
 			}
 		}(url, ch, p)
-
 	}
 
 loop:
@@ -100,7 +95,7 @@ loop:
 
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs) {
+func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, ctx context.Context) {
 	for p, url := range urls {
 		go func(url string, p int) {
 			if ok := g.rls.CheckURI(url); ok {
@@ -108,7 +103,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 				if err == nil {
 					client := pb.NewGrpcClient(conn)
 					reqMsg := &pb.RequestMessage{
-						Subscribers: urls,
+						Subscribers: nil,
 						Payload:     initalMsg,
 					}
 					stream, err := client.ServerStream(context.Background(), reqMsg)
@@ -125,11 +120,14 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 									}
 									return
 								} else {
-									msg <- resp.Payload
+									if _, ok := <-ctx.Done(); !ok {
+										msg <- resp.Payload
+									} else {
+										return
+									}
 								}
 							}
 						}(stream, p)
-
 					}
 				}
 			}
@@ -138,6 +136,8 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 }
 
 func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -159,17 +159,15 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 										if err := client.Send(&pb.RequestMessage{
 											Subscribers: urls,
 											Payload:     payload}); err != nil {
-
 											errMsg <- entities.Logs{
 												CreatedAt:  time.Now(),
 												Desc:       err.Error(),
-												
 												Stage:      "BidirectionalStream sends to subscribers",
 												Subscriber: urls[p],
 											}
-											return
 										}
 									} else {
+										client.CloseSend()
 										break loop
 									}
 								}
@@ -182,24 +180,26 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 								resp, err := client.Recv()
 								if err != nil {
 									log := entities.Logs{
-										CreatedAt: time.Now(),
-										Stage: "BidirectionalStream Recv from subscribers",
+										CreatedAt:  time.Now(),
+										Stage:      "BidirectionalStream Recv from subscribers",
 										Subscriber: urls[p],
-										Desc: err.Error(),
+										Desc:       err.Error(),
 									}
 									errMsg <- log
 									return
 								}
-								subMsg <- resp.GetPayload()
+								if _, ok := <- ctx.Done(); !ok {
+									subMsg <- resp.GetPayload()
+								}else {
+									return
+								}
 							}
 						}(stream, p)
 					}
 				}
-
 			}
 		}(ch, p, url)
 	}
-
 
 loop:
 	for {
@@ -210,6 +210,7 @@ loop:
 					ch <- payload
 				}
 			} else {
+				cancel()
 				for _, ch := range arrayMsg {
 					close(ch)
 				}

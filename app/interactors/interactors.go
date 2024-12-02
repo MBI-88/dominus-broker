@@ -108,6 +108,6 @@ type GrpResponseInt interface {
 type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
 	ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs)
-	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs)
+	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, ctx context.Context)
 	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs)
 }

@@ -1,6 +1,7 @@
 package interactors
 
 import (
+	"context"
 	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
@@ -82,11 +83,13 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 }
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
+	ctx, canel := context.WithCancel(context.Background())
+	defer canel()
 	stream := make(chan []byte, len(req.GetSubscribers()))
 	errMsg := make(chan entities.Logs, 0)
 	initialRequest := req.GetPayload()
 
-	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg)
+	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg, ctx)
 
 	go func(sig <-chan entities.Logs) {
 	loop:
@@ -118,6 +121,7 @@ loop:
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
+					canel()
 					close(stream)
 					close(errMsg)
 				}
@@ -131,6 +135,8 @@ loop:
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	request, err := stream.Recv()
 	subscribers := request.GetSubscribers()
 	streamProv := make(chan []byte, 0)
@@ -156,7 +162,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 		}
 	}(errMsg)
 
-	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg)
+	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg, ctx)
 	streamProv <- request.GetPayload()
 
 	//Receives from provider
@@ -173,6 +179,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 				if err := c.repo.InsertObject(log, c.collection); err != nil {
 					c.lg.WriteLog("InsertObject", err.Error())
 				}
+				cancel()
 				close(streamProv)
 				close(streamSub)
 				close(errMsg)
@@ -198,6 +205,7 @@ loop:
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
+					cancel()
 					close(streamProv)
 					close(streamSub)
 					close(errMsg)

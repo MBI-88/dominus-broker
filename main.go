@@ -96,8 +96,7 @@ func run() {
 		defer signal.Stop(system)
 
 		//context
-		ctx := context.Background()
-		ctx, cancel := context.WithCancel(ctx)
+		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
 		//**************************************
