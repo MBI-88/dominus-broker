@@ -133,6 +133,7 @@ func run() {
 		
 		_, errC := os.Stat(env.SslCert)
 		_, errK := os.Stat(env.KeyFile)
+		_, errCa := os.Stat(env.SslCaCert)
 
 		
 		if errC == nil && errK == nil {
@@ -159,7 +160,7 @@ func run() {
 		midGs := gm.NewMiddleware(env.ApiToken, logs)
 		midGc := gm.NewInterceptor(env.ApiToken)
 
-		if errC == nil && errK == nil {
+		if errC == nil && errK == nil && errCa == nil {
 			credsS, err := credentials.NewServerTLSFromFile(env.SslCert, env.KeyFile)
 			if err != nil {
 				cancel()

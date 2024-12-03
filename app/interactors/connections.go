@@ -55,7 +55,6 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 
 	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg)
 	go func(sig <-chan entities.Logs) {
-	loop:
 		for {
 			select {
 			case val, ok := <-sig:
@@ -64,7 +63,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
-					break loop
+					return
 				}
 			}
 		}
@@ -92,7 +91,6 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg, ctx)
 
 	go func(sig <-chan entities.Logs) {
-	loop:
 		for {
 			select {
 			case val, ok := <-sig:
@@ -101,13 +99,12 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
-					break loop
+					return
 				}
 			}
 		}
 	}(errMsg)
 
-loop:
 	for {
 		select {
 		case body, ok := <-stream:
@@ -126,12 +123,11 @@ loop:
 					close(errMsg)
 				}
 			} else {
-				break loop
+				return fmt.Errorf("Connection closed")
 			}
 
 		}
 	}
-	return fmt.Errorf("Connection closed")
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
@@ -190,7 +186,6 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 	}()
 
 	//Receives from subscribers
-loop:
 	for {
 		select {
 		case payload, ok := <-streamSub:
@@ -200,7 +195,6 @@ loop:
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamBiConn Send to provider",
-						
 					}
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
@@ -211,11 +205,10 @@ loop:
 					close(errMsg)
 				}
 			} else {
-				break loop
+				return fmt.Errorf("Connection closed")
 			}
 		}
 	}
-	return fmt.Errorf("Connection closed")
 }
 
 type ConnectionInt interface {

@@ -47,7 +47,6 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 					stream, err := client.ClientStream(context.Background())
 					if err == nil {
 						go func(client pb.Grpc_ClientStreamClient, p int) {
-						loop:
 							for {
 								select {
 								case payload, ok := <-ch:
@@ -64,7 +63,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 										}
 									} else {
 										client.CloseSend()
-										break loop
+										return
 									}
 
 								}
@@ -76,7 +75,6 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 		}(url, ch, p)
 	}
 
-loop:
 	for {
 		select {
 		case payload, ok := <-msg:
@@ -88,11 +86,10 @@ loop:
 				for _, ch := range arrayMsg {
 					close(ch)
 				}
-				break loop
+				return
 			}
 		}
 	}
-
 }
 
 func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, ctx context.Context) {
@@ -135,9 +132,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, ctx context.Context) {
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -151,7 +146,6 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 					if err == nil {
 						//Sends to subscriber
 						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
-						loop:
 							for {
 								select {
 								case payload, ok := <-ch:
@@ -168,7 +162,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 										}
 									} else {
 										client.CloseSend()
-										break loop
+										return
 									}
 								}
 							}
@@ -188,9 +182,9 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 									errMsg <- log
 									return
 								}
-								if _, ok := <- ctx.Done(); !ok {
+								if _, ok := <-ctx.Done(); !ok {
 									subMsg <- resp.GetPayload()
-								}else {
+								} else {
 									return
 								}
 							}
@@ -201,7 +195,6 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 		}(ch, p, url)
 	}
 
-loop:
 	for {
 		select {
 		case payload, ok := <-provMsg:
@@ -210,15 +203,13 @@ loop:
 					ch <- payload
 				}
 			} else {
-				cancel()
 				for _, ch := range arrayMsg {
 					close(ch)
 				}
-				break loop
+				return
 			}
 		}
 	}
-
 }
 
 func NewGrpClient(opts []grpc.DialOption) interactors.GrpClientInt {
