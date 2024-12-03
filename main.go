@@ -12,9 +12,9 @@ import (
 
 	fi "dominus/app/interfaces/fasthttp/input"
 	fm "dominus/app/interfaces/fasthttp/middlewares"
-	gt "dominus/app/interfaces/grpc/output"
 	gi "dominus/app/interfaces/grpc/input"
 	gm "dominus/app/interfaces/grpc/middlewares"
+	gt "dominus/app/interfaces/grpc/output"
 	"flag"
 	"fmt"
 	"log"
@@ -87,7 +87,7 @@ func run() {
 	case "start":
 		//Instances
 		logs := event.NewLogs("./logs")
-		
+
 		inter := interactors.NewInteractor(repo, logs)
 
 		// Signals
@@ -110,7 +110,7 @@ func run() {
 		midF.AddMiddleware(apiToken, allowedHost)
 		router := router.New()
 		fi.NewRestApi(router, inter)
-		
+
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
 			Name:                               "Dominus",
@@ -130,12 +130,11 @@ func run() {
 			StreamRequestBody:                  env.StreamRequestBody,
 			Logger:                             logs,
 		}
-		
+
 		_, errC := os.Stat(env.SslCert)
 		_, errK := os.Stat(env.KeyFile)
 		_, errCa := os.Stat(env.SslCaCert)
 
-		
 		if errC == nil && errK == nil {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key))
@@ -147,7 +146,6 @@ func run() {
 				cancel()
 			}(env.RestPort, cancel)
 		}
-		
 
 		//********************************
 		//*********Grpc server************
@@ -166,52 +164,33 @@ func run() {
 				cancel()
 				panic(err)
 			}
-			optsS = append(optsS,
-				grpc.Creds(credsS),
-				grpc.ChainUnaryInterceptor(
-					auth.UnaryServerInterceptor(midGs.ApiToken),
-					logging.UnaryServerInterceptor(midGs.LogErrors()),
-				),
-				grpc.ChainStreamInterceptor(
-					auth.StreamServerInterceptor(midGs.ApiToken),
-					logging.StreamServerInterceptor(midGs.LogErrors()),
-				),
-			)
+			optsS = append(optsS, grpc.Creds(credsS))
 
 			credsD, err := credentials.NewClientTLSFromFile(env.SslCaCert, "dominus.com")
 			if err != nil {
 				cancel()
 				panic(err)
 			}
+			optsD = append(optsD, grpc.WithTransportCredentials(credsD))
+		} 
 
-			optsD = append(optsD, 
-				grpc.WithTransportCredentials(credsD),
-				grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
-				grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
-				grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
-				grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
-			)
+		optsS = append(optsS,
+			grpc.ChainUnaryInterceptor(
+				auth.UnaryServerInterceptor(midGs.ApiToken),
+				logging.UnaryServerInterceptor(midGs.LogErrors()),
+			),
+			grpc.ChainStreamInterceptor(
+				auth.StreamServerInterceptor(midGs.ApiToken),
+				logging.StreamServerInterceptor(midGs.LogErrors()),
+			),
+		)
 
-		} else {
-			optsS = append(optsS,
-				grpc.ChainUnaryInterceptor(
-					midGs.UnaryLog,
-					logging.UnaryServerInterceptor(midGs.LogErrors()),
-				),
-				grpc.ChainStreamInterceptor(
-					midGs.StreamLog,
-					logging.StreamServerInterceptor(midGs.LogErrors()),
-				),
-			)
-
-			optsD = append(optsD, 
-				grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
-				grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
-				grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
-				grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
-			)
-		}
-
+		optsD = append(optsD,
+			grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
+			grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
+			grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
+			grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
+		)
 
 		gclient := gt.NewGrpClient(optsD)
 		inter = inter.Set(gclient)
@@ -245,7 +224,6 @@ func run() {
 			break
 		}
 
-		
 		if err := r.Shutdown(); err != nil {
 			log.Fatal(err)
 		}
