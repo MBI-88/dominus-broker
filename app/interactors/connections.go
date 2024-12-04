@@ -68,7 +68,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 			}
 		}
 	}(errMsg)
-
+  
 	stream <- req.GetPayload()
 	for {
 		req, err := st.Recv()
@@ -143,7 +143,6 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 		return err
 	}
 	go func(sig <-chan entities.Logs) {
-	loop:
 		for {
 			select {
 			case val, ok := <-sig:
@@ -152,7 +151,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				} else {
-					break loop
+					return
 				}
 			}
 		}

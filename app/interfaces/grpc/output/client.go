@@ -79,9 +79,13 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 		select {
 		case payload, ok := <-msg:
 			if ok {
-				for _, ch := range arrayMsg {
-					ch <- payload
-				}
+				go func() {
+					for _, ch := range arrayMsg {
+						go func(sub chan []byte) {
+							sub <- payload
+						}(ch)
+					}
+				}()
 			} else {
 				for _, ch := range arrayMsg {
 					close(ch)
@@ -199,9 +203,13 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 		select {
 		case payload, ok := <-provMsg:
 			if ok {
-				for _, ch := range arrayMsg {
-					ch <- payload
-				}
+				go func() {
+					for _, ch := range arrayMsg {
+						go func(sub chan []byte) {
+							sub <- payload
+						}(ch)
+					}
+				}()
 			} else {
 				for _, ch := range arrayMsg {
 					close(ch)
