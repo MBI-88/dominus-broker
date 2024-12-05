@@ -124,7 +124,7 @@ func (r *rest) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, st
 	return b
 }
 
-func NewRestApi(r *router.Router, i interactors.InteractorInt) {
+func NewRestController(r *router.Router, i interactors.InteractorInt) {
 	re := &rest{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }

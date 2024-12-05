@@ -56,7 +56,7 @@ func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamS
 	return nil
 }
 
-func NewGrpcServe(opts []grpc.ServerOption, i interactors.InteractorInt) *grpc.Server {
+func NewGrpcController(opts []grpc.ServerOption, i interactors.InteractorInt) *grpc.Server {
 	s := grpc.NewServer(opts...)
 	pb.RegisterGrpcServer(s, &grpcController{inter: i})
 	return s

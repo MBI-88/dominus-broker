@@ -109,7 +109,7 @@ func run() {
 
 		midF.AddMiddleware(apiToken, allowedHost)
 		router := router.New()
-		fi.NewRestApi(router, inter)
+		fi.NewRestController(router, inter)
 
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
@@ -194,7 +194,7 @@ func run() {
 
 		gclient := gt.NewGrpClient(optsD)
 		inter = inter.Set(gclient)
-		srG := gi.NewGrpcServe(optsS, inter)
+		srG := gi.NewGrpcController(optsS, inter)
 		listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", env.GrpcPort))
 
 		go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
