@@ -19,21 +19,7 @@ func (l *logs) Printf(format string, args ...any) {
 }
 
 type LogsInt interface {
-	//WriteLog. Writes logs created by database and system operations
-	//
-	//Parameters
-	//
-	//-> op: type of operation 
-	//
-	//-> dsc: description of error
 	WriteLog(op, dsc string)
-	//Used for fasthttp
-	//
-	//Parameters
-	//
-	//-> format: type of format chosen by fasthttp
-	//
-	//-> args: any countity of argumentes chosen by fasthttp
 	Printf(format string, args ...any)
 }
 
