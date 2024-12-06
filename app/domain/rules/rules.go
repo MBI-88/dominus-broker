@@ -157,6 +157,6 @@ type RulesInt interface {
 
 func NewRule() RulesInt {
 	return &rules{
-		re: regexp.MustCompile(`^(https?:\/\/[a-zA-Z0-9.-]+)(:\d{1,5})?(\/[^\s]*)?$`),
+		re: regexp.MustCompile(`^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$`),
 	}
 }
