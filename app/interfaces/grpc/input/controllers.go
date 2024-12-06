@@ -4,6 +4,7 @@ import (
 	"context"
 	"dominus/app/interactors"
 	pb "dominus/app/interfaces/grpc/proto/builder"
+	"io"
 
 	"google.golang.org/grpc"
 )
@@ -17,43 +18,40 @@ type grpcController struct {
 func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
 	inter := s.inter.NewConnection()
 	if err := inter.SimpleConn(ms); err != nil {
-		return &pb.Response{Status: uint32(406), Message: err.Error()}, err
+		return &pb.Response{Status: uint32(500), Message: err.Error()}, err
 	}
-	return &pb.Response{Status: uint32(202), Message: "Accepted"}, nil
+	return &pb.Response{Status: uint32(202), Message: "[+]Accepted"}, nil
 }
 
 // Receives array messages from client
 func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 	inter := s.inter.NewConnection()
 	ctx := newClientStreamContext(stream)
-	if err := inter.StreamClientConn(ctx); err != nil {
-		stream.SendAndClose(&pb.Response{
-			Status:  uint32(444),
+	err := inter.StreamClientConn(ctx)
+	if err != io.EOF {
+		return stream.SendAndClose(&pb.Response{
+			Status:  uint32(500),
 			Message: err.Error(),
 		})
-		return err
 	}
-	return nil
+	return stream.SendAndClose(&pb.Response{
+		Status: uint32(202),
+		Message: "[+]Connection closed",
+	})
 }
 
 // Sends array messages to client
 func (s *grpcController) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
 	inter := s.inter.NewConnection()
 	ctx := newServerStreamContext(stream)
-	if err := inter.StreamServerConn(ms, ctx); err != nil {
-		return err
-	}
-	return nil
+	return inter.StreamServerConn(ms, ctx)
 }
 
 // Receives and sends messages from server to client
 func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
 	inter := s.inter.NewConnection()
 	ctx := newBiStreamConn(stream)
-	if err := inter.StreamBiConn(ctx); err != nil {
-		return err
-	}
-	return nil
+	return inter.StreamBiConn(ctx)
 }
 
 func NewGrpcController(opts []grpc.ServerOption, i interactors.InteractorInt) *grpc.Server {

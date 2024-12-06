@@ -21,13 +21,13 @@ func (g *grpcClient) Simple(url string, body []byte) (interactors.GrpResponseInt
 	if err != nil {
 		return nil, err
 	}
-
 	client := pb.NewGrpcClient(conn)
 	msg := &pb.RequestMessage{
 		Subscribers: nil, Payload: body,
 	}
-
-	resp, err := client.Simple(context.Background(), msg)
+	ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
+	defer cancel()
+	resp, err := client.Simple(ctx, msg)
 	if err != nil {
 		return nil, err
 	}
@@ -44,31 +44,38 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
 					client := pb.NewGrpcClient(conn)
-					stream, err := client.ClientStream(context.Background())
+					ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
+					stream, err := client.ClientStream(ctx)
 					if err == nil {
 						go func(client pb.Grpc_ClientStreamClient, p int) {
+							defer cancel()
+							isClose := false
 							for {
 								select {
 								case payload, ok := <-ch:
 									if ok {
-										if err := client.Send(&pb.RequestMessage{
-											Subscribers: urls,
-											Payload:     payload}); err != nil {
-											sig <- entities.Logs{
-												CreatedAt:  time.Now(),
-												Desc:       err.Error(),
-												Stage:      "ClientStream sends to subscribers",
-												Subscriber: urls[p],
+										if !isClose {
+											if err := client.Send(&pb.RequestMessage{
+												Subscribers: urls,
+												Payload:     payload}); err != nil {
+												sig <- entities.Logs{
+													CreatedAt:  time.Now(),
+													Desc:       err.Error(),
+													Stage:      "ClientStream sends to subscribers",
+													Subscriber: urls[p],
+												}
+												isClose = true
 											}
 										}
 									} else {
-										client.CloseSend()
 										return
 									}
 
 								}
 							}
 						}(stream, p)
+					}else {
+						cancel()
 					}
 				}
 			}
@@ -107,9 +114,11 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 						Subscribers: nil,
 						Payload:     initalMsg,
 					}
-					stream, err := client.ServerStream(context.Background(), reqMsg)
+					ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
+					stream, err := client.ServerStream(ctx, reqMsg)
 					if err == nil {
 						go func(client pb.Grpc_ServerStreamClient, p int) {
+							defer cancel()
 							for {
 								resp, err := client.Recv()
 								if err != nil {
@@ -129,6 +138,8 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 								}
 							}
 						}(stream, p)
+					}else {
+						cancel()
 					}
 				}
 			}
@@ -146,26 +157,30 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
 					client := pb.NewGrpcClient(conn)
-					stream, err := client.BidirectionalStream(context.Background())
+					ctx, cancel := context.WithTimeout(context.Background(), 2 * time.Second)
+					stream, err := client.BidirectionalStream(ctx)
 					if err == nil {
 						//Sends to subscriber
 						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
+							isClose := false
 							for {
 								select {
 								case payload, ok := <-ch:
 									if ok {
-										if err := client.Send(&pb.RequestMessage{
-											Subscribers: urls,
-											Payload:     payload}); err != nil {
-											errMsg <- entities.Logs{
-												CreatedAt:  time.Now(),
-												Desc:       err.Error(),
-												Stage:      "BidirectionalStream sends to subscribers",
-												Subscriber: urls[p],
+										if !isClose {
+											if err := client.Send(&pb.RequestMessage{
+												Subscribers: urls,
+												Payload:     payload}); err != nil {
+												errMsg <- entities.Logs{
+													CreatedAt:  time.Now(),
+													Desc:       err.Error(),
+													Stage:      "BidirectionalStream sends to subscribers",
+													Subscriber: urls[p],
+												}
+												isClose = true
 											}
 										}
 									} else {
-										client.CloseSend()
 										return
 									}
 								}
@@ -174,16 +189,16 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 
 						//Receives from subscriber
 						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
+							defer cancel()
 							for {
 								resp, err := client.Recv()
-								if err != nil {
-									log := entities.Logs{
+								if err != nil { 
+									errMsg <- entities.Logs{
 										CreatedAt:  time.Now(),
 										Stage:      "BidirectionalStream Recv from subscribers",
 										Subscriber: urls[p],
 										Desc:       err.Error(),
 									}
-									errMsg <- log
 									return
 								}
 								if _, ok := <-ctx.Done(); !ok {
@@ -193,6 +208,8 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 								}
 							}
 						}(stream, p)
+					}else {
+						cancel()
 					}
 				}
 			}

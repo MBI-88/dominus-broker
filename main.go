@@ -137,7 +137,7 @@ func run() {
 
 		if errC == nil && errK == nil {
 			go func(port uint16, cert, key string, cancel context.CancelFunc) {
-				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf(":%d", port), cert, key))
+				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%d", port), cert, key))
 				cancel()
 			}(env.RestPort, env.SslCert, env.KeyFile, cancel)
 		} else {
@@ -195,7 +195,7 @@ func run() {
 		gclient := gt.NewGrpClient(optsD)
 		inter = inter.Set(gclient)
 		srG := gi.NewGrpcController(optsS, inter)
-		listener, _ := net.Listen("tcp", fmt.Sprintf(":%d", env.GrpcPort))
+		listener, _ := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
 
 		go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
 			log.Fatal(sr.Serve(list))
@@ -207,9 +207,9 @@ func run() {
 		//*********************************
 
 		if errC == nil && errK == nil && *showBanner {
-			fmt.Printf("%s 🚀 Rest: https://0.0.0.0:%d 🚀 Grpc: https://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
+			fmt.Printf("%s Rest: https://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", banner, env.RestPort, env.GrpcPort)
 		} else {
-			fmt.Printf("%s 🚀 Rest: http://0.0.0.0:%d 🚀 Grpc: http://0.0.0.0:%d\n", banner, env.RestPort, env.GrpcPort)
+			fmt.Printf("%s Rest: http://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", banner, env.RestPort, env.GrpcPort)
 		}
 
 		//*********************************

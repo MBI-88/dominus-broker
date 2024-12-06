@@ -10,10 +10,10 @@ import (
 )
 
 type connection struct {
-	r      rules.RulesInt // Rules
-	repo   RepositoryInt // Repository client
-	client GrpClientInt
-	lg     event.LogsInt
+	r          rules.RulesInt // Rules
+	repo       RepositoryInt  // Repository client
+	client     GrpClientInt
+	lg         event.LogsInt
 	collection string
 }
 
@@ -68,7 +68,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 			}
 		}
 	}(errMsg)
-  
+
 	stream <- req.GetPayload()
 	for {
 		req, err := st.Recv()
@@ -82,8 +82,10 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 }
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
-	ctx, canel := context.WithCancel(context.Background())
-	defer canel()
+	counter := 0
+	cal := make(chan struct{}, 0)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	stream := make(chan []byte, len(req.GetSubscribers()))
 	errMsg := make(chan entities.Logs, 0)
 	initialRequest := req.GetPayload()
@@ -118,19 +120,32 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
-					canel()
+					cancel()
 					close(stream)
 					close(errMsg)
 				}
+				counter = 0
 			} else {
+				close(cal)
 				return fmt.Errorf("Connection closed")
 			}
+		case <-time.Tick(3 * time.Second):
+			counter++
+			if counter >= 2 {
+				cal <- struct{}{}
+			}
+		case <-cal:
+			cancel()
+			close(stream)
+			close(errMsg)
 
 		}
 	}
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
+	counter := 0
+	cal := make(chan struct{}, 0)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	request, err := stream.Recv()
@@ -169,7 +184,6 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 					Desc:      err.Error(),
 					CreatedAt: time.Now(),
 					Stage:     "StreamBiConn Recv from provider",
-					
 				}
 				if err := c.repo.InsertObject(log, c.collection); err != nil {
 					c.lg.WriteLog("InsertObject", err.Error())
@@ -203,9 +217,21 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 					close(streamSub)
 					close(errMsg)
 				}
+				counter = 0
 			} else {
+				close(cal)
 				return fmt.Errorf("Connection closed")
 			}
+		case <-time.Tick(3 * time.Second):
+			counter++
+			if counter >= 2 {
+				cal <- struct{}{}
+			}
+		case <-cal:
+			cancel()
+			close(streamProv)
+			close(streamSub)
+			close(errMsg)
 		}
 	}
 }
