@@ -16,10 +16,10 @@ type rest struct {
 }
 
 func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
+	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
-	result, err := inter.GetLogs(context)
+	result, err := manger.GetLogs(context)
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusExpectationFailed, err.Error())
 		ctx.Response.SetBody(b)
@@ -35,10 +35,10 @@ func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
 }
 
 func (r *rest) getPages(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
+	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
-	result, err := inter.GetTotalPages(context)
+	result, err := manger.GetTotalPages(context)
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusExpectationFailed, err.Error())
 		ctx.Response.SetBody(b)
@@ -54,10 +54,10 @@ func (r *rest) getPages(ctx *fasthttp.RequestCtx) {
 }
 
 func (r *rest) deleteAll(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
+	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
-	if err := inter.DelectLogs(context); err != nil {
+	if err := manger.DelectLogs(context); err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusExpectationFailed, err.Error())
 		ctx.Response.SetBody(b)
 		return
@@ -72,8 +72,8 @@ func (r *rest) deleteAll(ctx *fasthttp.RequestCtx) {
 }
 
 func (r *rest) getStats(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
-	result, err := inter.GetStats()
+	manger := r.inter.NewManager()
+	result, err := manger.GetStats()
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusExpectationFailed, err.Error())
 		ctx.Response.SetBody(b)
@@ -87,10 +87,10 @@ func (r *rest) getStats(ctx *fasthttp.RequestCtx) {
 }
 
 func (r *rest) getBackup(ctx *fasthttp.RequestCtx) {
-	inter := r.inter.NewManager()
+	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
-	result, err := inter.GetBackup(context)
+	result, err := manger.GetBackup(context)
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusExpectationFailed, err.Error())
 		ctx.Response.SetBody(b)

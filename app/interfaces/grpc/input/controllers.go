@@ -16,8 +16,8 @@ type grpcController struct {
 
 // Receives simple messages from client
 func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
-	inter := s.inter.NewConnection()
-	if err := inter.SimpleConn(ms); err != nil {
+	conn := s.inter.NewConnection()
+	if err := conn.SimpleConn(ms); err != nil {
 		return &pb.Response{Status: uint32(500), Message: err.Error()}, err
 	}
 	return &pb.Response{Status: uint32(202), Message: "[+]Accepted"}, nil
@@ -25,9 +25,9 @@ func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.R
 
 // Receives array messages from client
 func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
-	inter := s.inter.NewConnection()
+	conn := s.inter.NewConnection()
 	ctx := newClientStreamContext(stream)
-	err := inter.StreamClientConn(ctx)
+	err := conn.StreamClientConn(ctx)
 	if err != io.EOF {
 		return stream.SendAndClose(&pb.Response{
 			Status:  uint32(500),
@@ -42,16 +42,16 @@ func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 
 // Sends array messages to client
 func (s *grpcController) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
-	inter := s.inter.NewConnection()
+	conn := s.inter.NewConnection()
 	ctx := newServerStreamContext(stream)
-	return inter.StreamServerConn(ms, ctx)
+	return conn.StreamServerConn(ms, ctx)
 }
 
 // Receives and sends messages from server to client
 func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
-	inter := s.inter.NewConnection()
+	conn := s.inter.NewConnection()
 	ctx := newBiStreamConn(stream)
-	return inter.StreamBiConn(ctx)
+	return conn.StreamBiConn(ctx)
 }
 
 func NewGrpcController(opts []grpc.ServerOption, i interactors.InteractorInt) *grpc.Server {
