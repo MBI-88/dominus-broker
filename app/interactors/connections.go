@@ -29,16 +29,15 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 				_, err := c.client.Simple(url, body)
 				if err != nil {
 					logs := entities.Logs{
+						ID:        c.r.MakeID(),
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "SimpleConn",
 					}
-
 					if err := c.repo.InsertObject(logs, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
 				}
-
 			}(sub, body)
 		}
 	}
@@ -48,12 +47,13 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 func (c *connection) StreamClientConn(st StreamClientInt) error {
 	stream := make(chan []byte, 0)
 	errMsg := make(chan entities.Logs, 0)
+	isWatting := make(chan struct{}, 0)
 	req, err := st.Recv()
 	if err != nil {
 		return err
 	}
 
-	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg)
+	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg, isWatting)
 	go func(sig <-chan entities.Logs) {
 		for {
 			select {
@@ -74,6 +74,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 		req, err := st.Recv()
 		if err != nil {
 			close(stream)
+			<-isWatting
 			close(errMsg)
 			return err
 		}
@@ -113,6 +114,7 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 			if ok {
 				if err := st.Send(body); err != nil {
 					log := entities.Logs{
+						ID:        c.r.MakeID(),
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamServerConn Send to provider",
@@ -181,6 +183,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 			req, err := stream.Recv()
 			if err != nil {
 				log := entities.Logs{
+					ID:        c.r.MakeID(),
 					Desc:      err.Error(),
 					CreatedAt: time.Now(),
 					Stage:     "StreamBiConn Recv from provider",
@@ -205,6 +208,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 			if ok {
 				if err := stream.Send(payload); err != nil {
 					log := entities.Logs{
+						ID:        c.r.MakeID(),
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamBiConn Send to provider",

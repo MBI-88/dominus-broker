@@ -18,6 +18,8 @@ func (i *interactor) NewConnection() ConnectionInt {
 		r:  rules.NewRule(),
 		lg: i.log,
 		collection: "logs",
+		client: i.gclient,
+		repo: i.repo,
 	}
 }
 
@@ -107,7 +109,7 @@ type GrpResponseInt interface {
 
 type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
-	ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs)
+	ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{})
 	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, ctx context.Context)
 	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, ctx context.Context)
 }

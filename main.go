@@ -8,6 +8,7 @@ import (
 	"dominus/app/interactors"
 	"dominus/app/interfaces/database"
 
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
 
 	fi "dominus/app/interfaces/fasthttp/input"
@@ -172,7 +173,9 @@ func run() {
 				panic(err)
 			}
 			optsD = append(optsD, grpc.WithTransportCredentials(credsD))
-		} 
+		}else {
+			optsD = append(optsD,grpc.WithTransportCredentials(insecure.NewCredentials()) )
+		}
 
 		optsS = append(optsS,
 			grpc.ChainUnaryInterceptor(

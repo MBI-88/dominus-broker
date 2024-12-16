@@ -32,7 +32,7 @@ func (r *rules) CheckURI(uri string) bool {
 }
 
 func (*rules) Paginator(page, size uint64) *options.FindOptions {
-	if page < 0 || size < 0 {
+	if page <= 0 || size <= 0 {
 		page = 2
 		size = 4
 	}
@@ -146,6 +146,10 @@ func (*rules) MakeBackupFilter(filters map[string]string) []bson.D {
 	return arrayFilter
 }
 
+func (*rules) MakeID() primitive.ObjectID {
+	return primitive.NewObjectID()
+}
+
 type RulesInt interface {
 	CreateIndex() []mongo.IndexModel
 	CheckURI(uri string) bool
@@ -153,6 +157,7 @@ type RulesInt interface {
 	Paginator(page, size uint64) *options.FindOptions
 	MakeEmptyFilter() bson.D
 	MakeBackupFilter(filters map[string]string) []bson.D
+	MakeID() primitive.ObjectID
 }
 
 func NewRule() RulesInt {
