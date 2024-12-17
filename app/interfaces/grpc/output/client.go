@@ -6,6 +6,7 @@ import (
 	"dominus/app/domain/rules"
 	"dominus/app/interactors"
 	pb "dominus/app/interfaces/grpc/proto/builder"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -44,11 +45,9 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
 					client := pb.NewGrpcClient(conn)
-					ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-					stream, err := client.ClientStream(ctx)
+					stream, err := client.ClientStream(context.Background())
 					if err == nil {
 						go func(client pb.Grpc_ClientStreamClient, p int) {
-							defer cancel()
 							isClose := false
 							for {
 								select {
@@ -71,12 +70,11 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 									} else {
 										return
 									}
-
 								}
 							}
 						}(stream, p)
 					} else {
-						cancel()
+						return
 					}
 				}
 			}
@@ -101,7 +99,16 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 	}
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, ctx context.Context) {
+func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, tx chan<- struct{}) {
+	open := new(bool)
+	*open = true
+	sync := new(sync.Mutex)
+	go func() {
+		<-closed
+		sync.Lock()
+		defer sync.Unlock()
+		*open = false
+	}()
 	for p, url := range urls {
 		go func(url string, p int) {
 			if ok := g.rls.CheckURI(url); ok {
@@ -112,33 +119,33 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 						Subscribers: nil,
 						Payload:     initalMsg,
 					}
-					ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-					stream, err := client.ServerStream(ctx, reqMsg)
+					stream, err := client.ServerStream(context.Background(), reqMsg)
 					if err == nil {
 						go func(client pb.Grpc_ServerStreamClient, p int) {
-							defer cancel()
 							for {
 								resp, err := client.Recv()
 								if err != nil {
-									sig <- entities.Logs{
+									sig <-entities.Logs{
 										ID:         g.rls.MakeID(),
 										Desc:       err.Error(),
 										CreatedAt:  time.Now(),
 										Subscriber: urls[p],
 										Stage:      "ServerStream receives from subscribers",
 									}
+									tx <-struct{}{}
 									return
 								} else {
-									if _, ok := <-ctx.Done(); !ok {
-										msg <- resp.Payload
+									if *open {
+										msg <-resp.GetPayload()
 									} else {
+										tx <-struct{}{}
 										return
 									}
 								}
 							}
 						}(stream, p)
 					} else {
-						cancel()
+						return
 					}
 				}
 			}

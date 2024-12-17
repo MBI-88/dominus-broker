@@ -47,13 +47,13 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 func (c *connection) StreamClientConn(st StreamClientInt) error {
 	stream := make(chan []byte, 0)
 	errMsg := make(chan entities.Logs, 0)
-	isWatting := make(chan struct{}, 0)
+	done := make(chan struct{}, 0)
 	req, err := st.Recv()
 	if err != nil {
 		return err
 	}
 
-	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg, isWatting)
+	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg, done)
 	go func(sig <-chan entities.Logs) {
 		for {
 			select {
@@ -74,7 +74,7 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 		req, err := st.Recv()
 		if err != nil {
 			close(stream)
-			<-isWatting
+			<-done
 			close(errMsg)
 			return err
 		}
@@ -83,15 +83,15 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 }
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
-	counter := 0
-	cal := make(chan struct{}, 0)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	stream := make(chan []byte, len(req.GetSubscribers()))
-	errMsg := make(chan entities.Logs, 0)
+	closed := make(chan struct{}, 0)
+	subs := req.GetSubscribers()
+	total := len(subs)
+	stream := make(chan []byte, total)
+	errMsg := make(chan entities.Logs, total)
+	done := make(chan struct{}, total)
 	initialRequest := req.GetPayload()
 
-	go c.client.ServerStream(req.GetSubscribers(), initialRequest, stream, errMsg, ctx)
+	go c.client.ServerStream(subs, initialRequest, stream, errMsg, closed, done)
 
 	go func(sig <-chan entities.Logs) {
 		for {
@@ -122,31 +122,24 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
-					cancel()
-					close(stream)
-					close(errMsg)
+					closed <-struct{}{}
 				}
-				counter = 0
-			} else {
-				close(cal)
+			} 
+		case <-done:
+			total--
+			if total == 0 {
+				close(done)
+				close(stream)
+				close(errMsg)
+				close(closed)
 				return fmt.Errorf("Connection closed")
 			}
-		case <-time.Tick(3 * time.Second):
-			counter++
-			if counter >= 2 {
-				cal <- struct{}{}
-			}
-		case <-cal:
-			cancel()
-			close(stream)
-			close(errMsg)
-
 		}
 	}
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
-	counter := 0
+	delay := 0
 	cal := make(chan struct{}, 0)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -221,14 +214,14 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 					close(streamSub)
 					close(errMsg)
 				}
-				counter = 0
+				delay = 0
 			} else {
 				close(cal)
 				return fmt.Errorf("Connection closed")
 			}
 		case <-time.Tick(3 * time.Second):
-			counter++
-			if counter >= 2 {
+			delay++
+			if delay >= 2 {
 				cal <- struct{}{}
 			}
 		case <-cal:
