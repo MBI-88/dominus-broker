@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	grpcConnKey = "Dominos_connection_adf465fdaf46-2024-27-09-gRPC_//(**)-@adf-dfadlj(adfafd)-=+REST-SERVER-=+GRPC-SERVER_dafdf-MBI"
+	grpcConnKey = "DominosKeyConnectionMBI@88"
 )
 
 type config struct {
