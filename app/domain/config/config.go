@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	grpcConnKey = "DominosKeyConnectionMBI@88"
+	grpcConnKey = "DominusKeyConnectionMBI@88"
 )
 
 type config struct {

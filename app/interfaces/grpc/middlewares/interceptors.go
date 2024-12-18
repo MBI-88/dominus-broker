@@ -25,7 +25,6 @@ func (i *interceptor) StreamAuthInterceptor(ctx context.Context, desc *grpc.Stre
 	if err != nil {
 		return nil, err
 	}
-
 	return s, nil
 }
 

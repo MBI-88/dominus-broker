@@ -20,20 +20,14 @@ type middlewares struct {
 
 func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
-
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Not found arguments")
 	}
-	if t, ok := md["API_TOKEN"]; ok {
-		if len(t) != 1 {
-			return nil, status.Errorf(codes.InvalidArgument, "Format error")
-		}
-		hashedTokenRecived := sha256.Sum256([]byte(t[0]))
-		hashedKey := sha256.Sum256(m.token)
-
-		if subtle.ConstantTimeCompare(hashedTokenRecived[:], hashedKey[:]) == 0 {
-			return nil, status.Errorf(codes.Unauthenticated, "Failed to match token")
-		}
+	token := md.Get("API_TOKEN")[0]
+	hashedTokenRecived := sha256.Sum256([]byte(token))
+	hashedKey := sha256.Sum256(m.token)
+	if subtle.ConstantTimeCompare(hashedTokenRecived[:], hashedKey[:]) == 0 {
+		return nil, status.Errorf(codes.Unauthenticated, "Failed to match token")
 	}
 	return ctx, nil
 }
@@ -55,8 +49,6 @@ func (m *middlewares) LogErrors() logging.Logger {
 		}
 	})
 }
-
-
 
 type MiddlewareInt interface {
 	ApiToken(ctx context.Context) (context.Context, error)
