@@ -106,7 +106,7 @@ func run() {
 
 		midF := fm.NewMiddleware()
 		apiToken := fm.NewMiddlewareApiToken(env.ApiToken)
-		allowedHost := fm.NewMiddlewareHot(env.Cidr)
+		allowedHost := fm.NewMiddlewareHost(env.Cidr)
 
 		midF.AddMiddleware(apiToken, allowedHost)
 		router := router.New()
@@ -137,13 +137,13 @@ func run() {
 		_, errCa := os.Stat(env.SslCaCert)
 
 		if errC == nil && errK == nil {
-			go func(port uint16, cert, key string, cancel context.CancelFunc) {
+			go func(port uint64, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%d", port), cert, key))
 				cancel()
 			}(env.RestPort, env.SslCert, env.KeyFile, cancel)
 		} else {
-			go func(port uint16, cancel context.CancelFunc) {
-				log.Fatal(r.ListenAndServe(fmt.Sprintf(":%d", port)))
+			go func(port uint64, cancel context.CancelFunc) {
+				log.Fatal(r.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port)))
 				cancel()
 			}(env.RestPort, cancel)
 		}
@@ -156,8 +156,8 @@ func run() {
 			optsD []grpc.DialOption
 		)
 
-		midGs := gm.NewMiddleware(env.ApiToken, logs)
-		midGc := gm.NewInterceptor(env.ApiToken)
+		midGs := gm.NewMiddleware(env.ConnectionKey, logs)
+		midGc := gm.NewInterceptor(env.ConnectionKey)
 
 		if errC == nil && errK == nil && errCa == nil {
 			credsS, err := credentials.NewServerTLSFromFile(env.SslCert, env.KeyFile)

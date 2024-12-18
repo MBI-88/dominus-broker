@@ -153,7 +153,17 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, ctx context.Context) {
+func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan <-struct{}) {
+	open := new(bool)
+	*open = true
+	sync := new(sync.Mutex)
+	go func() {
+		<-rx
+		sync.Lock()
+		defer sync.Unlock()
+		*open = false
+	}()
+
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -163,8 +173,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
 					client := pb.NewGrpcClient(conn)
-					ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-					stream, err := client.BidirectionalStream(ctx)
+					stream, err := client.BidirectionalStream(context.Background())
 					if err == nil {
 						//Sends to subscriber
 						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
@@ -196,7 +205,6 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 
 						//Receives from subscriber
 						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
-							defer cancel()
 							for {
 								resp, err := client.Recv()
 								if err != nil {
@@ -207,17 +215,17 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 										Subscriber: urls[p],
 										Desc:       err.Error(),
 									}
+									done <-struct{}{}
 									return
 								}
-								if _, ok := <-ctx.Done(); !ok {
+								if *open {
 									subMsg <- resp.GetPayload()
 								} else {
+									done <-struct{}{}
 									return
 								}
 							}
 						}(stream, p)
-					} else {
-						cancel()
 					}
 				}
 			}
@@ -228,17 +236,14 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 		select {
 		case payload, ok := <-provMsg:
 			if ok {
-				go func() {
-					for _, ch := range arrayMsg {
-						go func(sub chan []byte) {
-							sub <- payload
-						}(ch)
+				for _, ch := range arrayMsg {
+						ch <-payload
 					}
-				}()
 			} else {
 				for _, ch := range arrayMsg {
 					close(ch)
 				}
+				tx <- struct{}{}
 				return
 			}
 		}

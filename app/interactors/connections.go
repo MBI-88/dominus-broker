@@ -1,7 +1,6 @@
 package interactors
 
 import (
-	"context"
 	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
@@ -46,14 +45,15 @@ func (c *connection) SimpleConn(ms GrpRequestMessageInt) error {
 
 func (c *connection) StreamClientConn(st StreamClientInt) error {
 	stream := make(chan []byte, 0)
-	errMsg := make(chan entities.Logs, 0)
-	done := make(chan struct{}, 0)
+	closed := make(chan struct{}, 0)
 	req, err := st.Recv()
 	if err != nil {
 		return err
 	}
+	subscribers := req.GetSubscribers()
+	errMsg := make(chan entities.Logs, len(subscribers))
 
-	go c.client.ClientStream(req.GetSubscribers(), stream, errMsg, done)
+	go c.client.ClientStream(subscribers, stream, errMsg, closed)
 	go func(sig <-chan entities.Logs) {
 		for {
 			select {
@@ -73,8 +73,17 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 	for {
 		req, err := st.Recv()
 		if err != nil {
+			log := entities.Logs{
+				ID:        c.r.MakeID(),
+				Desc:      err.Error(),
+				CreatedAt: time.Now(),
+				Stage:     "StreamClientConn receives from provider",
+			}
+			if err := c.repo.InsertObject(log, c.collection); err != nil {
+				c.lg.WriteLog("InsertObject", err.Error())
+			}
 			close(stream)
-			<-done
+			<-closed
 			close(errMsg)
 			return err
 		}
@@ -86,7 +95,7 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 	closed := make(chan struct{}, 0)
 	subs := req.GetSubscribers()
 	total := len(subs)
-	stream := make(chan []byte, total)
+	stream := make(chan []byte, total + int(total * 2/3))
 	errMsg := make(chan entities.Logs, total)
 	done := make(chan struct{}, total)
 	initialRequest := req.GetPayload()
@@ -122,9 +131,9 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
-					closed <-struct{}{}
+					closed <- struct{}{}
 				}
-			} 
+			}
 		case <-done:
 			total--
 			if total == 0 {
@@ -139,15 +148,15 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 }
 
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
-	delay := 0
-	cal := make(chan struct{}, 0)
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	closedTx := make(chan struct{}, 0)
+	closedRx := make(chan struct{}, 0)
 	request, err := stream.Recv()
 	subscribers := request.GetSubscribers()
+	total := len(subscribers)
+	done := make(chan struct{}, total)
 	streamProv := make(chan []byte, 0)
-	streamSub := make(chan []byte, len(subscribers))
-	errMsg := make(chan entities.Logs, 0)
+	streamSub := make(chan []byte, total + int(total * 2/3))
+	errMsg := make(chan entities.Logs, total)
 
 	if err != nil {
 		return err
@@ -167,7 +176,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 		}
 	}(errMsg)
 
-	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg, ctx)
+	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg, closedTx, closedRx, done)
 	streamProv <- request.GetPayload()
 
 	//Receives from provider
@@ -184,10 +193,9 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 				if err := c.repo.InsertObject(log, c.collection); err != nil {
 					c.lg.WriteLog("InsertObject", err.Error())
 				}
-				cancel()
+
 				close(streamProv)
-				close(streamSub)
-				close(errMsg)
+				<-closedTx
 				return
 			}
 			streamProv <- req.GetPayload()
@@ -209,26 +217,17 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 					if err := c.repo.InsertObject(log, c.collection); err != nil {
 						c.lg.WriteLog("InsertObject", err.Error())
 					}
-					cancel()
-					close(streamProv)
-					close(streamSub)
-					close(errMsg)
+					closedRx <- struct{}{}
 				}
-				delay = 0
-			} else {
-				close(cal)
+			}
+		case <-done:
+			total--
+			if total == 0 {
+				close(streamSub)
+				close(errMsg)
+				close(done)
 				return fmt.Errorf("Connection closed")
 			}
-		case <-time.Tick(3 * time.Second):
-			delay++
-			if delay >= 2 {
-				cal <- struct{}{}
-			}
-		case <-cal:
-			cancel()
-			close(streamProv)
-			close(streamSub)
-			close(errMsg)
 		}
 	}
 }

@@ -13,7 +13,7 @@ type grpcBiContextStream struct {
 
 
 func (g *grpcBiContextStream) Recv() (interactors.GrpRequestMessageInt, error) {
-	return g.Recv()
+	return g.sr.Recv()
 }
 
 func (g *grpcBiContextStream) Send(msg []byte) error {

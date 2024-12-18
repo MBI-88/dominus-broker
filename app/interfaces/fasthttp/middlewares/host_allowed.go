@@ -20,7 +20,7 @@ func (h *hostAllowed) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 }
 
 
-func NewMiddlewareHot(c string) middlewaresInt {
+func NewMiddlewareHost(c string) middlewaresInt {
 	return &hostAllowed{
 		cidr: c,
 	}

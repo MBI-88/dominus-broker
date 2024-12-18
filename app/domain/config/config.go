@@ -9,37 +9,37 @@ var (
 )
 
 type config struct {
-	ApiToken                          string
-	RestPort                          uint16
-	GrpcPort                          uint16
-	SslCert                           string
-	SslCaCert						  string
-	KeyFile                           string
+	RestPort                          uint64
+	GrpcPort                          uint64
 	WriteTimeout                      int
 	ReadTimeout                       int
 	IdleTimeout                       int
 	MaxConnsPerIp                     int
 	MaxRequestPerConn                 int
 	MaxRequestBodySize                int
-	ReduceMemoryUsage                 bool
-	DisablePreparseMultipartForm      bool
-	DisableHeaderNamesNormalizing     bool
 	SleepWhenConcurrencyLimitExcedeed int
-	NoDefaultDate                     bool
-	KeepHijackedConns                 bool
-	CloseOnShutdown                   bool
-	StreamRequestBody                 bool
+	KeyFile                           string
+	SslCaCert						  string
+	SslCert                           string
+	ApiToken                          string
 	Dsn                               string
 	Cidr                              string
-	ConnectionKey                     []byte
+	ConnectionKey                     string
 	Database                          string
-	Collections                        string
+	Collections                       string
+	StreamRequestBody                 bool
+	CloseOnShutdown                   bool
+	KeepHijackedConns                 bool
+	NoDefaultDate                     bool
+	DisableHeaderNamesNormalizing     bool
+	DisablePreparseMultipartForm      bool
+	ReduceMemoryUsage                 bool
 }
 
 func (s *config) setEnv() {
 	s.ApiToken = viper.GetString("API_TOKEN")
-	s.RestPort = viper.GetUint16("REST_PORT")
-	s.GrpcPort = viper.GetUint16("GRPC_PORT")
+	s.RestPort = viper.GetUint64("REST_PORT")
+	s.GrpcPort = viper.GetUint64("GRPC_PORT")
 	s.SslCert = viper.GetString("SSL_CERT")
 	s.SslCaCert = viper.GetString("SSL_CA")
 	s.KeyFile = viper.GetString("KEY_FILE")
@@ -59,7 +59,7 @@ func (s *config) setEnv() {
 	s.StreamRequestBody = viper.GetBool("STREAM_REQUEST_BODY")
 	s.Dsn = viper.GetString("DSN")
 	s.Cidr = viper.GetString("CIDR")
-	s.ConnectionKey = []byte(grpcConnKey)
+	s.ConnectionKey = grpcConnKey
 	s.Database = viper.GetString("DATABASE")
 	s.Collections = viper.GetString("COLLECTIONS")
 }
