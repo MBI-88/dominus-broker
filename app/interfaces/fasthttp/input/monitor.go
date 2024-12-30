@@ -6,6 +6,8 @@ import (
 	"github.com/fasthttp/router"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/mem"
 	"github.com/valyala/fasthttp"
 )
 
@@ -13,11 +15,11 @@ var (
 	cpumetrics = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "cpu_usage_percentage",
 		Help: "Current cpu usage in percentage",
-	}, []string{"type"})
+	}, []string{"cpu_used"})
 	memorymetrics = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "memory_usage_percentage",
 		Help: "Current memory usage in percentage",
-	}, []string{"total", "used"})
+	}, []string{"mem_used"})
 )
 
 type adapter struct {
@@ -61,11 +63,19 @@ func (m *monitor) getMetrics(ctx *fasthttp.RequestCtx) {
 		ctx.Error("Error converting request", fasthttp.StatusInternalServerError)
 		return
 	}
+	m.collectMetrics()
 	handler.ServeHTTP(resp, req)
 }
 
 func (m *monitor) collectMetrics() {
-
+	cpuPercent, err := cpu.Percent(0, false)
+	if err == nil {
+		cpumetrics.WithLabelValues("cpu_used").Set(cpuPercent[0])
+	}
+	mem, err := mem.VirtualMemory()
+	if err == nil {
+		memorymetrics.WithLabelValues("mem_used").Set(mem.UsedPercent)
+	}
 }
 
 func (m *monitor) path() {
