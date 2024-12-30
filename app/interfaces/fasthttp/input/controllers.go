@@ -26,7 +26,7 @@ func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	msg := make(map[string]any)
+	msg := make(map[string]any, 1)
 	msg["logs"] = result
 	body, _ := r.js.Marshal(msg)
 	ctx.Response.Header.Set("Content-Type", "application/json")

@@ -102,13 +102,9 @@ func (r *repository) DeleteObjects(f any, collection string) error {
 	return nil
 }
 
-func (r *repository) CountPages(collection string) (uint64, error) {
+func (r *repository) CountPages(collection string) (int64, error) {
 	cl := r.client.Database(r.database).Collection(collection)
-	total, err := cl.EstimatedDocumentCount(context.TODO())
-	if err != nil {
-		return 0, err
-	}
-	return uint64(total), nil
+	return cl.EstimatedDocumentCount(context.TODO())
 }
 
 func (r *repository) Filter(filter any, object any, collection string) error {

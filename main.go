@@ -26,8 +26,11 @@ import (
 
 	"time"
 
+	grpcmetrics "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/prometheus/client_golang/prometheus"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
@@ -101,6 +104,19 @@ func run() {
 		defer cancel()
 
 		//**************************************
+		//***********Monitoring*****************
+		//**************************************
+
+		grpcmetrics := grpcmetrics.NewServerMetrics(
+			grpcmetrics.WithServerHandlingTimeHistogram(
+				grpcmetrics.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
+			),
+		)
+
+		reg := prometheus.NewRegistry()
+		reg.MustRegister(grpcmetrics)
+
+		//**************************************
 		//***********Rest Server****************
 		//**************************************
 
@@ -111,6 +127,7 @@ func run() {
 		midF.AddMiddleware(apiToken, allowedHost)
 		router := router.New()
 		fi.NewRestController(router, inter)
+		fi.NewMonitor(router, reg)
 
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
@@ -173,16 +190,20 @@ func run() {
 				panic(err)
 			}
 			optsD = append(optsD, grpc.WithTransportCredentials(credsD))
-		}else {
-			optsD = append(optsD,grpc.WithTransportCredentials(insecure.NewCredentials()) )
+		} else {
+			optsD = append(optsD, grpc.WithTransportCredentials(insecure.NewCredentials()))
 		}
 
 		optsS = append(optsS,
 			grpc.ChainUnaryInterceptor(
+				otelgrpc.UnaryServerInterceptor(),
+				grpcmetrics.UnaryServerInterceptor(),
 				auth.UnaryServerInterceptor(midGs.ApiToken),
 				logging.UnaryServerInterceptor(midGs.LogErrors()),
 			),
 			grpc.ChainStreamInterceptor(
+				otelgrpc.StreamServerInterceptor(),
+				grpcmetrics.StreamServerInterceptor(),
 				auth.StreamServerInterceptor(midGs.ApiToken),
 				logging.StreamServerInterceptor(midGs.LogErrors()),
 			),

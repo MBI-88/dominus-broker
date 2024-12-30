@@ -44,7 +44,7 @@ func (*rules) Paginator(page, size uint64) *options.FindOptions {
 
 func (r *rules) MakeLogFiter(filters map[string]string, page, size uint64) []bson.D {
 	var (
-		arrayFilter = make([]bson.D, 0, 50)
+		arrayFilter = make([]bson.D, 0, 100)
 		opts        = r.Paginator(page, size)
 		step        int
 	)

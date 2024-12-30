@@ -67,7 +67,7 @@ type RepositoryInt interface {
 	FindObject(f any, collection string, object any) error
 	DeleteObjects(f any, collection string) error
 	Filter(filter any, object any, collection string) error
-	CountPages(collection string) (uint64, error)
+	CountPages(collection string) (int64, error)
 	Stats() (any, error)
 }
 

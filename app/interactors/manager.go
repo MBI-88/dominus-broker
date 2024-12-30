@@ -15,7 +15,7 @@ type manager struct {
 
 func (m *manager) GetLogs(ctx RestContextInt) ([]entities.Logs, error) {
 	var (
-		logs []entities.Logs
+		logs = make([]entities.Logs, 0, 100)
 		filters = ctx.Queries()
 		page  = ctx.QueryInt("page")
 		size = ctx.QueryInt("size")
@@ -31,7 +31,7 @@ func (m *manager) GetLogs(ctx RestContextInt) ([]entities.Logs, error) {
 
 }
 
-func (m *manager) GetTotalPages(ctx RestContextInt) (uint64, error) {
+func (m *manager) GetTotalPages(ctx RestContextInt) (int64, error) {
 	total, err := m.repo.CountPages(m.collection)
 	if err != nil {
 		go m.lg.WriteLog("GetTotalPages CountPages", err.Error())
@@ -51,6 +51,7 @@ func (m *manager) DelectLogs(ctx RestContextInt) error {
 func (m *manager) GetStats() (any, error) {
 	result, err := m.repo.Stats()
 	if err != nil {
+		go m.lg.WriteLog("GetStats Stats", err.Error())
 		return nil, err
 	}
 	return result, nil 
@@ -58,7 +59,7 @@ func (m *manager) GetStats() (any, error) {
 
 func (m *manager) GetBackup(ctx RestContextInt) ([]entities.Logs, error) {
 	var (
-		logs []entities.Logs
+		logs = make([]entities.Logs, 0, 1000)
 		filters = ctx.Queries()
 	)
 	arrfilter := m.rls.MakeBackupFilter(filters)
@@ -72,7 +73,7 @@ func (m *manager) GetBackup(ctx RestContextInt) ([]entities.Logs, error) {
 
 type ManagerInt interface {
 	GetLogs(ctx RestContextInt) ([]entities.Logs, error)
-	GetTotalPages(ctx RestContextInt) (uint64, error)
+	GetTotalPages(ctx RestContextInt) (int64, error)
 	DelectLogs(ctx RestContextInt) error
 	GetStats() (any, error)
 	GetBackup(ctx RestContextInt) ([]entities.Logs, error)
