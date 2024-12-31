@@ -27,6 +27,7 @@ type config struct {
 	ConnectionKey                     string
 	Database                          string
 	Collections                       string
+	Logs                              string
 	StreamRequestBody                 bool
 	CloseOnShutdown                   bool
 	KeepHijackedConns                 bool
@@ -62,6 +63,7 @@ func (s *config) setEnv() {
 	s.ConnectionKey = grpcConnKey
 	s.Database = viper.GetString("DATABASE")
 	s.Collections = viper.GetString("COLLECTIONS")
+	s.Logs = viper.GetString("LOGS")
 }
 
 func (s config) GetEnvVar(prod bool) config {

@@ -90,7 +90,7 @@ func run() {
 		repo.Migrations()
 	case "start":
 		//Instances
-		logs := event.NewLogs("./logs")
+		logs := event.NewLogs(env.Logs)
 
 		inter := interactors.NewInteractor(repo, logs)
 

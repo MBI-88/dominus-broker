@@ -107,12 +107,19 @@ func (r *rest) getBackup(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
+func (r *rest) getHealthCheck(ctx *fasthttp.RequestCtx) {
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusOK)
+	ctx.Response.SetBody([]byte("Health ok"))
+}
+
 func (r *rest) path() {
 	r.router.GET("/manager", r.getLogs)
 	r.router.GET("/manager-pages", r.getPages)
 	r.router.DELETE("/manager", r.deleteAll)
 	r.router.GET("/manager-stats", r.getStats)
 	r.router.GET("/manager-backup", r.getBackup)
+	r.router.GET("/health", r.getHealthCheck)
 }
 
 func (r *rest) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, statusCode int, er string) []byte {

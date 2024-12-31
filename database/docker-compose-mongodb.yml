@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mongodb:
     image: mongo:latest
-    container_name: dominus
+    container_name: dominus_db
     
     deploy:
       restart_policy:

@@ -1,6 +1,6 @@
 .git/
 **/tests/
-Dockerfile
+Dockerfile.*
 *.md
 *.sum
 .gitignore

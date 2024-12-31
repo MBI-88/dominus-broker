@@ -1,43 +1,28 @@
 FROM golang:1.23-alpine3.20 as builder 
 
-WORKDIR /app 
-COPY . . 
-RUN go mod tidy \
+WORKDIR /app
+COPY . .
+RUN go mod tidy && \ 
     CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o ./dominus
 
 
 FROM alpine:3.20 as deployment 
 WORKDIR /app 
-ARG REST_PORT=8000 
-ARG GRPC_PORT=5000
-ARG SSL_CERT="./certs/cert.pem"
-ARG SSL_CA="./certs/ca_cert.pem"
-ARG KEY_FILE="./certs/cert.key"
-ARG DSN="mongodb://dominus:dominus10102024%408807@localhost:27017/admin"
-ARG API_TOKEN=dominus_example_@10102024KeyServerToken
-ARG CIDR="0.0.0.0/24"
-ARG MAX_CONNS_PER_IP=100
-ARG MAX_REQUEST_PER_CONN=100
-ARG MAX_REQUEST_BODY_SIZE=50
-ARG REDUCE_MEMORY_USAGE=0
-ARG WRITE_TIMEOUT=3
-ARG READ_TIMEOUT=3
-ARG IDLE_TIMOUT=0
 
-
-ENV API_TOKEN=${API_TOKEN}
-ENV REST_PORT=${REST_PORT}
-ENV GRPC_PORT=${GRPC_PORT}
-ENV SSL_CERT=${SSL_CERT}
-ENV SSL_CA=${SSL_CA}
-ENV KEY_FILE=${KEY_FILE}
-ENV WRITE_TIMEOUT=${WRITE_TIMEOUT}
-ENV READ_TIMEOUT=${READ_TIMEOUT}
-ENV IDLE_TIMOUT=${IDLE_TIMOUT}
-ENV MAX_CONNS_PER_IP=${MAX_CONNS_PER_IP}
-ENV MAX_REQUEST_PER_CONN=${MAX_REQUEST_PER_CONN}
-ENV MAX_REQUEST_BODY_SIZE=${MAX_REQUEST_BODY_SIZE}
-ENV REDUCE_MEMORY_USAGE=${REDUCE_MEMORY_USAGE}
+ENV API_TOKEN="dominus_example_@10102024KeyServerToken"
+ENV REST_PORT=8000
+ENV GRPC_PORT=5000
+ENV SSL_CERT="/etc/dominus/certs/cert.pem"
+ENV SSL_CA="/etc/dominus/certs/ca_cert.pem"
+ENV KEY_FILE="/etc/dominus/certs/cert.key"
+ENV LOGS="/var/dominus/logs"
+ENV WRITE_TIMEOUT=3
+ENV READ_TIMEOUT=3
+ENV IDLE_TIMOUT=0
+ENV MAX_CONNS_PER_IP=100
+ENV MAX_REQUEST_PER_CONN=100
+ENV MAX_REQUEST_BODY_SIZE=50
+ENV REDUCE_MEMORY_USAGE=0
 ENV DISABLE_PREPARSE_MULTIPART_FORM=0
 ENV DISABLE_HEADER_NAMES_NORMALIZING=0
 ENV SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDEED=0
@@ -45,8 +30,8 @@ ENV NO_DEFAULT_DATE=0
 ENV KEEP_HIJACKED_CONNS=0
 ENV CLOSE_ON_SHUTDOWN=1
 ENV STREAM_REQUEST_BODY=1
-ENV DSN=${DSN}
-ENV CIDR=${CIDR}
+ENV DSN="mongodb://dominus:dominus10102024%408807@dominus_db:27017/admin"
+ENV CIDR="0.0.0.0/0"
 ENV DATABASE="prod"
 ENV COLLECTIONS="logs"
 
@@ -54,6 +39,10 @@ ENV COLLECTIONS="logs"
 COPY --from=builder /app/dominus ./dominus  
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
     chown appuser:appgroup ./dominus
+RUN mkdir -p /var/dominus/logs && \
+    chown -R appuser:appgroup /var/dominus/logs
+RUN mkdir -p /etc/dominus/certs && \
+    chown -R appuser:appgroup /etc/dominus/certs
 
 USER appuser 
 EXPOSE ${REST_PORT} 

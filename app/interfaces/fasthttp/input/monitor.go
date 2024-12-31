@@ -87,7 +87,7 @@ func NewMonitor(r *router.Router, reg *prometheus.Registry) {
 	m := &monitor{
 		router: r,
 		reg:    reg,
-		opts:   promhttp.HandlerOpts{EnableOpenMetrics: true},
+		opts:   promhttp.HandlerOpts{EnableOpenMetrics: true, DisableCompression: true},
 	}
 	m.path()
 }

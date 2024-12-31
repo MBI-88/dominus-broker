@@ -1,0 +1,127 @@
+version: '3.9'
+
+services:
+  dominus:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.dominus 
+    container_name: dominus 
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy: 
+        condition: on-failure
+        delay: 2s
+        max_attempts: 3 
+    ports:
+      - "8000:8000"
+      - "5000:5000"
+    networks:
+      - dominus
+    volumes:
+      - dominus_certs:/etc/dominus/certs:ro 
+      - dominus_logs:/var/dominus/logs:rw
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--header","API_TOKEN: dominus_example_@10102024KeyServerToken","http://sidecar:80/health"]
+      interval: 1m
+      timeout: 2s
+      retries: 3
+
+
+  sidecar:
+    image: nginx:latest
+    container_name: sidecar
+    volumes:
+     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy: 
+        condition: on-failure
+        delay: 2s
+        max_attempts: 3
+    environment:
+      - NGINX_HOST=0.0.0.0
+      - NGINX_PORT=80
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf
+    networks:
+      - dominus
+    depends_on:
+      - dominus
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro 
+      - prometheus_data:/prometheus
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy: 
+        condition: on-failure
+        delay: 2s
+        max_attempts: 3
+    ports:
+      - "9090:9090"
+    networks:
+      - dominus
+    depends_on:
+      - dominus
+    labels:
+      - prometheus_job=dominus
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://prometheus:9090/-/ready"]
+      interval: 1m
+      timeout: 2s
+      retries: 3
+  
+
+  grafana:
+    image: grafana/grafana:latest 
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy: 
+        condition: on-failure
+        delay: 2s
+        max_attempts: 3
+    networks:
+      - dominus
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://grafana:3000/login"]
+      interval: 1m
+      timeout: 2s
+      retries: 3
+  
+
+volumes:
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  dominus_certs:
+    driver: local
+  dominus_logs:
+    driver: local
+  
+
+
+networks:
+  dominus:
+    driver: overlay
+    attachable: true 
+    external: true
