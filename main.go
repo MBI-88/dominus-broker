@@ -230,10 +230,18 @@ func run() {
 		//**********Banner*****************
 		//*********************************
 
-		if errC == nil && errK == nil && *showBanner {
-			fmt.Printf("%s Rest: https://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", banner, env.RestPort, env.GrpcPort)
+		if errC == nil && errK == nil {
+			if *showBanner {
+				fmt.Printf("%s Rest: https://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", banner, env.RestPort, env.GrpcPort)
+			} else {
+				fmt.Printf("Rest: https://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", env.RestPort, env.GrpcPort)
+			}
 		} else {
-			fmt.Printf("%s Rest: http://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", banner, env.RestPort, env.GrpcPort)
+			if *showBanner {
+				fmt.Printf("%s Rest: http://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", banner, env.RestPort, env.GrpcPort)
+			} else {
+				fmt.Printf("Rest: http://0.0.0.0:%d 🚀  Grpc: 0.0.0.0:%d 🚀\n", env.RestPort, env.GrpcPort)
+			}
 		}
 
 		//*********************************

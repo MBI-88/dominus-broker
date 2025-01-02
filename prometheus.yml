@@ -1,12 +1,12 @@
 global:
   scrape_interval: 5s
-  evaluation_interval: 5s
-  body_size_limit: 15MB
-  sample_limit: 1500
-  target_limit: 30
-  label_limit: 30
-  label_name_length_limit: 200
-  label_value_length_limit: 200
+  evaluation_interval: 30s
+  body_size_limit: 50MB
+  sample_limit: 2000
+  target_limit: 100
+  label_limit: 100
+  label_name_length_limit: 1000
+  label_value_length_limit: 1000
   query_log_file: query.log
 
 scrape_configs:
