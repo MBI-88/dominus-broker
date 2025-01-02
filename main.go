@@ -57,6 +57,7 @@ var (
 Dominus server is running on`
 )
 
+
 // catches inital variables
 func init() {
 	mode = flag.Bool("prod", false, "set operation mode")
@@ -107,14 +108,18 @@ func run() {
 		//***********Monitoring*****************
 		//**************************************
 
-		grpcmetrics := grpcmetrics.NewServerMetrics(
-			grpcmetrics.WithServerHandlingTimeHistogram(
-				grpcmetrics.WithHistogramBuckets([]float64{0.001, 0.01, 0.1, 0.3, 0.6, 1, 3, 6, 9, 20, 30, 60, 90, 120}),
-			),
+		metricserver := grpcmetrics.NewServerMetrics(
+			grpcmetrics.WithServerCounterOptions(grpcmetrics.WithConstLabels(prometheus.Labels{})),
+			grpcmetrics.WithServerHandlingTimeHistogram(grpcmetrics.WithHistogramOpts(&prometheus.HistogramOpts{})),
+		)
+		metricclient := grpcmetrics.NewClientMetrics(
+			grpcmetrics.WithClientCounterOptions(grpcmetrics.WithConstLabels(prometheus.Labels{})),
+			grpcmetrics.WithClientHandlingTimeHistogram(grpcmetrics.WithHistogramOpts(&prometheus.HistogramOpts{})),
+			grpcmetrics.WithClientStreamRecvHistogram(grpcmetrics.WithHistogramOpts(&prometheus.HistogramOpts{})),
 		)
 
 		reg := prometheus.NewRegistry()
-		reg.MustRegister(grpcmetrics)
+		reg.MustRegister(metricserver, metricclient)
 
 		//**************************************
 		//***********Rest Server****************
@@ -197,19 +202,23 @@ func run() {
 		optsS = append(optsS,
 			grpc.ChainUnaryInterceptor(
 				otelgrpc.UnaryServerInterceptor(),
-				grpcmetrics.UnaryServerInterceptor(),
+				metricserver.UnaryServerInterceptor(),
 				auth.UnaryServerInterceptor(midGs.ApiToken),
 				logging.UnaryServerInterceptor(midGs.LogErrors()),
 			),
 			grpc.ChainStreamInterceptor(
 				otelgrpc.StreamServerInterceptor(),
-				grpcmetrics.StreamServerInterceptor(),
+				metricserver.StreamServerInterceptor(),
 				auth.StreamServerInterceptor(midGs.ApiToken),
 				logging.StreamServerInterceptor(midGs.LogErrors()),
 			),
 		)
 
 		optsD = append(optsD,
+			grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+			grpc.WithUnaryInterceptor(metricclient.UnaryClientInterceptor()),
+			grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+			grpc.WithStreamInterceptor(metricclient.StreamClientInterceptor()),
 			grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
 			grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
 			grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
