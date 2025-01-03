@@ -1,16 +1,15 @@
 package interactors
 
 import (
-	"context"
-	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
+	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 )
 
 type interactor struct {
-	repo    RepositoryInt
+	repo    repos.RepositoryInt
 	log     event.LogsInt
-	gclient GrpClientInt
+	gclient repos.GrpClientInt
 	rls     rules.RulesInt
 }
 
@@ -33,7 +32,7 @@ func (i *interactor) NewManager() ManagerInt {
 	}
 }
 
-func (i *interactor) Set(c GrpClientInt) InteractorInt {
+func (i *interactor) Set(c repos.GrpClientInt) InteractorInt {
 	i.gclient = c
 	return i
 }
@@ -41,74 +40,14 @@ func (i *interactor) Set(c GrpClientInt) InteractorInt {
 type InteractorInt interface {
 	NewConnection() ConnectionInt
 	NewManager() ManagerInt
-	Set(cl GrpClientInt) InteractorInt
+	Set(cl repos.GrpClientInt) InteractorInt
 }
 
 // Create a new interactor instance
-func NewInteractor(rp RepositoryInt, lg event.LogsInt, rls rules.RulesInt) InteractorInt {
+func NewInteractor(rp repos.RepositoryInt, lg event.LogsInt, rls rules.RulesInt) InteractorInt {
 	return &interactor{
 		repo: rp,
 		log:  lg,
 		rls: rls,
 	}
-}
-
-type RestContextInt interface {
-	BodyParser(obj any) error
-	Queries() map[string]string
-	Params(key string) string
-	QueryInt(key string) uint64
-}
-
-type RepositoryInt interface {
-	Migrations()
-	InsertObject(obj any, collection string) error
-	FindObjects(collection string, objects any, filter any, page, size int) error
-	FindObject(f any, collection string, object any) error
-	DeleteObjects(f any, collection string) error
-	Filter(filter any, object any, collection string) error
-	CountPages(collection string) (int64, error)
-	Stats() (any, error)
-}
-
-type GrpRequestMessageInt interface {
-	Descriptor() ([]byte, []int)
-	GetPayload() []byte
-	GetSubscribers() []string
-	Reset()
-	String() string
-	Validate() error
-	ValidateAll() error
-}
-
-type StreamClientInt interface {
-	Recv() (GrpRequestMessageInt, error)
-}
-
-type StreamServerInt interface {
-	Send(payload []byte) error
-	Context() context.Context
-}
-
-type StreamBiInt interface {
-	Recv() (GrpRequestMessageInt, error)
-	Send(msg []byte) error
-}
-
-type GrpResponseInt interface {
-	Descriptor() ([]byte, []int)
-	GetMessage() string
-	GetStatus() uint32
-	ProtoMessage()
-	Reset()
-	String() string
-	Validate() error
-	ValidateAll() error
-}
-
-type GrpClientInt interface {
-	Simple(url string, msg []byte) (GrpResponseInt, error)
-	ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{})
-	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, done chan<- struct{})
-	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{})
 }

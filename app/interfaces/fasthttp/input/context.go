@@ -1,7 +1,7 @@
 package input
 
 import (
-	"dominus/app/interactors"
+	"dominus/app/domain/repos"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
@@ -42,7 +42,7 @@ func (r *restContext) QueryInt(key string) uint64 {
 	return uint64(result)
 }
 
-func NewRestContext(ctx *fasthttp.RequestCtx) interactors.RestContextInt {
+func NewRestContext(ctx *fasthttp.RequestCtx) repos.RestContextInt {
 	return &restContext{
 		context: ctx,
 		js:      jsoniter.ConfigCompatibleWithStandardLibrary,

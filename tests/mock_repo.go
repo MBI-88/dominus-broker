@@ -1,8 +1,7 @@
 package tests
 
 import (
-	"dominus/app/interactors"
-	
+	"dominus/app/domain/repos"
 )
 
 type repoMock struct {
@@ -50,6 +49,6 @@ func (*repoMock) Stats() (any, error) {
 
 
 
-func NewRepoMock() interactors.RepositoryInt {
+func NewRepoMock() repos.RepositoryInt {
 	return new(repoMock)
 }

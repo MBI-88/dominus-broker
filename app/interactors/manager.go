@@ -3,17 +3,18 @@ package interactors
 import (
 	"dominus/app/domain/entities"
 	"dominus/app/domain/event"
+	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 )
 
 type manager struct {
-	repo RepositoryInt
+	repo repos.RepositoryInt
 	lg   event.LogsInt
 	rls  rules.RulesInt
 	collection string
 }
 
-func (m *manager) GetLogs(ctx RestContextInt) ([]entities.Logs, error) {
+func (m *manager) GetLogs(ctx repos.RestContextInt) ([]entities.Logs, error) {
 	var (
 		logs = make([]entities.Logs, 0, 100)
 		filters = ctx.Queries()
@@ -31,7 +32,7 @@ func (m *manager) GetLogs(ctx RestContextInt) ([]entities.Logs, error) {
 
 }
 
-func (m *manager) GetTotalPages(ctx RestContextInt) (int64, error) {
+func (m *manager) GetTotalPages(ctx repos.RestContextInt) (int64, error) {
 	total, err := m.repo.CountPages(m.collection)
 	if err != nil {
 		go m.lg.WriteLog("GetTotalPages CountPages", err.Error())
@@ -40,7 +41,7 @@ func (m *manager) GetTotalPages(ctx RestContextInt) (int64, error) {
 	return total, nil
 }
 
-func (m *manager) DelectLogs(ctx RestContextInt) error {
+func (m *manager) DelectLogs(ctx repos.RestContextInt) error {
 	if err := m.repo.DeleteObjects(m.rls.MakeEmptyFilter(), m.collection); err != nil {
 		go m.lg.WriteLog("DelectLogs DeleteObjects", err.Error())
 		return err
@@ -57,7 +58,7 @@ func (m *manager) GetStats() (any, error) {
 	return result, nil 
 }
 
-func (m *manager) GetBackup(ctx RestContextInt) ([]entities.Logs, error) {
+func (m *manager) GetBackup(ctx repos.RestContextInt) ([]entities.Logs, error) {
 	var (
 		logs = make([]entities.Logs, 0, 1000)
 		filters = ctx.Queries()
@@ -72,9 +73,9 @@ func (m *manager) GetBackup(ctx RestContextInt) ([]entities.Logs, error) {
 
 
 type ManagerInt interface {
-	GetLogs(ctx RestContextInt) ([]entities.Logs, error)
-	GetTotalPages(ctx RestContextInt) (int64, error)
-	DelectLogs(ctx RestContextInt) error
+	GetLogs(ctx repos.RestContextInt) ([]entities.Logs, error)
+	GetTotalPages(ctx repos.RestContextInt) (int64, error)
+	DelectLogs(ctx repos.RestContextInt) error
 	GetStats() (any, error)
-	GetBackup(ctx RestContextInt) ([]entities.Logs, error)
+	GetBackup(ctx repos.RestContextInt) ([]entities.Logs, error)
 }

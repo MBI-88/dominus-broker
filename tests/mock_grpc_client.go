@@ -2,7 +2,7 @@ package tests
 
 import (
 	"dominus/app/domain/entities"
-	"dominus/app/interactors"
+	"dominus/app/domain/repos"
 	"encoding/json"
 	"sync"
 	"time"
@@ -11,7 +11,7 @@ import (
 type grpcClientMock struct {
 }
 
-func (*grpcClientMock) Simple(url string, msg []byte) (interactors.GrpResponseInt, error) {
+func (*grpcClientMock) Simple(url string, msg []byte) (repos.GrpResponseInt, error) {
 	return nil, nil
 }
 
@@ -65,6 +65,6 @@ func (*grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte,
 
 }
 
-func NewGrpcClientMock() interactors.GrpClientInt {
+func NewGrpcClientMock() repos.GrpClientInt {
 	return new(grpcClientMock)
 }

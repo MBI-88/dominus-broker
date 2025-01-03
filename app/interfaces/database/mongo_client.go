@@ -2,8 +2,8 @@ package database
 
 import (
 	"context"
+	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
-	"dominus/app/interactors"
 	"fmt"
 	"strings"
 
@@ -137,7 +137,7 @@ func (r *repository) Stats() (any, error) {
 }
 
 
-func NewRepository(dsn, database, cols string, r rules.RulesInt, c *mongo.Client) interactors.RepositoryInt {
+func NewRepository(dsn, database, cols string, r rules.RulesInt, c *mongo.Client) repos.RepositoryInt {
 	return &repository{
 		dsn:         dsn,
 		database:    database,

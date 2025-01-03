@@ -2,7 +2,7 @@ package tests
 
 import (
 	"context"
-	"dominus/app/interactors"
+	"dominus/app/domain/repos"
 	"fmt"
 	"time"
 )
@@ -48,7 +48,7 @@ func (*simpleconnMock) ValidateAll() error {
 	return nil
 }
 
-func NewSimpleConnMock(payload []byte, subs []string) interactors.GrpRequestMessageInt {
+func NewSimpleConnMock(payload []byte, subs []string) repos.GrpRequestMessageInt {
 	return &simpleconnMock {
 		payload: payload,
 		subs: subs,
@@ -61,12 +61,12 @@ type clientconnMock struct {
 	*simpleconnMock
 }
 
-func (c *clientconnMock) Recv() (interactors.GrpRequestMessageInt, error) {
+func (c *clientconnMock) Recv() (repos.GrpRequestMessageInt, error) {
 	return c.simpleconnMock, c.err
 }
 
 
-func NewClienConnMock(payload []byte, subs []string) interactors.StreamClientInt {
+func NewClienConnMock(payload []byte, subs []string) repos.StreamClientInt {
 	stream := &clientconnMock{
 		&simpleconnMock{
 			payload: payload,
@@ -92,7 +92,7 @@ func (se *serverconnMock) Context() context.Context {
 }
 
 
-func NewServerConnMock(payload []byte, subs []string) (interactors.GrpRequestMessageInt,interactors.StreamServerInt) {
+func NewServerConnMock(payload []byte, subs []string) (repos.GrpRequestMessageInt,repos.StreamServerInt) {
 	stream := &serverconnMock{
 		&simpleconnMock{
 			payload: payload,
@@ -110,7 +110,7 @@ type biconnMock struct {
 	*simpleconnMock
 }
 
-func (b *biconnMock) Recv() (interactors.GrpRequestMessageInt, error) {
+func (b *biconnMock) Recv() (repos.GrpRequestMessageInt, error) {
 	return b.simpleconnMock, b.err
 }
 
@@ -119,7 +119,7 @@ func (b *biconnMock) Send(msg []byte) error {
 }
 
 
-func NewBiConnMock(payload []byte, subs []string) interactors.StreamBiInt {
+func NewBiConnMock(payload []byte, subs []string) repos.StreamBiInt {
 	stream := &biconnMock{
 		&simpleconnMock{
 			payload: payload,
