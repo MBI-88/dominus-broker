@@ -11,28 +11,27 @@ type interactor struct {
 	repo    RepositoryInt
 	log     event.LogsInt
 	gclient GrpClientInt
+	rls     rules.RulesInt
 }
 
 func (i *interactor) NewConnection() ConnectionInt {
 	return &connection{
-		r:  rules.NewRule(),
-		lg: i.log,
+		r:          i.rls,
+		lg:         i.log,
 		collection: "logs",
-		client: i.gclient,
-		repo: i.repo,
+		client:     i.gclient,
+		repo:       i.repo,
 	}
 }
 
-
 func (i *interactor) NewManager() ManagerInt {
 	return &manager{
-		rls:          rules.NewRule(),
+		rls:        i.rls,
 		repo:       i.repo,
 		collection: "logs",
 		lg:         i.log,
 	}
 }
-
 
 func (i *interactor) Set(c GrpClientInt) InteractorInt {
 	i.gclient = c
@@ -46,10 +45,11 @@ type InteractorInt interface {
 }
 
 // Create a new interactor instance
-func NewInteractor(rp RepositoryInt, lg event.LogsInt) InteractorInt {
+func NewInteractor(rp RepositoryInt, lg event.LogsInt, rls rules.RulesInt) InteractorInt {
 	return &interactor{
 		repo: rp,
 		log:  lg,
+		rls: rls,
 	}
 }
 
@@ -70,7 +70,6 @@ type RepositoryInt interface {
 	CountPages(collection string) (int64, error)
 	Stats() (any, error)
 }
-
 
 type GrpRequestMessageInt interface {
 	Descriptor() ([]byte, []int)
@@ -110,6 +109,6 @@ type GrpResponseInt interface {
 type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
 	ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{})
-	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, done chan <-struct{})
+	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, done chan<- struct{})
 	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{})
 }

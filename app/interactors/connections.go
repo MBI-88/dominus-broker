@@ -51,6 +51,9 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 		return err
 	}
 	subscribers := req.GetSubscribers()
+	if len(subscribers) == 0 {
+		return fmt.Errorf("Subscribers not found")
+	}
 	errMsg := make(chan entities.Logs, len(subscribers))
 
 	go c.client.ClientStream(subscribers, stream, errMsg, closed)
@@ -93,14 +96,17 @@ func (c *connection) StreamClientConn(st StreamClientInt) error {
 
 func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerInt) error {
 	closed := make(chan struct{}, 0)
-	subs := req.GetSubscribers()
-	total := len(subs)
-	stream := make(chan []byte, total + int(total * 2/3))
+	subscribers := req.GetSubscribers()
+	if len(subscribers) == 0 {
+		return fmt.Errorf("Subscribers not found")
+	}
+	total := len(subscribers)
+	stream := make(chan []byte, total+int(total*2/3))
 	errMsg := make(chan entities.Logs, total)
 	done := make(chan struct{}, total)
 	initialRequest := req.GetPayload()
 
-	go c.client.ServerStream(subs, initialRequest, stream, errMsg, closed, done)
+	go c.client.ServerStream(subscribers, initialRequest, stream, errMsg, closed, done)
 
 	go func(sig <-chan entities.Logs) {
 		for {
@@ -138,9 +144,10 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 			total--
 			if total == 0 {
 				close(done)
+				close(closed)
+				time.Sleep(5 * time.Millisecond)
 				close(stream)
 				close(errMsg)
-				close(closed)
 				return fmt.Errorf("Connection closed")
 			}
 		}
@@ -150,12 +157,15 @@ func (c *connection) StreamServerConn(req GrpRequestMessageInt, st StreamServerI
 func (c *connection) StreamBiConn(stream StreamBiInt) error {
 	closedTx := make(chan struct{}, 0)
 	closedRx := make(chan struct{}, 0)
-	request, err := stream.Recv()
-	subscribers := request.GetSubscribers()
+	req, err := stream.Recv()
+	subscribers := req.GetSubscribers()
+	if len(subscribers) == 0 {
+		return fmt.Errorf("Subscribers not found")
+	}
 	total := len(subscribers)
 	done := make(chan struct{}, total)
 	streamProv := make(chan []byte, 0)
-	streamSub := make(chan []byte, total + int(total * 2/3))
+	streamSub := make(chan []byte, total+int(total*2/3))
 	errMsg := make(chan entities.Logs, total)
 
 	if err != nil {
@@ -177,7 +187,7 @@ func (c *connection) StreamBiConn(stream StreamBiInt) error {
 	}(errMsg)
 
 	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg, closedTx, closedRx, done)
-	streamProv <- request.GetPayload()
+	streamProv <- req.GetPayload()
 
 	//Receives from provider
 	go func() {

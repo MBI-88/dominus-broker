@@ -83,7 +83,7 @@ func run() {
 	env := settings.GetEnvVar(*mode)
 	mongoConfig := database.NewMongoConfig()
 	mongoClient := mongoConfig.CreateClient(env.Dsn)
-	rls := rules.NewRule()
+	rls := rules.NewRules()
 	repo := database.NewRepository(env.Dsn, env.Database, env.Collections, rls, mongoClient)
 
 	switch args {
@@ -93,7 +93,7 @@ func run() {
 		//Instances
 		logs := event.NewLogs(env.Logs)
 
-		inter := interactors.NewInteractor(repo, logs)
+		inter := interactors.NewInteractor(repo, logs, rls)
 
 		// Signals
 		system = make(chan os.Signal, 1)

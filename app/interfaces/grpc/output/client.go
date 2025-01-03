@@ -253,6 +253,6 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 func NewGrpClient(opts []grpc.DialOption) interactors.GrpClientInt {
 	return &grpcClient{
 		opts: opts,
-		rls:  rules.NewRule(),
+		rls:  rules.NewRules(),
 	}
 }

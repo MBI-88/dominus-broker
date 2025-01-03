@@ -9,6 +9,9 @@ RUN go mod tidy && \
 FROM alpine:3.20 as deployment 
 WORKDIR /app 
 
+ARG MODE=true
+ARG BANNER=true
+
 ENV API_TOKEN="dominus_example_@10102024KeyServerToken"
 ENV REST_PORT=8000
 ENV GRPC_PORT=5000
@@ -48,4 +51,4 @@ USER appuser
 EXPOSE ${REST_PORT} 
 EXPOSE ${GRPC_PORT}
 
-CMD ["sh","-c", "./dominus -prod=true migrate && ./dominus -prod=true start"]
+CMD ["sh","-c", "./dominus -prod=true migrate && ./dominus -prod=${MODE} -banner=${BANNER} start"]

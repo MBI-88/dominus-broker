@@ -160,7 +160,7 @@ type RulesInt interface {
 	MakeID() primitive.ObjectID
 }
 
-func NewRule() RulesInt {
+func NewRules() RulesInt {
 	return &rules{
 		re: regexp.MustCompile(`^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$`),
 	}

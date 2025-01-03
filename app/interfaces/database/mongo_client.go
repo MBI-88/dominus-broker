@@ -75,9 +75,9 @@ func (r *repository) InsertObject(object any, collection string) error {
 	return nil
 }
 
-func (r *repository) UpdateObject(filter any, updadte any, collection string) error {
+func (r *repository) UpdateObject(filter any, update any, collection string) error {
 	cl := r.client.Database(r.database).Collection(collection)
-	_, err := cl.UpdateOne(context.TODO(), filter, updadte)
+	_, err := cl.UpdateOne(context.TODO(), filter, update)
 	if err != nil {
 		return err
 	}
