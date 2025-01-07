@@ -55,6 +55,17 @@ func (m *monitor) convertToHTTP(ctx *fasthttp.RequestCtx) (*http.Request, error)
 	return req, nil
 }
 
+func (m *monitor) collectMetrics() {
+	cpuPercent, err := cpu.Percent(0, false)
+	if err == nil {
+		cpumetrics.WithLabelValues("cpu_used").Set(cpuPercent[0])
+	}
+	mem, err := mem.VirtualMemory()
+	if err == nil {
+		memorymetrics.WithLabelValues("mem_used").Set(mem.UsedPercent)
+	}
+}
+
 func (m *monitor) getMetrics(ctx *fasthttp.RequestCtx) {
 	handler := promhttp.HandlerFor(m.reg, m.opts)
 	resp := &adapter{ctx}
@@ -67,19 +78,17 @@ func (m *monitor) getMetrics(ctx *fasthttp.RequestCtx) {
 	handler.ServeHTTP(resp, req)
 }
 
-func (m *monitor) collectMetrics() {
-	cpuPercent, err := cpu.Percent(0, false)
-	if err == nil {
-		cpumetrics.WithLabelValues("cpu_used").Set(cpuPercent[0])
-	}
-	mem, err := mem.VirtualMemory()
-	if err == nil {
-		memorymetrics.WithLabelValues("mem_used").Set(mem.UsedPercent)
-	}
+func (*monitor) getHealthCheck(ctx *fasthttp.RequestCtx) {
+	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.SetStatusCode(fasthttp.StatusOK)
+	ctx.Response.SetBody([]byte("Health ok"))
 }
+
+
 
 func (m *monitor) path() {
 	m.router.GET("/metrics", m.getMetrics)
+	m.router.GET("/health", m.getHealthCheck)
 }
 
 func NewMonitor(r *router.Router, reg *prometheus.Registry) {
