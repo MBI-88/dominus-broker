@@ -62,6 +62,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 												Subscribers: urls,
 												Payload:     payload}); err != nil {
 												sig <- entities.Logs{
+													ID:         g.rls.MakeMongoID(),
 													CreatedAt:  time.Now(),
 													Desc:       err.Error(),
 													Stage:      "ClientStream sends to subscribers",
@@ -129,6 +130,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 								resp, err := client.Recv()
 								if err != nil {
 									sig <- entities.Logs{
+										ID:         g.rls.MakeMongoID(),
 										Desc:       err.Error(),
 										CreatedAt:  time.Now(),
 										Subscriber: urls[p],
@@ -189,6 +191,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 												Subscribers: urls,
 												Payload:     payload}); err != nil {
 												errMsg <- entities.Logs{
+													ID:         g.rls.MakeMongoID(),
 													CreatedAt:  time.Now(),
 													Desc:       err.Error(),
 													Stage:      "BidirectionalStream sends to subscribers",
@@ -210,6 +213,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 								resp, err := client.Recv()
 								if err != nil {
 									errMsg <- entities.Logs{
+										ID:         g.rls.MakeMongoID(),
 										CreatedAt:  time.Now(),
 										Stage:      "BidirectionalStream Recv from subscribers",
 										Subscriber: urls[p],
