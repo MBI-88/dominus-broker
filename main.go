@@ -7,6 +7,7 @@ import (
 	"dominus/app/domain/rules"
 	"dominus/app/interactors"
 	"dominus/app/interfaces/database"
+	_ "dominus/docs"
 
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
@@ -23,7 +24,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-
 	"time"
 
 	grpcmetrics "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
@@ -31,7 +31,6 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/prometheus/client_golang/prometheus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
-
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 	"google.golang.org/grpc"
@@ -133,6 +132,7 @@ func run() {
 		router := router.New()
 		fi.NewRestController(router, inter)
 		fi.NewMonitor(router, reg)
+		fi.NewSwagger(router)
 
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
@@ -276,6 +276,14 @@ func run() {
 }
 
 // Dominus entripoint
+// @title Dominus server
+// @description This server is a bidirectional queue using gRCP
+// @contact.name MBI
+// @contact.email ingmbi8807@gmail.com
+// @contact.url https://www.pr0c0d3.com/
+// @version 1.0.0
+// @host localhost:8000
+// @BasePath /
 func main() {
 	run()
 }

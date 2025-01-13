@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"fmt"
+	"strings"
 
 	"github.com/valyala/fasthttp"
 )
@@ -13,6 +14,10 @@ type apiMiddleware struct {
 }
 
 func (a *apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
+	path := string(ctx.RequestURI())
+	if strings.HasPrefix(path, "/swagger") {
+		return nil 
+	}
 	token := ctx.Request.Header.Peek("API_TOKEN")
 	hashedToken := sha256.Sum256(token)
 	hashedKey := sha256.Sum256(a.token)
