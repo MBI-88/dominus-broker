@@ -84,7 +84,7 @@ func run() {
 	mongoConfig := database.NewMongoConfig()
 	mongoClient := mongoConfig.CreateClient(env.Dsn)
 	rls := rules.NewRules()
-	repo := database.NewRepository(env.Dsn, env.Database, env.Collections, rls, mongoClient)
+	repo := database.NewRepository(env.Dsn, env.Database, env.Collections, mongoClient)
 
 	switch args {
 	case "migrate":

@@ -6,6 +6,7 @@ import (
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 	pb "dominus/app/interfaces/grpc/proto/builder"
+	"fmt"
 	"sync"
 	"time"
 
@@ -18,21 +19,24 @@ type grpcClient struct {
 }
 
 func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, error) {
-	conn, err := grpc.NewClient(url, g.opts...)
-	if err != nil {
-		return nil, err
+	if g.rls.CheckURI(url) {
+		conn, err := grpc.NewClient(url, g.opts...)
+		if err != nil {
+			return nil, err
+		}
+		client := pb.NewGrpcClient(conn)
+		msg := &pb.RequestMessage{
+			Subscribers: nil, Payload: body,
+		}
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		resp, err := client.Simple(ctx, msg)
+		if err != nil {
+			return nil, err
+		}
+		return resp, nil
 	}
-	client := pb.NewGrpcClient(conn)
-	msg := &pb.RequestMessage{
-		Subscribers: nil, Payload: body,
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-	resp, err := client.Simple(ctx, msg)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+	return nil, fmt.Errorf("Invalid uri")
 }
 
 func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{}) {
@@ -58,7 +62,6 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 												Subscribers: urls,
 												Payload:     payload}); err != nil {
 												sig <- entities.Logs{
-													ID:         g.rls.MakeID(),
 													CreatedAt:  time.Now(),
 													Desc:       err.Error(),
 													Stage:      "ClientStream sends to subscribers",
@@ -92,7 +95,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 				for _, ch := range arrayMsg {
 					close(ch)
 				}
-				tx <-struct{}{}
+				tx <- struct{}{}
 				return
 			}
 		}
@@ -125,20 +128,19 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 							for {
 								resp, err := client.Recv()
 								if err != nil {
-									sig <-entities.Logs{
-										ID:         g.rls.MakeID(),
+									sig <- entities.Logs{
 										Desc:       err.Error(),
 										CreatedAt:  time.Now(),
 										Subscriber: urls[p],
 										Stage:      "ServerStream receives from subscribers",
 									}
-									tx <-struct{}{}
+									tx <- struct{}{}
 									return
 								} else {
 									if *open {
-										msg <-resp.GetPayload()
+										msg <- resp.GetPayload()
 									} else {
-										tx <-struct{}{}
+										tx <- struct{}{}
 										return
 									}
 								}
@@ -153,7 +155,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan <-struct{}) {
+func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
 	open := new(bool)
 	*open = true
 	sync := new(sync.Mutex)
@@ -187,7 +189,6 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 												Subscribers: urls,
 												Payload:     payload}); err != nil {
 												errMsg <- entities.Logs{
-													ID:         g.rls.MakeID(),
 													CreatedAt:  time.Now(),
 													Desc:       err.Error(),
 													Stage:      "BidirectionalStream sends to subscribers",
@@ -209,19 +210,18 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 								resp, err := client.Recv()
 								if err != nil {
 									errMsg <- entities.Logs{
-										ID:         g.rls.MakeID(),
 										CreatedAt:  time.Now(),
 										Stage:      "BidirectionalStream Recv from subscribers",
 										Subscriber: urls[p],
 										Desc:       err.Error(),
 									}
-									done <-struct{}{}
+									done <- struct{}{}
 									return
 								}
 								if *open {
 									subMsg <- resp.GetPayload()
 								} else {
-									done <-struct{}{}
+									done <- struct{}{}
 									return
 								}
 							}
@@ -237,8 +237,8 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 		case payload, ok := <-provMsg:
 			if ok {
 				for _, ch := range arrayMsg {
-						ch <-payload
-					}
+					ch <- payload
+				}
 			} else {
 				for _, ch := range arrayMsg {
 					close(ch)

@@ -9,7 +9,7 @@ import (
 
 
 func helperErr(flag *simpleconnMock) {
-	time.Sleep(5 * time.Second)
+	time.Sleep(3 * time.Second)
 	adquired.Lock()
 	defer adquired.Unlock()
 	flag.err = fmt.Errorf("End")

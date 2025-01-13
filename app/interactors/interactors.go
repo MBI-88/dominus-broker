@@ -15,7 +15,7 @@ type interactor struct {
 
 func (i *interactor) NewConnection() ConnectionInt {
 	return &connection{
-		r:          i.rls,
+		rls:        i.rls,
 		lg:         i.log,
 		collection: "logs",
 		client:     i.gclient,
@@ -48,6 +48,6 @@ func NewInteractor(rp repos.RepositoryInt, lg event.LogsInt, rls rules.RulesInt)
 	return &interactor{
 		repo: rp,
 		log:  lg,
-		rls: rls,
+		rls:  rls,
 	}
 }

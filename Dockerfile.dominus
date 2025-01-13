@@ -9,9 +9,8 @@ RUN go mod tidy && \
 FROM alpine:3.20 as deployment 
 WORKDIR /app 
 
-ARG MODE=true
-ARG BANNER=true
-
+ENV MODE=true
+ENV BANNER=true
 ENV API_TOKEN="dominus_example_@10102024KeyServerToken"
 ENV REST_PORT=8000
 ENV GRPC_PORT=5000

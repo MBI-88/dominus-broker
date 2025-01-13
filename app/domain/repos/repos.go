@@ -15,10 +15,9 @@ type RestContextInt interface {
 type RepositoryInt interface {
 	Migrations()
 	InsertObject(obj any, collection string) error
-	FindObjects(collection string, objects any, filter any, page, size int) error
-	FindObject(f any, collection string, object any) error
-	DeleteObjects(f any, collection string) error
-	Filter(filter any, object any, collection string) error
+	DeleteObjects(collection string) error
+	Filter(filter map[string]string, object any, collection string, page, size uint64) error
+	Backup(filter map[string]string, obj any, collection string) error
 	CountPages(collection string) (int64, error)
 	Stats() (any, error)
 }

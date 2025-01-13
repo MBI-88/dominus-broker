@@ -1,6 +1,6 @@
 global:
-  scrape_interval: 5s
-  evaluation_interval: 30s
+  scrape_interval: 15s
+  evaluation_interval: 15s
   body_size_limit: 50MB
   sample_limit: 2000
   target_limit: 100

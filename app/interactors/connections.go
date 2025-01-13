@@ -10,8 +10,8 @@ import (
 )
 
 type connection struct {
-	r          rules.RulesInt // Rules
-	repo       repos.RepositoryInt  // Repository client
+	rls        rules.RulesInt
+	repo       repos.RepositoryInt // Repository client
 	client     repos.GrpClientInt
 	lg         event.LogsInt
 	collection string
@@ -24,22 +24,21 @@ func (c *connection) SimpleConn(ms repos.GrpRequestMessageInt) error {
 	}
 	body := ms.GetPayload()
 	for _, sub := range subs {
-		if ok := c.r.CheckURI(sub); ok {
-			go func(url string, body []byte) {
-				_, err := c.client.Simple(url, body)
-				if err != nil {
-					logs := entities.Logs{
-						ID:        c.r.MakeID(),
-						Desc:      err.Error(),
-						CreatedAt: time.Now(),
-						Stage:     "SimpleConn",
-					}
-					if err := c.repo.InsertObject(logs, c.collection); err != nil {
-						c.lg.WriteLog("InsertObject", err.Error())
-					}
+		go func(url string, body []byte) {
+			_, err := c.client.Simple(url, body)
+			if err != nil {
+				logs := entities.Logs{
+					ID:        c.rls.MakeMongoID(),
+					Desc:      err.Error(),
+					CreatedAt: time.Now(),
+					Stage:     "SimpleConn",
 				}
-			}(sub, body)
-		}
+				if err := c.repo.InsertObject(logs, c.collection); err != nil {
+					c.lg.WriteLog("InsertObject", err.Error())
+				}
+			}
+		}(sub, body)
+
 	}
 	return nil
 }
@@ -78,7 +77,7 @@ func (c *connection) StreamClientConn(st repos.StreamClientInt) error {
 		req, err := st.Recv()
 		if err != nil {
 			log := entities.Logs{
-				ID:        c.r.MakeID(),
+				ID:        c.rls.MakeMongoID(),
 				Desc:      err.Error(),
 				CreatedAt: time.Now(),
 				Stage:     "StreamClientConn receives from provider",
@@ -130,7 +129,7 @@ func (c *connection) StreamServerConn(req repos.GrpRequestMessageInt, st repos.S
 			if ok {
 				if err := st.Send(body); err != nil {
 					log := entities.Logs{
-						ID:        c.r.MakeID(),
+						ID:        c.rls.MakeMongoID(),
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamServerConn Send to provider",
@@ -196,7 +195,7 @@ func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
 			req, err := stream.Recv()
 			if err != nil {
 				log := entities.Logs{
-					ID:        c.r.MakeID(),
+					ID:        c.rls.MakeMongoID(),
 					Desc:      err.Error(),
 					CreatedAt: time.Now(),
 					Stage:     "StreamBiConn Recv from provider",
@@ -220,7 +219,7 @@ func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
 			if ok {
 				if err := stream.Send(payload); err != nil {
 					log := entities.Logs{
-						ID:        c.r.MakeID(),
+						ID:        c.rls.MakeMongoID(),
 						Desc:      err.Error(),
 						CreatedAt: time.Now(),
 						Stage:     "StreamBiConn Send to provider",

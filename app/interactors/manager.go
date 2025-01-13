@@ -8,27 +8,24 @@ import (
 )
 
 type manager struct {
-	repo repos.RepositoryInt
-	lg   event.LogsInt
-	rls  rules.RulesInt
+	repo       repos.RepositoryInt
+	lg         event.LogsInt
+	rls        rules.RulesInt
 	collection string
 }
 
 func (m *manager) GetLogs(ctx repos.RestContextInt) ([]entities.Logs, error) {
 	var (
-		logs = make([]entities.Logs, 0, 100)
+		logs    = make([]entities.Logs, 0, 100)
 		filters = ctx.Queries()
-		page  = ctx.QueryInt("page")
-		size = ctx.QueryInt("size")
+		page    = ctx.QueryInt("page")
+		size    = ctx.QueryInt("size")
 	)
-
-	arrfilter := m.rls.MakeLogFiter(filters, page, size)
-
-	if err := m.repo.Filter(arrfilter, &logs, m.collection); err != nil {
+	if err := m.repo.Filter(filters, &logs, m.collection, page, size); err != nil {
 		go m.lg.WriteLog("GetLogs Filter", err.Error())
 		return nil, err
 	}
-	return logs, nil 
+	return logs, nil
 
 }
 
@@ -42,11 +39,11 @@ func (m *manager) GetTotalPages(ctx repos.RestContextInt) (int64, error) {
 }
 
 func (m *manager) DelectLogs(ctx repos.RestContextInt) error {
-	if err := m.repo.DeleteObjects(m.rls.MakeEmptyFilter(), m.collection); err != nil {
+	if err := m.repo.DeleteObjects(m.collection); err != nil {
 		go m.lg.WriteLog("DelectLogs DeleteObjects", err.Error())
 		return err
 	}
-	return nil 
+	return nil
 }
 
 func (m *manager) GetStats() (any, error) {
@@ -55,22 +52,20 @@ func (m *manager) GetStats() (any, error) {
 		go m.lg.WriteLog("GetStats Stats", err.Error())
 		return nil, err
 	}
-	return result, nil 
+	return result, nil
 }
 
 func (m *manager) GetBackup(ctx repos.RestContextInt) ([]entities.Logs, error) {
 	var (
-		logs = make([]entities.Logs, 0, 1000)
+		logs    = make([]entities.Logs, 0, 1000)
 		filters = ctx.Queries()
 	)
-	arrfilter := m.rls.MakeBackupFilter(filters)
-	if err := m.repo.Filter(arrfilter, &logs, m.collection); err != nil {
+	if err := m.repo.Backup(filters, &logs, m.collection); err != nil {
 		go m.lg.WriteLog("GetBackup Filter", err.Error())
 		return nil, err
 	}
-	return logs, nil 
+	return logs, nil
 }
-
 
 type ManagerInt interface {
 	GetLogs(ctx repos.RestContextInt) ([]entities.Logs, error)
