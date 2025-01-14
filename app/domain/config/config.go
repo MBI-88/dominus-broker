@@ -9,8 +9,8 @@ var (
 )
 
 type config struct {
-	RestPort                          uint64
-	GrpcPort                          uint64
+	RestPort                          int64
+	GrpcPort                          int64
 	WriteTimeout                      int
 	ReadTimeout                       int
 	IdleTimeout                       int
@@ -39,8 +39,8 @@ type config struct {
 
 func (s *config) setEnv() {
 	s.ApiToken = viper.GetString("API_TOKEN")
-	s.RestPort = viper.GetUint64("REST_PORT")
-	s.GrpcPort = viper.GetUint64("GRPC_PORT")
+	s.RestPort = viper.GetInt64("REST_PORT")
+	s.GrpcPort = viper.GetInt64("GRPC_PORT")
 	s.SslCert = viper.GetString("SSL_CERT")
 	s.SslCaCert = viper.GetString("SSL_CA")
 	s.KeyFile = viper.GetString("KEY_FILE")

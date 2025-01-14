@@ -7,7 +7,6 @@ import (
 	"dominus/app/domain/rules"
 	"dominus/app/interactors"
 	"dominus/app/interfaces/database"
-	_ "dominus/docs"
 
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
@@ -132,7 +131,6 @@ func run() {
 		router := router.New()
 		fi.NewRestController(router, inter)
 		fi.NewMonitor(router, reg)
-		fi.NewSwagger(router)
 
 		r := fasthttp.Server{
 			Handler:                            midF.Middlewares(router.Handler),
@@ -159,12 +157,12 @@ func run() {
 		_, errCa := os.Stat(env.SslCaCert)
 
 		if errC == nil && errK == nil {
-			go func(port uint64, cert, key string, cancel context.CancelFunc) {
+			go func(port int64, cert, key string, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%d", port), cert, key))
 				cancel()
 			}(env.RestPort, env.SslCert, env.KeyFile, cancel)
 		} else {
-			go func(port uint64, cancel context.CancelFunc) {
+			go func(port int64, cancel context.CancelFunc) {
 				log.Fatal(r.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", port)))
 				cancel()
 			}(env.RestPort, cancel)
