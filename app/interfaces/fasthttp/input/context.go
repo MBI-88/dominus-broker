@@ -33,13 +33,13 @@ func (r *restContext) Params(key string) string {
 	return r.context.UserValue(key).(string)
 }
 
-func (r *restContext) QueryInt(key string) uint64 {
+func (r *restContext) QueryInt(key string) int {
 	args := r.context.QueryArgs()
 	result, err := args.GetUint(key)
 	if err != nil {
 		return 0
 	}
-	return uint64(result)
+	return result
 }
 
 func NewRestContext(ctx *fasthttp.RequestCtx) repos.RestContextInt {

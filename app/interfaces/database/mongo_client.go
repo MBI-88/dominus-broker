@@ -66,7 +66,7 @@ func (r *repository) CountPages(collection string) (int64, error) {
 	return cl.EstimatedDocumentCount(context.TODO())
 }
 
-func (r *repository) Filter(filter map[string]string, object any, collection string, page, size uint64) error {
+func (r *repository) Filter(filter map[string]string, object any, collection string, page, size int) error {
 	allowDiskUse := true
 	options := &options.AggregateOptions{
 		AllowDiskUse: &allowDiskUse,

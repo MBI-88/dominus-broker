@@ -9,14 +9,14 @@ type RestContextInt interface {
 	BodyParser(obj any) error
 	Queries() map[string]string
 	Params(key string) string
-	QueryInt(key string) uint64
+	QueryInt(key string) int
 }
 
 type RepositoryInt interface {
 	Migrations()
 	InsertObject(obj any, collection string) error
 	DeleteObjects(collection string) error
-	Filter(filter map[string]string, object any, collection string, page, size uint64) error
+	Filter(filter map[string]string, object any, collection string, page, size int) error
 	Backup(filter map[string]string, obj any, collection string) error
 	CountPages(collection string) (int64, error)
 	Stats() (any, error)

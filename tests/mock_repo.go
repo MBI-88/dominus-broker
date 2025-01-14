@@ -23,7 +23,7 @@ func (*repoMock) CountPages(collection string) (int64, error) {
 	return 0, nil
 }
 
-func (*repoMock) Filter(filter map[string]string, object any, collection string, page, size uint64) error {
+func (*repoMock) Filter(filter map[string]string, object any, collection string, page, size int) error {
 	return nil
 }
 

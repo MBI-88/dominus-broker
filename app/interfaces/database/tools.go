@@ -30,7 +30,7 @@ func (m *mongoTools) MakeBackupFilter(filters map[string]string) []bson.D {
 	return m.makeAgregation(filters)
 }
 
-func (*mongoTools) Paginator(page, size uint64) *options.FindOptions {
+func (*mongoTools) Paginator(page, size int) *options.FindOptions {
 	if page <= 0 || size <= 0 {
 		page = 2
 		size = 4
@@ -41,7 +41,7 @@ func (*mongoTools) Paginator(page, size uint64) *options.FindOptions {
 	return opts
 }
 
-func (m *mongoTools) MakeLogFiter(filters map[string]string, page, size uint64) []bson.D {
+func (m *mongoTools) MakeLogFiter(filters map[string]string, page, size int) []bson.D {
 	var (
 		opts        = m.Paginator(page, size)
 		step        int
@@ -110,8 +110,8 @@ func (m *mongoTools) makeAgregation(filters map[string]string) []bson.D {
 type mongoToolsInt interface {
 	CreateIndex() []mongo.IndexModel
 	MakeBackupFilter(filters map[string]string) []bson.D
-	Paginator(page, size uint64) *options.FindOptions
-	MakeLogFiter(filters map[string]string, page, size uint64) []bson.D
+	Paginator(page, size int) *options.FindOptions
+	MakeLogFiter(filters map[string]string, page, size int) []bson.D
 }
 
 func newMongoTools() mongoToolsInt {
