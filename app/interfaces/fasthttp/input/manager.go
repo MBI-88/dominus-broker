@@ -10,7 +10,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-type rest struct {
+type manager struct {
 	router *router.Router
 	inter  interactors.InteractorInt
 	js     jsoniter.API
@@ -18,7 +18,7 @@ type rest struct {
 
 // getLogs 
 // @Summary gets logs
-// @Tag Manager
+// @Tags Manager
 // @Description gets all logs fron the database using page and size (required)
 // @Param page query int true "page"
 // @Param size query int true "size"
@@ -29,7 +29,7 @@ type rest struct {
 // @Success 200 {object} entities.Logs "Respose body {id:string,desc:string,create_at:time, stage:string, subscriber:string}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager [get]
-func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
+func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
 	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
@@ -48,9 +48,9 @@ func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// getPages
+// GetPages
 // @Summary gets pages
-// @Tag Manager
+// @Tags Manager
 // @Description gets total pages in the database
 // @Param API_TOKEN header string true "api token to connect with Dominus"
 // @securityDefinitions.apikey API_TOKEN
@@ -59,7 +59,7 @@ func (r *rest) getLogs(ctx *fasthttp.RequestCtx) {
 // @Success 200 {object} map[string]int "Respose body {pages:int}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-pages [get]
-func (r *rest) getPages(ctx *fasthttp.RequestCtx) {
+func (r *manager) getPages(ctx *fasthttp.RequestCtx) {
 	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
@@ -78,9 +78,9 @@ func (r *rest) getPages(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// deleteAll
+// DeleteAll
 // @Summary delete logs
-// @Tag Manager
+// @Tags Manager
 // @Description delete all logs in the database
 // @Param API_TOKEN header string true "api token to connect with Dominus"
 // @securityDefinitions.apikey API_TOKEN
@@ -89,7 +89,7 @@ func (r *rest) getPages(ctx *fasthttp.RequestCtx) {
 // @Success 200 {object} map[string]string "Respose body {message:string}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager [delete]
-func (r *rest) deleteAll(ctx *fasthttp.RequestCtx) {
+func (r *manager) deleteAll(ctx *fasthttp.RequestCtx) {
 	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
@@ -107,9 +107,9 @@ func (r *rest) deleteAll(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// getStats
+// GetStats
 // @Summary gets stats
-// @Tag Manager
+// @Tags Manager
 // @Description gets all statistic from the database
 // @Param API_TOKEN header string true "api token to connect with Dominus"
 // @securityDefinitions.apikey API_TOKEN
@@ -118,7 +118,7 @@ func (r *rest) deleteAll(ctx *fasthttp.RequestCtx) {
 // @Success 200 {object} map[string]any "Respose body { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-stats [get]
-func (r *rest) getStats(ctx *fasthttp.RequestCtx) {
+func (r *manager) getStats(ctx *fasthttp.RequestCtx) {
 	manger := r.inter.NewManager()
 	result, err := manger.GetStats()
 	if err != nil {
@@ -133,9 +133,9 @@ func (r *rest) getStats(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// getBackup
+// GetBackup
 // @Summary gets backup
-// @Tag Manager
+// @Tags Manager
 // @Description gets all selected items from the database for making a backup
 // @Param API_TOKEN header string true "api token to connect with Dominus"
 // @securityDefinitions.apikey API_TOKEN
@@ -144,7 +144,7 @@ func (r *rest) getStats(ctx *fasthttp.RequestCtx) {
 // @Success 200 {object} map[string]any "Respose body {logs:[{id:string,desc:string,create_at:time, stage:string, subscriber:string}]}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-backup [get]
-func (r *rest) getBackup(ctx *fasthttp.RequestCtx) {
+func (r *manager) getBackup(ctx *fasthttp.RequestCtx) {
 	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
 
@@ -167,7 +167,7 @@ func (r *rest) getBackup(ctx *fasthttp.RequestCtx) {
 
 
 
-func (r *rest) path() {
+func (r *manager) path() {
 	r.router.GET("/manager", r.getLogs)
 	r.router.GET("/manager-pages", r.getPages)
 	r.router.DELETE("/manager", r.deleteAll)
@@ -175,7 +175,7 @@ func (r *rest) path() {
 	r.router.GET("/manager-backup", r.getBackup)
 }
 
-func (r *rest) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, statusCode int, er string) []byte {
+func (r *manager) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, statusCode int, er string) []byte {
 	ctx.Response.Header.Set("Content-Type", contenType)
 	ctx.Response.Header.SetStatusCode(statusCode)
 	msg := make(map[string]string)
@@ -184,7 +184,7 @@ func (r *rest) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, st
 	return b
 }
 
-func NewRestController(r *router.Router, i interactors.InteractorInt) {
-	re := &rest{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
+func NewManager(r *router.Router, i interactors.InteractorInt) {
+	re := &manager{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }
