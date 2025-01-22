@@ -68,7 +68,6 @@ func (s *config) setEnv() {
 
 func (s config) GetEnvVar(prod bool) config {
 	if prod {
-		viper.SetEnvPrefix("")
 		viper.AutomaticEnv()
 	} else {
 		viper.SetConfigFile("./.env")
