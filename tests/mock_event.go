@@ -1,6 +1,6 @@
 package tests
 
-import "dominus/app/domain/event"
+import "dominus/app/interactors"
 
 
 
@@ -17,6 +17,6 @@ func (*eventMock) Printf(format string, args ...any) {
 
 
 
-func NewEventMock() event.LogsInt {
+func NewEventMock() interactors.LogsInt {
 	return new(eventMock)
 }

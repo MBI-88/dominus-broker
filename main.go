@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"dominus/app/domain/config"
-	"dominus/app/domain/event"
 	"dominus/app/domain/rules"
 	"dominus/app/interactors"
 	"dominus/app/interfaces/database"
@@ -100,7 +99,7 @@ func run() {
 		repo.Migrations()
 	case "start":
 		//Instances
-		logs := event.NewLogs(env.Logs)
+		logs := interactors.NewLogs(env.Logs)
 		inter := interactors.NewInteractor(repo, logs, rls)
 
 		// Signals
@@ -139,7 +138,7 @@ func run() {
 
 		midF.AddMiddleware(apiToken, allowedHost)
 		router := router.New()
-		fi.NewManager(router, inter)
+		fi.NewManager(router, inter.NewManager())
 		fi.NewMonitor(router, reg)
 		fi.NewSwagger(router)
 
@@ -236,7 +235,7 @@ func run() {
 
 		gclient := gt.NewGrpClient(optsD)
 		inter = inter.Set(gclient)
-		srG := gi.NewGrpcController(optsS, inter)
+		srG := gi.NewGrpcController(optsS, inter.NewConnection())
 		listener, _ := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
 
 		go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
-	"dominus/app/domain/event"
+	"dominus/app/interactors"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"
@@ -15,7 +15,7 @@ import (
 
 type middlewares struct {
 	token []byte
-	logs  event.LogsInt
+	logs  interactors.LogsInt
 }
 
 func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
@@ -57,7 +57,7 @@ type MiddlewareInt interface {
 	StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
 }
 
-func NewMiddleware(t string, lg event.LogsInt) MiddlewareInt {
+func NewMiddleware(t string, lg interactors.LogsInt) MiddlewareInt {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,

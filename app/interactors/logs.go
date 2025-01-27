@@ -1,4 +1,4 @@
-package event
+package interactors
 
 import (
 	"log"
@@ -11,7 +11,7 @@ type logs struct {
 }
 
 func (l *logs) WriteLog(op, dsc string) {
-	l.lg.Printf("%s: %s\n", op,dsc)
+	l.lg.Printf("%s: %s\n", op, dsc)
 }
 
 func (l *logs) Printf(format string, args ...any) {

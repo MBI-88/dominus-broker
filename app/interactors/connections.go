@@ -2,7 +2,6 @@ package interactors
 
 import (
 	"dominus/app/domain/entities"
-	"dominus/app/domain/event"
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 	"fmt"
@@ -13,7 +12,7 @@ type connection struct {
 	rls        rules.RulesInt
 	repo       repos.RepositoryInt // Repository client
 	client     repos.GrpClientInt
-	lg         event.LogsInt
+	lg         LogsInt
 	collection string
 }
 

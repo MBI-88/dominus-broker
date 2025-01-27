@@ -12,7 +12,7 @@ import (
 
 type manager struct {
 	router *router.Router
-	inter  interactors.InteractorInt
+	service  interactors.ManagerInt
 	js     jsoniter.API
 }
 
@@ -30,10 +30,8 @@ type manager struct {
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager [get]
 func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
-	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
-
-	result, err := manger.GetLogs(context)
+	result, err := r.service.GetLogs(context)
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
 		ctx.Response.SetBody(b)
@@ -60,10 +58,8 @@ func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-pages [get]
 func (r *manager) getPages(ctx *fasthttp.RequestCtx) {
-	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
-
-	result, err := manger.GetTotalPages(context)
+	result, err := r.service.GetTotalPages(context)
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
 		ctx.Response.SetBody(b)
@@ -90,10 +86,8 @@ func (r *manager) getPages(ctx *fasthttp.RequestCtx) {
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager [delete]
 func (r *manager) deleteAll(ctx *fasthttp.RequestCtx) {
-	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
-
-	if err := manger.DelectLogs(context); err != nil {
+	if err := r.service.DelectLogs(context); err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
 		ctx.Response.SetBody(b)
 		return
@@ -119,8 +113,7 @@ func (r *manager) deleteAll(ctx *fasthttp.RequestCtx) {
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-stats [get]
 func (r *manager) getStats(ctx *fasthttp.RequestCtx) {
-	manger := r.inter.NewManager()
-	result, err := manger.GetStats()
+	result, err := r.service.GetStats()
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
 		ctx.Response.SetBody(b)
@@ -145,10 +138,8 @@ func (r *manager) getStats(ctx *fasthttp.RequestCtx) {
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-backup [get]
 func (r *manager) getBackup(ctx *fasthttp.RequestCtx) {
-	manger := r.inter.NewManager()
 	context := NewRestContext(ctx)
-
-	result, err := manger.GetBackup(context)
+	result, err := r.service.GetBackup(context)
 	if err != nil {
 		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
 		ctx.Response.SetBody(b)
@@ -184,7 +175,7 @@ func (r *manager) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string,
 	return b
 }
 
-func NewManager(r *router.Router, i interactors.InteractorInt) {
-	re := &manager{router: r, inter: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
+func NewManager(r *router.Router, i interactors.ManagerInt) {
+	re := &manager{router: r, service: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }

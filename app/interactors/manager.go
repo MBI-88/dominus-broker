@@ -2,14 +2,13 @@ package interactors
 
 import (
 	"dominus/app/domain/entities"
-	"dominus/app/domain/event"
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 )
 
 type manager struct {
 	repo       repos.RepositoryInt
-	lg         event.LogsInt
+	lg         LogsInt
 	rls        rules.RulesInt
 	collection string
 }

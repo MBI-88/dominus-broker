@@ -1,14 +1,13 @@
 package interactors
 
 import (
-	"dominus/app/domain/event"
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 )
 
 type interactor struct {
 	repo    repos.RepositoryInt
-	log     event.LogsInt
+	log     LogsInt
 	gclient repos.GrpClientInt
 	rls     rules.RulesInt
 }
@@ -44,7 +43,7 @@ type InteractorInt interface {
 }
 
 // Create a new interactor instance
-func NewInteractor(rp repos.RepositoryInt, lg event.LogsInt, rls rules.RulesInt) InteractorInt {
+func NewInteractor(rp repos.RepositoryInt, lg LogsInt, rls rules.RulesInt) InteractorInt {
 	return &interactor{
 		repo: rp,
 		log:  lg,
