@@ -13,7 +13,7 @@ import (
 type mongoTools struct {
 }
 
-func (*mongoTools) CreateIndex() []mongo.IndexModel {
+func (mongoTools) CreateIndex() []mongo.IndexModel {
 	var indexModel []mongo.IndexModel
 	for _, key := range []string{"created_at", "stage", "subscriber"} {
 		index := mongo.IndexModel{
@@ -26,11 +26,11 @@ func (*mongoTools) CreateIndex() []mongo.IndexModel {
 }
 
 
-func (m *mongoTools) MakeBackupFilter(filters map[string]string) []bson.D {
+func (m mongoTools) MakeBackupFilter(filters map[string]string) []bson.D {
 	return m.makeAgregation(filters)
 }
 
-func (*mongoTools) Paginator(page, size int) *options.FindOptions {
+func (mongoTools) Paginator(page, size int) *options.FindOptions {
 	if page <= 0 || size <= 0 {
 		page = 2
 		size = 4
@@ -41,7 +41,7 @@ func (*mongoTools) Paginator(page, size int) *options.FindOptions {
 	return opts
 }
 
-func (m *mongoTools) MakeLogFiter(filters map[string]string, page, size int) []bson.D {
+func (m mongoTools) MakeLogFiter(filters map[string]string, page, size int) []bson.D {
 	var (
 		opts        = m.Paginator(page, size)
 		step        int
@@ -60,7 +60,7 @@ func (m *mongoTools) MakeLogFiter(filters map[string]string, page, size int) []b
 }
 
 
-func (m *mongoTools) makeAgregation(filters map[string]string) []bson.D {
+func (m mongoTools) makeAgregation(filters map[string]string) []bson.D {
 	var arrayFilter = make([]bson.D, 0, 100)
 	for key, val := range filters {
 		switch key {

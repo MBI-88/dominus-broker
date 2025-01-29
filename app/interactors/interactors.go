@@ -12,7 +12,7 @@ type interactor struct {
 	rls     rules.RulesInt
 }
 
-func (i *interactor) NewConnection() ConnectionInt {
+func (i interactor) NewConnection() ConnectionInt {
 	return &connection{
 		rls:        i.rls,
 		lg:         i.log,
@@ -22,7 +22,7 @@ func (i *interactor) NewConnection() ConnectionInt {
 	}
 }
 
-func (i *interactor) NewManager() ManagerInt {
+func (i interactor) NewManager() ManagerInt {
 	return &manager{
 		rls:        i.rls,
 		repo:       i.repo,
@@ -31,7 +31,7 @@ func (i *interactor) NewManager() ManagerInt {
 	}
 }
 
-func (i *interactor) Set(c repos.GrpClientInt) InteractorInt {
+func (i interactor) Set(c repos.GrpClientInt) InteractorInt {
 	i.gclient = c
 	return i
 }
