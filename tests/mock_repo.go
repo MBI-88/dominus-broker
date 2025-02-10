@@ -5,39 +5,44 @@ import (
 )
 
 type repoMock struct {
+	happyPath bool
+	mockData string
 }
 
-func (*repoMock) Migrations() {
+func (r *repoMock) Migrations() {
 }
 
 
-func (*repoMock) InsertObject(object any, collection string) error {
+func (r *repoMock) InsertObject(object any, collection string) error {
 	return nil 
 }
 
-func (*repoMock) DeleteObjects(collection string) error {
+func (r *repoMock) DeleteObjects(collection string) error {
 	return nil
 }
 
-func (*repoMock) CountPages(collection string) (int64, error) {
+func (r *repoMock) CountPages(collection string) (int64, error) {
 	return 0, nil
 }
 
-func (*repoMock) Filter(filter map[string]string, object any, collection string, page, size int) error {
+func (r *repoMock) Filter(filter map[string]string, object any, collection string, page, size int) error {
 	return nil
 }
 
-func (*repoMock) Backup(filter map[string]string, object any, collection string) error  {
+func (r *repoMock) Backup(filter map[string]string, object any, collection string) error  {
 	return nil 
 }
 
-func (*repoMock) Stats() (any, error) {
+func (r *repoMock) Stats() (any, error) {
 	return nil, nil
 }
 
 
 
 
-func NewRepoMock() repos.RepositoryInt {
-	return new(repoMock)
+func NewRepoMock(happyPath bool, mock string) repos.RepositoryInt {
+	return &repoMock{
+		happyPath: happyPath,
+		mockData: mock,
+	}
 }
