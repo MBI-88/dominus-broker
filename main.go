@@ -267,10 +267,10 @@ func run() {
 
 		// Wait for a signal
 		select {
-		case <-system:
-			break
+		case err := <-system:
+			log.Fatalln(err)
 		case <-ctx.Done():
-			break
+			log.Fatalln("[-] Context closed")
 		}
 
 		if err := r.Shutdown(); err != nil {

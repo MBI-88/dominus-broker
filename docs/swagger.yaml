@@ -34,13 +34,13 @@ paths:
         type: string
       responses:
         "200":
-          description: Respose body {message:string}
+          description: 'Respose response: {message:string}'
           schema:
             additionalProperties:
               type: string
             type: object
         "404":
-          description: 'Response body {message: error}'
+          description: 'Error response {message: error}'
           schema:
             additionalProperties:
               type: string
@@ -68,10 +68,11 @@ paths:
         type: string
       responses:
         "200":
-          description: Respose body {id:string,desc:string,create_at:time, stage:string,
-            subscriber:string}
+          description: Success response
           schema:
-            $ref: '#/definitions/entities.Logs'
+            items:
+              $ref: '#/definitions/entities.Logs'
+            type: array
         "404":
           description: 'Response body {message: error}'
           schema:
@@ -92,13 +93,13 @@ paths:
         type: string
       responses:
         "200":
-          description: Respose body {logs:[{id:string,desc:string,create_at:time,
-            stage:string, subscriber:string}]}
+          description: Success response
           schema:
-            additionalProperties: true
-            type: object
+            items:
+              $ref: '#/definitions/entities.Logs'
+            type: array
         "404":
-          description: 'Response body {message: error}'
+          description: Error response
           schema:
             additionalProperties:
               type: string
@@ -117,7 +118,7 @@ paths:
         type: string
       responses:
         "200":
-          description: Respose body {pages:int}
+          description: 'Success response: {pages:int}'
           schema:
             additionalProperties:
               type: integer
@@ -142,7 +143,7 @@ paths:
         type: string
       responses:
         "200":
-          description: 'Respose body { avgObjSize: int,collections: int, dataSize:
+          description: 'Success response: { avgObjSize: int,collections: int, dataSize:
             int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes:
             int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize:
             int, views: int}'
@@ -150,7 +151,7 @@ paths:
             additionalProperties: true
             type: object
         "404":
-          description: 'Response body {message: error}'
+          description: 'Error response {message: error}'
           schema:
             additionalProperties:
               type: string

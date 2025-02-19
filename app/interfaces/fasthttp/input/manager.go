@@ -26,7 +26,7 @@ type manager struct {
 // @securityDefinitions.apikey API_TOKEN
 // @in header
 // @name API_TOKEN
-// @Success 200 {object} entities.Logs "Respose body {id:string,desc:string,create_at:time, stage:string, subscriber:string}"
+// @Success 200 {object} []entities.Logs "Success response"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager [get]
 func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
@@ -54,7 +54,7 @@ func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
 // @securityDefinitions.apikey API_TOKEN
 // @in header
 // @name API_TOKEN
-// @Success 200 {object} map[string]int "Respose body {pages:int}"
+// @Success 200 {object} map[string]int "Success response: {pages:int}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-pages [get]
 func (r *manager) getPages(ctx *fasthttp.RequestCtx) {
@@ -82,8 +82,8 @@ func (r *manager) getPages(ctx *fasthttp.RequestCtx) {
 // @securityDefinitions.apikey API_TOKEN
 // @in header
 // @name API_TOKEN
-// @Success 200 {object} map[string]string "Respose body {message:string}"
-// @Failure 404 {object} map[string]string "Response body {message: error}"
+// @Success 200 {object} map[string]string "Respose response: {message:string}"
+// @Failure 404 {object} map[string]string "Error response {message: error}"
 // @Router /manager [delete]
 func (r *manager) deleteAll(ctx *fasthttp.RequestCtx) {
 	context := NewRestContext(ctx)
@@ -109,8 +109,8 @@ func (r *manager) deleteAll(ctx *fasthttp.RequestCtx) {
 // @securityDefinitions.apikey API_TOKEN
 // @in header
 // @name API_TOKEN
-// @Success 200 {object} map[string]any "Respose body { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}"
-// @Failure 404 {object} map[string]string "Response body {message: error}"
+// @Success 200 {object} map[string]any "Success response: { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}"
+// @Failure 404 {object} map[string]string "Error response {message: error}"
 // @Router /manager-stats [get]
 func (r *manager) getStats(ctx *fasthttp.RequestCtx) {
 	result, err := r.service.GetStats()
@@ -134,8 +134,8 @@ func (r *manager) getStats(ctx *fasthttp.RequestCtx) {
 // @securityDefinitions.apikey API_TOKEN
 // @in header
 // @name API_TOKEN
-// @Success 200 {object} map[string]any "Respose body {logs:[{id:string,desc:string,create_at:time, stage:string, subscriber:string}]}"
-// @Failure 404 {object} map[string]string "Response body {message: error}"
+// @Success 200 {object} []entities.Logs "Success response"
+// @Failure 404 {object} map[string]string "Error response"
 // @Router /manager-backup [get]
 func (r *manager) getBackup(ctx *fasthttp.RequestCtx) {
 	context := NewRestContext(ctx)

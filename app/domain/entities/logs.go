@@ -6,7 +6,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// Log saves messages failed
+// Logs saves messages failed
 type Logs struct {
 	ID         primitive.ObjectID `bson:"_id" json:"id"`
 	Desc       string             `bson:"description" json:"description"`

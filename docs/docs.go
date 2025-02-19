@@ -51,9 +51,12 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Respose body {id:string,desc:string,create_at:time, stage:string, subscriber:string}",
+                        "description": "Success response",
                         "schema": {
-                            "$ref": "#/definitions/entities.Logs"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.Logs"
+                            }
                         }
                     },
                     "404": {
@@ -84,7 +87,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Respose body {message:string}",
+                        "description": "Respose response: {message:string}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -93,7 +96,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Response body {message: error}",
+                        "description": "Error response {message: error}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -122,14 +125,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Respose body {logs:[{id:string,desc:string,create_at:time, stage:string, subscriber:string}]}",
+                        "description": "Success response",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.Logs"
+                            }
                         }
                     },
                     "404": {
-                        "description": "Response body {message: error}",
+                        "description": "Error response",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -158,7 +163,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Respose body {pages:int}",
+                        "description": "Success response: {pages:int}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -196,14 +201,14 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Respose body { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}",
+                        "description": "Success response: { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
                         }
                     },
                     "404": {
-                        "description": "Response body {message: error}",
+                        "description": "Error response {message: error}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
