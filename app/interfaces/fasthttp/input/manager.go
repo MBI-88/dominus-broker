@@ -16,16 +16,13 @@ type manager struct {
 	js     jsoniter.API
 }
 
-// getLogs 
-// @Summary gets logs
+ 
+
 // @Tags Manager
-// @Description gets all logs fron the database using page and size (required)
+// @Description <h3>gets all logs fron the database using page and size (required)</h3>
 // @Param page query int true "page"
 // @Param size query int true "size"
-// @Param API_TOKEN header string true "api token to connect with Dominus"
-// @securityDefinitions.apikey API_TOKEN
-// @in header
-// @name API_TOKEN
+// @Security ApiKeyAuth
 // @Success 200 {object} []entities.Logs "Success response"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager [get]
@@ -46,14 +43,10 @@ func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// GetPages
-// @Summary gets pages
+
 // @Tags Manager
-// @Description gets total pages in the database
-// @Param API_TOKEN header string true "api token to connect with Dominus"
-// @securityDefinitions.apikey API_TOKEN
-// @in header
-// @name API_TOKEN
+// @Description <h3>Gets total pages in the database</h3>
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]int "Success response: {pages:int}"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /manager-pages [get]
@@ -74,14 +67,11 @@ func (r *manager) getPages(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// DeleteAll
-// @Summary delete logs
+
+
 // @Tags Manager
-// @Description delete all logs in the database
-// @Param API_TOKEN header string true "api token to connect with Dominus"
-// @securityDefinitions.apikey API_TOKEN
-// @in header
-// @name API_TOKEN
+// @Description <h3>Delete all logs in the database</h3>
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]string "Respose response: {message:string}"
 // @Failure 404 {object} map[string]string "Error response {message: error}"
 // @Router /manager [delete]
@@ -101,14 +91,10 @@ func (r *manager) deleteAll(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// GetStats
-// @Summary gets stats
+
 // @Tags Manager
-// @Description gets all statistic from the database
-// @Param API_TOKEN header string true "api token to connect with Dominus"
-// @securityDefinitions.apikey API_TOKEN
-// @in header
-// @name API_TOKEN
+// @Description <h3>Gets all statistic from the database</h3>
+// @Security ApiKeyAuth
 // @Success 200 {object} map[string]any "Success response: { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}"
 // @Failure 404 {object} map[string]string "Error response {message: error}"
 // @Router /manager-stats [get]
@@ -126,14 +112,10 @@ func (r *manager) getStats(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody(body)
 }
 
-// GetBackup
-// @Summary gets backup
+
 // @Tags Manager
-// @Description gets all selected items from the database for making a backup
-// @Param API_TOKEN header string true "api token to connect with Dominus"
-// @securityDefinitions.apikey API_TOKEN
-// @in header
-// @name API_TOKEN
+// @Description <h3>Gets all selected items from the database for making a backup</h3>
+// @Security ApiKeyAuth
 // @Success 200 {object} []entities.Logs "Success response"
 // @Failure 404 {object} map[string]string "Error response"
 // @Router /manager-backup [get]

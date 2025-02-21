@@ -79,6 +79,9 @@ func init() {
 // @contact.email ingmbi8807@gmail.com
 // @contact.url https://www.pr0c0d3.com/
 // @version 1.0.0
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name API_TOKEN
 // @host localhost:8000
 // @BasePath /
 func run() {

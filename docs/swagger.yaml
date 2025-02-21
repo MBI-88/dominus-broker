@@ -1,4 +1,3 @@
-basePath: /
 definitions:
   entities.Logs:
     properties:
@@ -13,7 +12,6 @@ definitions:
       subscriber:
         type: string
     type: object
-host: localhost:8000
 info:
   contact:
     email: ingmbi8807@gmail.com
@@ -25,13 +23,7 @@ info:
 paths:
   /manager:
     delete:
-      description: delete all logs in the database
-      parameters:
-      - description: api token to connect with Dominus
-        in: header
-        name: API_TOKEN
-        required: true
-        type: string
+      description: <h3>Delete all logs in the database</h3>
       responses:
         "200":
           description: 'Respose response: {message:string}'
@@ -45,11 +37,12 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: delete logs
+      security:
+      - ApiKeyAuth: []
       tags:
       - Manager
     get:
-      description: gets all logs fron the database using page and size (required)
+      description: <h3>gets all logs fron the database using page and size (required)</h3>
       parameters:
       - description: page
         in: query
@@ -61,11 +54,6 @@ paths:
         name: size
         required: true
         type: integer
-      - description: api token to connect with Dominus
-        in: header
-        name: API_TOKEN
-        required: true
-        type: string
       responses:
         "200":
           description: Success response
@@ -79,18 +67,13 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: gets logs
+      security:
+      - ApiKeyAuth: []
       tags:
       - Manager
   /manager-backup:
     get:
-      description: gets all selected items from the database for making a backup
-      parameters:
-      - description: api token to connect with Dominus
-        in: header
-        name: API_TOKEN
-        required: true
-        type: string
+      description: <h3>Gets all selected items from the database for making a backup</h3>
       responses:
         "200":
           description: Success response
@@ -104,18 +87,13 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: gets backup
+      security:
+      - ApiKeyAuth: []
       tags:
       - Manager
   /manager-pages:
     get:
-      description: gets total pages in the database
-      parameters:
-      - description: api token to connect with Dominus
-        in: header
-        name: API_TOKEN
-        required: true
-        type: string
+      description: <h3>Gets total pages in the database</h3>
       responses:
         "200":
           description: 'Success response: {pages:int}'
@@ -129,18 +107,13 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: gets pages
+      security:
+      - ApiKeyAuth: []
       tags:
       - Manager
   /manager-stats:
     get:
-      description: gets all statistic from the database
-      parameters:
-      - description: api token to connect with Dominus
-        in: header
-        name: API_TOKEN
-        required: true
-        type: string
+      description: <h3>Gets all statistic from the database</h3>
       responses:
         "200":
           description: 'Success response: { avgObjSize: int,collections: int, dataSize:
@@ -156,7 +129,13 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: gets stats
+      security:
+      - ApiKeyAuth: []
       tags:
       - Manager
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: API_TOKEN
+    type: apiKey
 swagger: "2.0"

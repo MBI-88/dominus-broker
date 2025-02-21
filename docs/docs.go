@@ -21,11 +21,15 @@ const docTemplate = `{
     "paths": {
         "/manager": {
             "get": {
-                "description": "gets all logs fron the database using page and size (required)",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003egets all logs fron the database using page and size (required)\u003c/h3\u003e",
                 "tags": [
                     "Manager"
                 ],
-                "summary": "gets logs",
                 "parameters": [
                     {
                         "type": "integer",
@@ -39,13 +43,6 @@ const docTemplate = `{
                         "description": "size",
                         "name": "size",
                         "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "api token to connect with Dominus",
-                        "name": "API_TOKEN",
-                        "in": "header",
                         "required": true
                     }
                 ],
@@ -71,19 +68,14 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "delete all logs in the database",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eDelete all logs in the database\u003c/h3\u003e",
                 "tags": [
                     "Manager"
-                ],
-                "summary": "delete logs",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "api token to connect with Dominus",
-                        "name": "API_TOKEN",
-                        "in": "header",
-                        "required": true
-                    }
                 ],
                 "responses": {
                     "200": {
@@ -109,19 +101,14 @@ const docTemplate = `{
         },
         "/manager-backup": {
             "get": {
-                "description": "gets all selected items from the database for making a backup",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eGets all selected items from the database for making a backup\u003c/h3\u003e",
                 "tags": [
                     "Manager"
-                ],
-                "summary": "gets backup",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "api token to connect with Dominus",
-                        "name": "API_TOKEN",
-                        "in": "header",
-                        "required": true
-                    }
                 ],
                 "responses": {
                     "200": {
@@ -147,19 +134,14 @@ const docTemplate = `{
         },
         "/manager-pages": {
             "get": {
-                "description": "gets total pages in the database",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eGets total pages in the database\u003c/h3\u003e",
                 "tags": [
                     "Manager"
-                ],
-                "summary": "gets pages",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "api token to connect with Dominus",
-                        "name": "API_TOKEN",
-                        "in": "header",
-                        "required": true
-                    }
                 ],
                 "responses": {
                     "200": {
@@ -185,19 +167,14 @@ const docTemplate = `{
         },
         "/manager-stats": {
             "get": {
-                "description": "gets all statistic from the database",
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eGets all statistic from the database\u003c/h3\u003e",
                 "tags": [
                     "Manager"
-                ],
-                "summary": "gets stats",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "api token to connect with Dominus",
-                        "name": "API_TOKEN",
-                        "in": "header",
-                        "required": true
-                    }
                 ],
                 "responses": {
                     "200": {
@@ -241,14 +218,21 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "API_TOKEN",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
-	Host:             "localhost:8000",
-	BasePath:         "/",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Dominus server",
 	Description:      "<h3>This server is a bidirectional queue using gRCP. Manager section</h3>",
