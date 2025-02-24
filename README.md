@@ -1,13 +1,8 @@
-# Dominus Project
+# DOMINUS
 
+## Summary
 
-██████    ██████  ███    ██  ██ ███    ██ ██    ██ ███████
-██   ██  ██    ██ ████  ████ ██ ████   ██ ██    ██ ██
-██   ██  ██    ██ ██ ████ ██ ██ ██ ██  ██ ██    ██ ███████
-██   ██  ██    ██ ██  ██  ██ ██ ██  ██ ██ ██    ██      ██
-██████    ██████  ██      ██ ██ ██   ████  ██████  ███████
-
-👉 Github: <https://github.com/MBI-88>
+Dominus is a containerized application designed to function as a bidirectional queue using gRPC. It is managed using Docker Compose and consists of two main services: `dominus` and `sidecar`. The `dominus` service is the core application, while the `sidecar` service uses Nginx as a reverse proxy to manage incoming traffic.
 
 ## Overview
 
