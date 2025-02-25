@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Sidecar
+  namespace: default
+  labels:
+    app: Sidecar
+spec:
+  selector:
+    matchLabels:
+      app: Sidecar
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: Sidecar
+    spec:
+      containers:
+        - name: Sidecar-Cmp
+          image: nginx:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+
+          env:
+            - name: NGINX_HOST
+              value: 0.0.0.0
+            - name: NGINX_PORT
+              value: "80"
+            - name: NGINX_ENVSUBST_TEMPLATE_SUFFIX
+              value: ".conf"
+
+          ports:
+            - containerPort: 80
+              name: http
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf 
+              readOnly: true
+
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+
+      restartPolicy: "OnFailure"
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: sidecar-service
+  namespace: default
+spec:
+  selector:
+    app: Sidecar
+  type: ClusterIP
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: sidecar
+    protocol: TCP
+    port: 80
+    targetPort: 80

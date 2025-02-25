@@ -1,0 +1,7 @@
+configMapGenerator:
+  - name: nginx-config
+    files:
+      - ./../nginx.conf
+  - name: prometheus-config
+    files:
+      - ./../prometheus.yml

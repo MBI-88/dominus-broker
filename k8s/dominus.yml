@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Dominus
+  namespace: default
+  labels:
+    app: Dominus
+spec:
+  selector:
+    matchLabels:
+      app: Dominus
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: Dominus
+    spec:
+      containers:
+        - name: Dominus-Cmp
+          image: dominus:latest #pending
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          livenessProbe:
+            exec:
+              command: 
+                - sh 
+                - -c 
+                - "wget -qO- --header=API_TOKEN $API_TOKEN http://localhost:8000/health"
+            initialDelaySeconds: 60
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 60
+
+          ports:
+            - containerPort: 8000
+              name: Rest
+            - containerPort: 5000
+              name: gRPC
+
+      volumes:
+        - name: dominus-certs
+          persistentVolumeClaim:
+            claimName: dominus-certs-pvc
+        - name: dominus-logs
+          persistentVolumeClaim:
+            claimName: dominus-logs-pvc
+
+      restartPolicy: "OnFailure"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dominus-service
+  namespace: default
+spec:
+  selector:
+    app: Dominus
+  sessionAffinity: None
+  type: ClusterIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+    - name: Rest
+      protocol: TCP
+      port: 8000
+      targetPort: 8000
+    - name: gRPC
+      protocol: TCP
+      port: 5000
+      targetPort: 5000

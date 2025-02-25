@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  Prometheus
+  namespace: default
+  labels:
+    app:  Prometheus
+spec:
+  selector:
+    matchLabels:
+      app: Prometheus
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  Prometheus
+    spec:
+      containers:
+      - name:  Prometheus-Cmp
+        image:  prom/prometheus:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        livenessProbe:
+          httpGet:
+            port: 9090
+            path: /-/ready
+          initialDelaySeconds: 60
+          periodSeconds: 60
+          timeoutSeconds: 2
+          failureThreshold: 3
+       
+        ports:
+        - containerPort:  9090
+          name:  http
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-data
+          persistentVolumeClaim:
+            claimName: prometheus-data-pvc
+      restartPolicy: "OnFailure"
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-service
+  namespace: default
+spec:
+  selector:
+    app: Prometheus
+  type: ClusterIP
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9090
+    targetPort: 9090
