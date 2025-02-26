@@ -32,7 +32,7 @@ func TestCheckURI(t *testing.T) {
 			arrayErr = append(arrayErr, rls.CheckURI(uri))
 		}
 
-		if arrayErr[0] != true && arrayErr[1] != true {
+		if arrayErr[0] != true && arrayErr[1] != true && arrayErr[2] != true && arrayErr[3] != true {
 			t.Fatalf("Expected true but received false")
 		}
 	})

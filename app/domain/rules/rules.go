@@ -26,6 +26,6 @@ type RulesInt interface {
 
 func NewRules() RulesInt {
 	return &rules{
-		re: regexp.MustCompile(`^(\d{1,3}\.){3}\d{1,3}:\d{1,5}$`),
+		re: regexp.MustCompile(`^(?:(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}:\d{1,5})|(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}))(?:\/[^\s]*)?$`),
 	}
 }

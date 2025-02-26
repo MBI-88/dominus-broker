@@ -5,6 +5,9 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.dominus 
+      args:
+        - MODE=true
+        - BANNER=false
     container_name: dominus 
     deploy:
       mode: replicated
@@ -12,7 +15,9 @@ services:
       restart_policy: 
         condition: on-failure
         delay: 2s
-        max_attempts: 3 
+        max_attempts: 3
+    environment:
+      - .env.prod 
     ports:
       - "8000:8000"
       - "5000:5000"

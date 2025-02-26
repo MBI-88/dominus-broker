@@ -10,7 +10,7 @@ import (
 var (
 	rls = rules.NewRules()
 	inter interactors.InteractorInt
-	subsOk  = []string{"192.168.1.6:5001", "192.168.1.6:5002"}
+	subsOk  = []string{"78.168.1.6:5001/api/test", "grpc.dominus.com/api","192.16.1.6:5001","grpc.dominus.com"}
 	subsEr = []string{"error.err", "error.empty:5001"}
 	data  = struct {
 		Id        string    `json:"id"`

@@ -21,3 +21,4 @@
 *.sum
 #Database
 database/database/*
+*.prod
