@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  Dominus-DB
+  name: database
   namespace: default
   labels:
-    app:  Dominus-DB
+    app: database
 spec:
   selector:
     matchLabels:
-      app: Dominus-DB
+      app: database
   replicas: 1
   strategy:
     rollingUpdate:
@@ -18,60 +18,70 @@ spec:
   template:
     metadata:
       labels:
-        app:  Dominus-DB
+        app: database
     spec:
-      # initContainers:
-        # Init containers are exactly like regular containers, except:
-          # - Init containers always run to completion.
-          # - Each init container must complete successfully before the next one starts.
       containers:
-      - name:  dominus_db
-        image:  mongo:latest
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 100m
-            memory: 100Mi
-       
-        env:
-        - name: DB_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: MYAPP
-              key: DB_HOST
+        - name: database
+          image: mongo:latest
+          args: ["--auth"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
 
+          env:
+            - name: MONGO_INITDB_DATABASE
+              value: dominus
+            - name: MONGO_INITDB_ROOT_USERNAME
+              value: dominus
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              value: dominus10102024@8807
 
-        ports:
-        - containerPort:  27017
-          name:  db
-        volumeMounts:
-        - name: localtime
-          mountPath: /etc/localtime
+          ports:
+            - containerPort: 27017
+              name: db-port
+          volumeMounts:
+            - name: db-storage
+              mountPath: /data/db
       volumes:
-        - name: localtime
-          hostPath:
-            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
 
-      restartPolicy: OnFailure
+      restartPolicy: Always
+
 
 --- 
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
 kind: Service
 metadata:
-  name: db-service
+  name: database
   namespace: default
 spec:
   selector:
-    app: Dominus-DB
+    app: dominus-db
   type: ClusterIP
   sessionAffinity: None
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
   ports:
-  - name: db-port
-    protocol: TCP
-    port: 27017
-    targetPort: 27017
+    - name: db-port
+      protocol: TCP
+      port: 27017
+      targetPort: 27017

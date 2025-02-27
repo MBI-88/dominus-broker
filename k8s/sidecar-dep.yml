@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Sidecar
+  name: sidecar
   namespace: default
   labels:
-    app: Sidecar
+    app: sidecar
 spec:
   selector:
     matchLabels:
-      app: Sidecar
+      app: sidecar
   replicas: 1
   strategy:
     rollingUpdate:
@@ -18,10 +18,10 @@ spec:
   template:
     metadata:
       labels:
-        app: Sidecar
+        app: sidecar
     spec:
       containers:
-        - name: Sidecar-Cmp
+        - name: sidecar-cmp
           image: nginx:latest
           resources:
             requests:
@@ -53,24 +53,24 @@ spec:
           configMap:
             name: nginx-config
 
-      restartPolicy: "OnFailure"
+      restartPolicy: Always
 
 --- 
 apiVersion: v1
 kind: Service
 metadata:
-  name: sidecar-service
+  name: sidecar
   namespace: default
 spec:
   selector:
-    app: Sidecar
+    app: sidecar
   type: ClusterIP
   sessionAffinity: None
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
   ports:
-  - name: sidecar
+  - name: http
     protocol: TCP
     port: 80
     targetPort: 80

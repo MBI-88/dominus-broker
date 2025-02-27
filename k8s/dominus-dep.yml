@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Dominus
+  name: dominus
   namespace: default
   labels:
-    app: Dominus
+    app: dominus
 spec:
   selector:
     matchLabels:
-      app: Dominus
+      app: dominus
   replicas: 1
   strategy:
     rollingUpdate:
@@ -18,11 +18,14 @@ spec:
   template:
     metadata:
       labels:
-        app: Dominus
+        app: dominus
     spec:
       containers:
-        - name: Dominus-Cmp
-          image: dominus:latest #pending
+        - name: dominus-cmp
+          image: mbi8807/dominus:kubernetes # public repo only test
+          args:
+            - MODE=true
+            - BANNER=false
           resources:
             requests:
               cpu: 100m
@@ -46,152 +49,160 @@ spec:
             - name: API_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: API_TOKEN
 
             - name: REST_PORT
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: REST_PORT
 
             - name: GRPC_PORT
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: GRPC_PORT
 
             - name: SSL_CERT
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: SSL_CERT
 
             - name: SSL_CA
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: SSL_CA
 
             - name: KEY_FILE
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: KEY_FILE
 
             - name: LOGS
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: LOGS
 
             - name: WRITE_TIMEOUT
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: WRITE_TIMEOUT
 
             - name: READ_TIMEOUT
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: READ_TIMEOUT
 
             - name: IDLE_TIMOUTLOGS
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: IDLE_TIMOUT
 
             - name: MAX_CONNS_PER_IP
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: MAX_CONNS_PER_IP
 
             - name: MAX_REQUEST_PER_CONN
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: MAX_REQUEST_PER_CONN
 
             - name: MAX_REQUEST_BODY_SIZE
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: MAX_REQUEST_BODY_SIZE
 
             - name: REDUCE_MEMORY_USAGE
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: REDUCE_MEMORY_USAGE
 
             - name: DISABLE_HEADER_NAMES_NORMALIZING
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: DISABLE_HEADER_NAMES_NORMALIZING
 
             - name: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDEED
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDEED
 
             - name: NO_DEFAULT_DATE
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: NO_DEFAULT_DATE
 
             - name: KEEP_HIJACKED_CONNS
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: KEEP_HIJACKED_CONNS
 
             - name: CLOSE_ON_SHUTDOWN
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: CLOSE_ON_SHUTDOWN
 
             - name: STREAM_REQUEST_BODY
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: STREAM_REQUEST_BODY
 
             - name: DSN
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: DSN
 
             - name: CIDR
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: CIDR
 
             - name: DATABASE
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: DATABASE
 
             - name: COLLECTIONS
               valueFrom:
                 secretKeyRef:
-                  name: Dominus-Config
+                  name: dominus-config
                   key: COLLECTIONS
 
           ports:
             - containerPort: 8000
-              name: Rest
+              name: rest
             - containerPort: 5000
-              name: gRPC
+              name: grpc
+
+          volumeMounts:
+            - name: dominus-certs
+              mountPath: /etc/dominus/certs
+              readOnly: true
+            - name: dominus-logs
+              mountPath: /var/dominus/logs
+              readOnly: true
 
       volumes:
         - name: dominus-certs
@@ -201,28 +212,54 @@ spec:
           persistentVolumeClaim:
             claimName: dominus-logs-pvc
 
-      restartPolicy: "OnFailure"
+      restartPolicy: Always
+
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dominus-certs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Ki
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: dominus-logs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi 
+
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: dominus-service
+  name: dominus
   namespace: default
 spec:
   selector:
-    app: Dominus
+    app: dominus
   sessionAffinity: None
   type: ClusterIP
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
   ports:
-    - name: Rest
+    - name: rest
       protocol: TCP
       port: 8000
       targetPort: 8000
-    - name: gRPC
+    - name: grpc
       protocol: TCP
       port: 5000
       targetPort: 5000

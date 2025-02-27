@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  Prometheus
+  name: prometheus
   namespace: default
   labels:
-    app:  Prometheus
+    app: prometheus
 spec:
   selector:
     matchLabels:
-      app: Prometheus
+      app: prometheus
   replicas: 1
   strategy:
     rollingUpdate:
@@ -18,58 +18,76 @@ spec:
   template:
     metadata:
       labels:
-        app:  Prometheus
+        app: prometheus
     spec:
       containers:
-      - name:  Prometheus-Cmp
-        image:  prom/prometheus:latest
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 100m
-            memory: 100Mi
-        livenessProbe:
-          httpGet:
-            port: 9090
-            path: /-/ready
-          initialDelaySeconds: 60
-          periodSeconds: 60
-          timeoutSeconds: 2
-          failureThreshold: 3
-       
-        ports:
-        - containerPort:  9090
-          name:  http
-        volumeMounts:
-        - name: localtime
-          mountPath: /etc/localtime
+        - name: prometheus-cmp
+          image: prom/prometheus:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          livenessProbe:
+            httpGet:
+              port: 9090
+              path: /-/ready
+            initialDelaySeconds: 60
+            periodSeconds: 60
+            timeoutSeconds: 2
+            failureThreshold: 3
+          ports:
+            - containerPort: 9090
+              name: http
+          volumeMounts:
+            - name: prometheus-config-volume
+              mountPath: /etc/prometheus/prometheus.yml
+              subPath: prometheus.yml
+              readOnly: true
+            - name: prometheus-data
+              mountPath: /prometheus
+              readOnly: false
+
       volumes:
-        - name: prometheus-config
+        - name: prometheus-config-volume
           configMap:
             name: prometheus-config
         - name: prometheus-data
           persistentVolumeClaim:
-            claimName: prometheus-data-pvc
-      restartPolicy: "OnFailure"
+            claimName: prometheus-storage-pvc
+
+      restartPolicy: Always
 
 --- 
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-storage-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
 kind: Service
 metadata:
-  name: prometheus-service
+  name: prometheus
   namespace: default
 spec:
   selector:
-    app: Prometheus
+    app: prometheus
   type: ClusterIP
   sessionAffinity: None
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
   ports:
-  - name: http
-    protocol: TCP
-    port: 9090
-    targetPort: 9090
+    - name: http
+      protocol: TCP
+      port: 9090
+      targetPort: 9090
