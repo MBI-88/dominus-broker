@@ -13,7 +13,7 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=dominus
       - MONGO_INITDB_ROOT_USERNAME=dominus
-      - MONGO_INITDB_ROOT_PASSWORD=dominus10102024@8807
+      - MONGO_INITDB_ROOT_PASSWORD=dominus1234
 
     volumes:
       - ./database:/data/db

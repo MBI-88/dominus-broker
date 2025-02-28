@@ -21,7 +21,7 @@ spec:
         app: grafana
     spec:
       containers:
-        - name: grafana-cmp
+        - name: grafana
           image: grafana/grafana:latest
           resources:
             requests:

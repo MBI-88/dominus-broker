@@ -21,7 +21,7 @@ spec:
         app: prometheus
     spec:
       containers:
-        - name: prometheus-cmp
+        - name: prometheus
           image: prom/prometheus:latest
           resources:
             requests:

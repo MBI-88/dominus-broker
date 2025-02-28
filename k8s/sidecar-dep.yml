@@ -21,7 +21,7 @@ spec:
         app: sidecar
     spec:
       containers:
-        - name: sidecar-cmp
+        - name: sidecar
           image: nginx:latest
           resources:
             requests:

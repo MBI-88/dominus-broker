@@ -38,7 +38,7 @@ spec:
             - name: MONGO_INITDB_ROOT_USERNAME
               value: dominus
             - name: MONGO_INITDB_ROOT_PASSWORD
-              value: dominus10102024@8807
+              value: dominus1234
 
           ports:
             - containerPort: 27017
@@ -49,7 +49,7 @@ spec:
       volumes:
         - name: db-storage
           persistentVolumeClaim:
-            claimName: mongodb-pvc
+            claimName: mongo-pvc
 
       restartPolicy: Always
 
@@ -58,7 +58,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongodb-pvc
+  name: mongo-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -74,8 +74,8 @@ metadata:
   namespace: default
 spec:
   selector:
-    app: dominus-db
-  type: ClusterIP
+    app: database
+  type: LoadBalancer
   sessionAffinity: None
   sessionAffinityConfig:
     clientIP:

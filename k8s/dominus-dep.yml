@@ -21,11 +21,8 @@ spec:
         app: dominus
     spec:
       containers:
-        - name: dominus-cmp
-          image: mbi8807/dominus:kubernetes # public repo only test
-          args:
-            - MODE=true
-            - BANNER=false
+        - name: dominus
+          image: mbi8807/dominus:latest # public repo only test
           resources:
             requests:
               cpu: 100m
