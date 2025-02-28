@@ -5,9 +5,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.dominus 
-      args:
-        - MODE=true
-        - BANNER=false
     container_name: dominus 
     deploy:
       mode: replicated

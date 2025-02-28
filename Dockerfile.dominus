@@ -9,8 +9,6 @@ RUN go mod tidy && \
 FROM alpine:3.20 as deployment 
 WORKDIR /app 
 
-ARG MODE 
-ARG BANNER
 ENV REST_PORT=${REST_PORT}
 ENV GRPC_PORT=${GRPC_PORT}
 
@@ -26,4 +24,4 @@ USER appuser
 EXPOSE ${REST_PORT} 
 EXPOSE ${GRPC_PORT}
 
-CMD ["sh","-c", "./dominus -prod=${MODE} migrate && ./dominus -prod=${MODE} -banner=${BANNER} start"]
+CMD ["sh","-c", "./dominus -prod=true migrate && ./dominus -prod=true -banner=false start"]
