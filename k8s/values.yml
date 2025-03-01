@@ -1,8 +1,3 @@
-database:
-  MONGO_INITDB_DATABASE: dominus
-  MONGO_INITDB_ROOT_PASSWORD: dominus1234
-  MONGO_INITDB_ROOT_USERNAME: dominus
-
 dominus: 
    API_TOKEN: "dominus_example_@10102024KeyServerToken"
    REST_PORT: 8000
@@ -25,8 +20,4 @@ dominus:
    KEEP_HIJACKED_CONNS: 0
    CLOSE_ON_SHUTDOWN: 1
    STREAM_REQUEST_BODY: 1
-   DSN: "mongodb://dominus:dominus1234@database:27017/admin"
    CIDR: "0.0.0.0/0"
-   DATABASE: "prod"
-   COLLECTIONS: "logs"
-   IS_ACTIVE_DB: false
