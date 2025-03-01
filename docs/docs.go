@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/manager": {
+        "/logs": {
             "get": {
                 "security": [
                     {
@@ -50,9 +50,12 @@ const docTemplate = `{
                     "200": {
                         "description": "Success response",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.Logs"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -66,40 +69,9 @@ const docTemplate = `{
                         }
                     }
                 }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "\u003ch3\u003eDelete all logs in the database\u003c/h3\u003e",
-                "tags": [
-                    "Manager"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Respose response: {message:string}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Error response {message: error}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
             }
         },
-        "/manager-backup": {
+        "/logs-backup": {
             "get": {
                 "security": [
                     {
@@ -114,9 +86,12 @@ const docTemplate = `{
                     "200": {
                         "description": "Success response",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/entities.Logs"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
@@ -129,92 +104,6 @@ const docTemplate = `{
                             }
                         }
                     }
-                }
-            }
-        },
-        "/manager-pages": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "\u003ch3\u003eGets total pages in the database\u003c/h3\u003e",
-                "tags": [
-                    "Manager"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response: {pages:int}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "integer"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Response body {message: error}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/manager-stats": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "\u003ch3\u003eGets all statistic from the database\u003c/h3\u003e",
-                "tags": [
-                    "Manager"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response: { avgObjSize: int,collections: int, dataSize: int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes: int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize: int, views: int}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Error response {message: error}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "entities.Logs": {
-            "type": "object",
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "stage": {
-                    "type": "string"
-                },
-                "subscriber": {
-                    "type": "string"
                 }
             }
         }

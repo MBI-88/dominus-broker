@@ -6,8 +6,7 @@ import (
 )
 
 type interactor struct {
-	repo    repos.RepositoryInt
-	log     LogsInt
+	log     repos.LogsInt
 	gclient repos.GrpClientInt
 	rls     rules.RulesInt
 }
@@ -16,17 +15,12 @@ func (i interactor) NewConnection() ConnectionInt {
 	return &connection{
 		rls:        i.rls,
 		lg:         i.log,
-		collection: "logs",
 		client:     i.gclient,
-		repo:       i.repo,
 	}
 }
 
 func (i interactor) NewManager() ManagerInt {
 	return &manager{
-		rls:        i.rls,
-		repo:       i.repo,
-		collection: "logs",
 		lg:         i.log,
 	}
 }
@@ -43,9 +37,8 @@ type InteractorInt interface {
 }
 
 // Create a new interactor instance
-func NewInteractor(rp repos.RepositoryInt, lg LogsInt, rls rules.RulesInt) InteractorInt {
+func NewInteractor(lg repos.LogsInt, rls rules.RulesInt) InteractorInt {
 	return &interactor{
-		repo: rp,
 		log:  lg,
 		rls:  rls,
 	}

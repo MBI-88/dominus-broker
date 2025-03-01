@@ -1,17 +1,3 @@
-definitions:
-  entities.Logs:
-    properties:
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      stage:
-        type: string
-      subscriber:
-        type: string
-    type: object
 info:
   contact:
     email: ingmbi8807@gmail.com
@@ -21,26 +7,7 @@ info:
   title: Dominus server
   version: 1.0.0
 paths:
-  /manager:
-    delete:
-      description: <h3>Delete all logs in the database</h3>
-      responses:
-        "200":
-          description: 'Respose response: {message:string}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: 'Error response {message: error}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Manager
+  /logs:
     get:
       description: <h3>gets all logs fron the database using page and size (required)</h3>
       parameters:
@@ -58,9 +25,11 @@ paths:
         "200":
           description: Success response
           schema:
-            items:
-              $ref: '#/definitions/entities.Logs'
-            type: array
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
         "404":
           description: 'Response body {message: error}'
           schema:
@@ -71,60 +40,20 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Manager
-  /manager-backup:
+  /logs-backup:
     get:
       description: <h3>Gets all selected items from the database for making a backup</h3>
       responses:
         "200":
           description: Success response
           schema:
-            items:
-              $ref: '#/definitions/entities.Logs'
-            type: array
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
         "404":
           description: Error response
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Manager
-  /manager-pages:
-    get:
-      description: <h3>Gets total pages in the database</h3>
-      responses:
-        "200":
-          description: 'Success response: {pages:int}'
-          schema:
-            additionalProperties:
-              type: integer
-            type: object
-        "404":
-          description: 'Response body {message: error}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Manager
-  /manager-stats:
-    get:
-      description: <h3>Gets all statistic from the database</h3>
-      responses:
-        "200":
-          description: 'Success response: { avgObjSize: int,collections: int, dataSize:
-            int, db: string, fsTotalSize: int, fsUsedSize: int, indexSize: int, indexes:
-            int, objects: int,ok: int, scaleFactor: int, storageSize: int, totalSize:
-            int, views: int}'
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: 'Error response {message: error}'
           schema:
             additionalProperties:
               type: string

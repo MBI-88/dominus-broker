@@ -29,8 +29,7 @@ var (
 )
 
 func init() {
-	rp := NewRepoMock(true, "")
 	log := NewEventMock()
-	inter = interactors.NewInteractor(rp, log, rls)
+	inter = interactors.NewInteractor(log, rls)
 	inter = inter.Set(NewGrpcClientMock())
 }

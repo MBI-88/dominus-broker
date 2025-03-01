@@ -2,7 +2,6 @@ package repos
 
 import (
 	"context"
-	"dominus/app/domain/entities"
 )
 
 type RestContextInt interface {
@@ -10,16 +9,6 @@ type RestContextInt interface {
 	Queries() map[string]string
 	Params(key string) string
 	QueryInt(key string) int
-}
-
-type RepositoryInt interface {
-	Migrations()
-	InsertObject(obj any, collection string) error
-	DeleteObjects(collection string) error
-	Filter(filter map[string]string, object any, collection string, page, size int) error
-	Backup(filter map[string]string, obj any, collection string) error
-	CountPages(collection string) (int64, error)
-	Stats() (any, error)
 }
 
 type GrpRequestMessageInt interface {
@@ -59,7 +48,13 @@ type GrpResponseInt interface {
 
 type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
-	ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{})
-	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, done chan<- struct{})
-	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{})
+	ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{})
+	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, closed <-chan struct{}, done chan<- struct{})
+	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{})
+}
+
+type LogsInt interface {
+	WriteLog(op, dsc string)
+	Printf(format string, args ...any)
+	GetLogs() ([]string, error)
 }

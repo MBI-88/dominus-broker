@@ -2,7 +2,6 @@ package output
 
 import (
 	"context"
-	"dominus/app/domain/entities"
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 	pb "dominus/app/interfaces/grpc/proto/builder"
@@ -39,7 +38,7 @@ func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, erro
 	return nil, fmt.Errorf("Invalid uri")
 }
 
-func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{}) {
+func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{}) {
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -61,13 +60,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 											if err := client.Send(&pb.RequestMessage{
 												Subscribers: urls,
 												Payload:     payload}); err != nil {
-												sig <- entities.Logs{
-													ID:         g.rls.MakeMongoID(),
-													CreatedAt:  time.Now(),
-													Desc:       err.Error(),
-													Stage:      "ClientStream sends to subscribers",
-													Subscriber: urls[p],
-												}
+												sig <- err
 												isClose = true
 											}
 										}
@@ -103,7 +96,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 	}
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, tx chan<- struct{}) {
+func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, closed <-chan struct{}, tx chan<- struct{}) {
 	open := new(bool)
 	*open = true
 	sync := new(sync.Mutex)
@@ -129,13 +122,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 							for {
 								resp, err := client.Recv()
 								if err != nil {
-									sig <- entities.Logs{
-										ID:         g.rls.MakeMongoID(),
-										Desc:       err.Error(),
-										CreatedAt:  time.Now(),
-										Subscriber: urls[p],
-										Stage:      "ServerStream receives from subscribers",
-									}
+									sig <- err
 									tx <- struct{}{}
 									return
 								} else {
@@ -157,7 +144,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
+func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
 	open := new(bool)
 	*open = true
 	sync := new(sync.Mutex)
@@ -190,13 +177,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 											if err := client.Send(&pb.RequestMessage{
 												Subscribers: urls,
 												Payload:     payload}); err != nil {
-												errMsg <- entities.Logs{
-													ID:         g.rls.MakeMongoID(),
-													CreatedAt:  time.Now(),
-													Desc:       err.Error(),
-													Stage:      "BidirectionalStream sends to subscribers",
-													Subscriber: urls[p],
-												}
+												errMsg <- err
 												isClose = true
 											}
 										}
@@ -212,13 +193,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 							for {
 								resp, err := client.Recv()
 								if err != nil {
-									errMsg <- entities.Logs{
-										ID:         g.rls.MakeMongoID(),
-										CreatedAt:  time.Now(),
-										Stage:      "BidirectionalStream Recv from subscribers",
-										Subscriber: urls[p],
-										Desc:       err.Error(),
-									}
+									errMsg <- err
 									done <- struct{}{}
 									return
 								}

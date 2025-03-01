@@ -1,7 +1,6 @@
 package interactors
 
 import (
-	"dominus/app/domain/entities"
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 	"fmt"
@@ -10,9 +9,8 @@ import (
 
 type connection struct {
 	rls        rules.RulesInt
-	repo       repos.RepositoryInt // Repository client
 	client     repos.GrpClientInt
-	lg         LogsInt
+	lg         repos.LogsInt
 	collection string
 }
 
@@ -26,18 +24,9 @@ func (c *connection) SimpleConn(ms repos.GrpRequestMessageInt) error {
 		go func(url string, body []byte) {
 			_, err := c.client.Simple(url, body)
 			if err != nil {
-				logs := entities.Logs{
-					ID:        c.rls.MakeMongoID(),
-					Desc:      err.Error(),
-					CreatedAt: time.Now(),
-					Stage:     "SimpleConn",
-				}
-				if err := c.repo.InsertObject(logs, c.collection); err != nil {
-					c.lg.WriteLog("InsertObject", err.Error())
-				}
+				c.lg.WriteLog("SimpleConn", err.Error())
 			}
 		}(sub, body)
-
 	}
 	return nil
 }
@@ -53,17 +42,15 @@ func (c *connection) StreamClientConn(st repos.StreamClientInt) error {
 	if len(subscribers) == 0 {
 		return fmt.Errorf("Subscribers not found")
 	}
-	errMsg := make(chan entities.Logs, len(subscribers))
 
+	errMsg := make(chan error, len(subscribers))
 	go c.client.ClientStream(subscribers, stream, errMsg, closed)
-	go func(sig <-chan entities.Logs) {
+	go func(sig <-chan error) {
 		for {
 			select {
-			case val, ok := <-sig:
+			case err, ok := <-sig:
 				if ok {
-					if err := c.repo.InsertObject(val, c.collection); err != nil {
-						c.lg.WriteLog("InsertObject", err.Error())
-					}
+					c.lg.WriteLog("StreamClientConn", err.Error())
 				} else {
 					return
 				}
@@ -75,15 +62,7 @@ func (c *connection) StreamClientConn(st repos.StreamClientInt) error {
 	for {
 		req, err := st.Recv()
 		if err != nil {
-			log := entities.Logs{
-				ID:        c.rls.MakeMongoID(),
-				Desc:      err.Error(),
-				CreatedAt: time.Now(),
-				Stage:     "StreamClientConn receives from provider",
-			}
-			if err := c.repo.InsertObject(log, c.collection); err != nil {
-				c.lg.WriteLog("InsertObject", err.Error())
-			}
+			c.lg.WriteLog("StreamClientConn", err.Error())
 			close(stream)
 			<-closed
 			close(errMsg)
@@ -101,20 +80,18 @@ func (c *connection) StreamServerConn(req repos.GrpRequestMessageInt, st repos.S
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))
-	errMsg := make(chan entities.Logs, total)
+	errMsg := make(chan error, total)
 	done := make(chan struct{}, total)
 	initialRequest := req.GetPayload()
 
 	go c.client.ServerStream(subscribers, initialRequest, stream, errMsg, closed, done)
 
-	go func(sig <-chan entities.Logs) {
+	go func(sig <-chan error) {
 		for {
 			select {
-			case val, ok := <-sig:
+			case err, ok := <-sig:
 				if ok {
-					if err := c.repo.InsertObject(val, c.collection); err != nil {
-						c.lg.WriteLog("InsertObject", err.Error())
-					}
+					go c.lg.WriteLog("StreamServerConn", err.Error())
 				} else {
 					return
 				}
@@ -127,15 +104,7 @@ func (c *connection) StreamServerConn(req repos.GrpRequestMessageInt, st repos.S
 		case body, ok := <-stream:
 			if ok {
 				if err := st.Send(body); err != nil {
-					log := entities.Logs{
-						ID:        c.rls.MakeMongoID(),
-						Desc:      err.Error(),
-						CreatedAt: time.Now(),
-						Stage:     "StreamServerConn Send to provider",
-					}
-					if err := c.repo.InsertObject(log, c.collection); err != nil {
-						c.lg.WriteLog("InsertObject", err.Error())
-					}
+					go c.lg.WriteLog("StreamServerConn", err.Error())
 					closed <- struct{}{}
 				}
 			}
@@ -165,19 +134,17 @@ func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
 	done := make(chan struct{}, total)
 	streamProv := make(chan []byte, 0)
 	streamSub := make(chan []byte, total+int(total*2/3))
-	errMsg := make(chan entities.Logs, total)
+	errMsg := make(chan error, total)
 
 	if err != nil {
 		return err
 	}
-	go func(sig <-chan entities.Logs) {
+	go func(sig <-chan error) {
 		for {
 			select {
-			case val, ok := <-sig:
+			case err, ok := <-sig:
 				if ok {
-					if err := c.repo.InsertObject(val, c.collection); err != nil {
-						c.lg.WriteLog("InsertObject", err.Error())
-					}
+					go c.lg.WriteLog("InsertObject", err.Error())
 				} else {
 					return
 				}
@@ -193,16 +160,7 @@ func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
 		for {
 			req, err := stream.Recv()
 			if err != nil {
-				log := entities.Logs{
-					ID:        c.rls.MakeMongoID(),
-					Desc:      err.Error(),
-					CreatedAt: time.Now(),
-					Stage:     "StreamBiConn Recv from provider",
-				}
-				if err := c.repo.InsertObject(log, c.collection); err != nil {
-					c.lg.WriteLog("InsertObject", err.Error())
-				}
-
+				go c.lg.WriteLog("StreamBiConn", err.Error())
 				close(streamProv)
 				<-closedTx
 				return
@@ -217,15 +175,7 @@ func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
 		case payload, ok := <-streamSub:
 			if ok {
 				if err := stream.Send(payload); err != nil {
-					log := entities.Logs{
-						ID:        c.rls.MakeMongoID(),
-						Desc:      err.Error(),
-						CreatedAt: time.Now(),
-						Stage:     "StreamBiConn Send to provider",
-					}
-					if err := c.repo.InsertObject(log, c.collection); err != nil {
-						c.lg.WriteLog("InsertObject", err.Error())
-					}
+					go c.lg.WriteLog("StreamBiConn", err.Error())
 					closedRx <- struct{}{}
 				}
 			}

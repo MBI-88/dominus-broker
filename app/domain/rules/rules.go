@@ -2,8 +2,6 @@ package rules
 
 import (
 	"regexp"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type rules struct {
@@ -15,13 +13,9 @@ func (r *rules) CheckURI(uri string) bool {
 	return r.re.MatchString(uri)
 }
 
-func (*rules) MakeMongoID() primitive.ObjectID {
-	return primitive.NewObjectID()
-}
 
 type RulesInt interface {
 	CheckURI(uri string) bool
-	MakeMongoID() primitive.ObjectID
 }
 
 func NewRules() RulesInt {

@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"dominus/app/domain/entities"
 	"dominus/app/domain/repos"
 	"encoding/json"
 	"sync"
@@ -14,7 +13,7 @@ func (grpcClientMock) Simple(url string, msg []byte) (repos.GrpResponseInt, erro
 	return nil, nil
 }
 
-func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- entities.Logs, tx chan<- struct{}) {
+func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{}) {
 	for {
 		select {
 		case _, ok := <-msg:
@@ -27,7 +26,7 @@ func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- 
 
 }
 
-func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- entities.Logs, closed <-chan struct{}, tx chan<- struct{}) {
+func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, closed <-chan struct{}, tx chan<- struct{}) {
 	open := new(bool)
 	*open = true
 	sync := new(sync.Mutex)
@@ -59,7 +58,7 @@ func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- [
 
 }
 
-func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- entities.Logs, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
+func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
 	open := new(bool)
 	*open = true
 	sync := new(sync.Mutex)
