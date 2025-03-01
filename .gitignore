@@ -22,3 +22,4 @@
 #Database
 database/database/*
 *.prod
+*.log

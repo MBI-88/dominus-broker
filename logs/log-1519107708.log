@@ -1,7 +1,0 @@
-LOG: 2025/03/01 16:47:22 StreamClientConn: EOF
-LOG: 2025/03/01 16:48:07 StreamServerConn: EOF
-LOG: 2025/03/01 16:48:07 StreamServerConn: EOF
-LOG: 2025/03/01 16:48:07 StreamServerConn: EOF
-LOG: 2025/03/01 16:48:07 StreamServerConn: EOF
-LOG: 2025/03/01 16:48:07 Error: finished call
-LOG: 2025/03/01 16:49:20 StreamBiConn: rpc error: code = Canceled desc = context canceled
