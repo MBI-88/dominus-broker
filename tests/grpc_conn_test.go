@@ -8,7 +8,7 @@ import (
 func TestSimpleConn(t *testing.T) {
 	t.Run("Connection-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		simple := inter.NewConnection()
+		simple := inter.NewGrpcService()
 		result := simple.SimpleConn(NewSimpleConnMock(payload, subsOk))
 		if result != nil {
 			t.Fatal(result)
@@ -17,7 +17,7 @@ func TestSimpleConn(t *testing.T) {
 
 	t.Run("Connection-Error", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		simple := inter.NewConnection()
+		simple := inter.NewGrpcService()
 		result := simple.SimpleConn(NewSimpleConnMock(payload, make([]string, 0)))
 		if result == nil {
 			t.Fatalf("Expected error but received nil")
@@ -52,7 +52,7 @@ func TestCheckURI(t *testing.T) {
 func TestClientStream(t *testing.T) {
 	t.Run("ClientStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		stream := inter.NewConnection()
+		stream := inter.NewGrpcService()
 		result := stream.StreamClientConn(NewClienConnMock(payload, subsOk))
 		if result.Error() != "End" {
 			t.Fatal(result)
@@ -61,7 +61,7 @@ func TestClientStream(t *testing.T) {
 
 	t.Run("ClientStream-Error", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		stream := inter.NewConnection()
+		stream := inter.NewGrpcService()
 		result := stream.StreamClientConn(NewClienConnMock(payload, make([]string, 0)))
 		if result == nil {
 			t.Fatalf("Expected error but received nil")
@@ -72,7 +72,7 @@ func TestClientStream(t *testing.T) {
 func TestServerStream(t *testing.T) {
 	t.Run("ServerStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		stream := inter.NewConnection()
+		stream := inter.NewGrpcService()
 		msg, ctx := NewServerConnMock(payload, subsOk)
 		result := stream.StreamServerConn(msg, ctx)
 		if result.Error() != "Connection closed" {
@@ -83,7 +83,7 @@ func TestServerStream(t *testing.T) {
 
 	t.Run("ServerStream-Error", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		stream := inter.NewConnection()
+		stream := inter.NewGrpcService()
 		msg, ctx := NewServerConnMock(payload, make([]string, 0))
 		result := stream.StreamServerConn(msg, ctx)
 		if result.Error() == "End" {
@@ -96,7 +96,7 @@ func TestServerStream(t *testing.T) {
 func TestBidirectionalStream(t *testing.T) {
 	t.Run("BidirectionalStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		stream := inter.NewConnection()
+		stream := inter.NewGrpcService()
 		result := stream.StreamBiConn(NewBiConnMock(payload, subsOk))
 		if result.Error() != "Connection closed" {
 			t.Fatal(result)
@@ -105,7 +105,7 @@ func TestBidirectionalStream(t *testing.T) {
 
 	t.Run("BidirectionalStream-Error", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
-		stream := inter.NewConnection()
+		stream := inter.NewGrpcService()
 		result := stream.StreamBiConn(NewBiConnMock(payload, make([]string, 0)))
 		if result.Error() == "End" {
 			t.Fatalf("Expected error but received nil")

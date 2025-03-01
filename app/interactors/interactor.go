@@ -11,17 +11,17 @@ type interactor struct {
 	rls     rules.RulesInt
 }
 
-func (i interactor) NewConnection() ConnectionInt {
-	return &connection{
-		rls:        i.rls,
-		lg:         i.log,
-		client:     i.gclient,
+func (i interactor) NewGrpcService() GrpcServiceInt {
+	return &grpcService{
+		rls:    i.rls,
+		lg:     i.log,
+		client: i.gclient,
 	}
 }
 
-func (i interactor) NewManager() ManagerInt {
-	return &manager{
-		lg:         i.log,
+func (i interactor) NewSystemService() SystemServiceInt {
+	return &systemService{
+		lg: i.log,
 	}
 }
 
@@ -31,15 +31,15 @@ func (i interactor) Set(c repos.GrpClientInt) InteractorInt {
 }
 
 type InteractorInt interface {
-	NewConnection() ConnectionInt
-	NewManager() ManagerInt
+	NewGrpcService() GrpcServiceInt
+	NewSystemService() SystemServiceInt
 	Set(cl repos.GrpClientInt) InteractorInt
 }
 
 // Create a new interactor instance
 func NewInteractor(lg repos.LogsInt, rls rules.RulesInt) InteractorInt {
 	return &interactor{
-		log:  lg,
-		rls:  rls,
+		log: lg,
+		rls: rls,
 	}
 }

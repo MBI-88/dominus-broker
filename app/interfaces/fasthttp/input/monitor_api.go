@@ -91,7 +91,7 @@ func (m *monitor) path() {
 	m.router.GET("/health", m.getHealthCheck)
 }
 
-func NewMonitor(r *router.Router, reg *prometheus.Registry) {
+func NewMonitorAPI(r *router.Router, reg *prometheus.Registry) {
 	reg.MustRegister(cpumetrics, memorymetrics)
 	m := &monitor{
 		router: r,

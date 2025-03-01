@@ -9,33 +9,33 @@ var (
 )
 
 type config struct {
-	RestPort                          int64
-	GrpcPort                          int64
-	WriteTimeout                      int
-	ReadTimeout                       int
-	IdleTimeout                       int
-	MaxConnsPerIp                     int
-	MaxRequestPerConn                 int
-	MaxRequestBodySize                int
-	SleepWhenConcurrencyLimitExcedeed int
-	KeyFile                           string
-	SslCaCert                         string
-	SslCert                           string
-	ApiToken                          string
-	Dsn                               string
-	Cidr                              string
-	ConnectionKey                     string
-	Database                          string
-	Collections                       string
-	Logs                              string
-	StreamRequestBody                 bool
-	CloseOnShutdown                   bool
-	KeepHijackedConns                 bool
-	NoDefaultDate                     bool
-	DisableHeaderNamesNormalizing     bool
-	DisablePreparseMultipartForm      bool
-	ReduceMemoryUsage                 bool
-	IsActiveDb                        bool
+	RestPort                         int64
+	GrpcPort                         int64
+	WriteTimeout                     int
+	ReadTimeout                      int
+	IdleTimeout                      int
+	MaxConnsPerIp                    int
+	MaxRequestPerConn                int
+	MaxRequestBodySize               int
+	SleepWhenConcurrencyLimitExceded int
+	KeyFile                          string
+	SslCaCert                        string
+	SslCert                          string
+	ApiToken                         string
+	Dsn                              string
+	Cidr                             string
+	ConnectionKey                    string
+	Database                         string
+	Collections                      string
+	Logs                             string
+	StreamRequestBody                bool
+	CloseOnShutdown                  bool
+	KeepHijackedConns                bool
+	NoDefaultDate                    bool
+	DisableHeaderNamesNormalizing    bool
+	DisablePreparseMultipartForm     bool
+	ReduceMemoryUsage                bool
+	IsActiveDb                       bool
 }
 
 func (s *config) setEnv() {
@@ -54,7 +54,7 @@ func (s *config) setEnv() {
 	s.ReduceMemoryUsage = viper.GetBool("REDUCE_MEMORY_USAGE")
 	s.DisablePreparseMultipartForm = viper.GetBool("DISABLE_PREPARSE_MULTIPART_FORM")
 	s.DisableHeaderNamesNormalizing = viper.GetBool("DISABLE_HEADER_NAMES_NORMALIZING")
-	s.SleepWhenConcurrencyLimitExcedeed = viper.GetInt("SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDEED")
+	s.SleepWhenConcurrencyLimitExceded = viper.GetInt("SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDED")
 	s.NoDefaultDate = viper.GetBool("NO_DEFAULT_DATE")
 	s.KeepHijackedConns = viper.GetBool("KEEP_HIJACKED_CONNS")
 	s.CloseOnShutdown = viper.GetBool("CLOSE_ON_SHUTDOWN")

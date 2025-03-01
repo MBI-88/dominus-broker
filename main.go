@@ -64,13 +64,12 @@ func init() {
 		info := fmt.Sprintf("[*] ***Dominus*** [*]\n")
 		info += "mode: boolean\n"
 		info += "banner: boolean\n"
-		info += "args: migrate|start"
 		fmt.Fprintf(os.Stderr, "%s\n", info)
 		flag.PrintDefaults()
 	}
 }
 
-// Dominus entripoint
+
 // @title Dominus server
 // @description <h3>This server is a bidirectional queue using gRCP. Manager section</h3>
 // @contact.name MBI
@@ -130,9 +129,9 @@ func main() {
 
 	midF.AddMiddleware(apiToken, allowedHost)
 	router := router.New()
-	fi.NewManager(router, inter.NewManager())
-	fi.NewMonitor(router, reg)
-	fi.NewSwagger(router)
+	fi.NewSystemAPI(router, inter.NewSystemService())
+	fi.NewMonitorAPI(router, reg)
+	fi.NewSwaggerAPI(router)
 
 	r := fasthttp.Server{
 		Handler:                            midF.Middlewares(router.Handler),
@@ -146,7 +145,7 @@ func main() {
 		ReduceMemoryUsage:                  env.ReduceMemoryUsage,
 		DisablePreParseMultipartForm:       env.DisablePreparseMultipartForm,
 		DisableHeaderNamesNormalizing:      env.DisableHeaderNamesNormalizing,
-		SleepWhenConcurrencyLimitsExceeded: time.Duration(env.SleepWhenConcurrencyLimitExcedeed),
+		SleepWhenConcurrencyLimitsExceeded: time.Duration(env.SleepWhenConcurrencyLimitExceded),
 		NoDefaultDate:                      env.NoDefaultDate,
 		KeepHijackedConns:                  env.KeepHijackedConns,
 		CloseOnShutdown:                    env.CloseOnShutdown,
@@ -227,9 +226,12 @@ func main() {
 
 	gclient := gt.NewGrpClient(optsD)
 	inter = inter.Set(gclient)
-	srG := gi.NewGrpcController(optsS, inter.NewConnection())
-	listener, _ := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
-
+	srG := gi.NewGrpcAPI(optsS, inter.NewGrpcService())
+	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
+	if err != nil {
+		log.Println(err)
+		return 
+	}
 	go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
 		log.Fatal(sr.Serve(list))
 		cancel()

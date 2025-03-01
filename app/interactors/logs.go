@@ -4,19 +4,19 @@ import (
 	"dominus/app/domain/repos"
 )
 
-type manager struct {
+type systemService struct {
 	lg         repos.LogsInt
 }
 
-func (m *manager) GetLogs(ctx repos.RestContextInt) ([]string, error) {
+func (m *systemService) GetLogs(ctx repos.RestContextInt) ([]string, error) {
 	return m.lg.GetLogs()
 }
 
-func (m *manager) GetBackup(ctx repos.RestContextInt) ([]string, error) {
+func (m *systemService) GetBackup(ctx repos.RestContextInt) ([]string, error) {
 	return m.lg.GetLogs()
 }
 
-type ManagerInt interface {
+type SystemServiceInt interface {
 	GetLogs(ctx repos.RestContextInt) ([]string, error)
 	GetBackup(ctx repos.RestContextInt) ([]string, error)
 }

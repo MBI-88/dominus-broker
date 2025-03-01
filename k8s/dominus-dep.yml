@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
         - name: dominus
-          image: mbi8807/dominus:latest # public repo only test
+          image: mbi8807/dominus:kubernetes
           resources:
             requests:
               cpu: 100m
@@ -35,7 +35,7 @@ spec:
               command:
                 - sh
                 - -c
-                - "wget -qO- --header=API_TOKEN $API_TOKEN http://localhost:8000/health"
+                - "wget -qO- --header='API_TOKEN: $API_TOKEN' http://localhost:8000/health"
             initialDelaySeconds: 60
             timeoutSeconds: 2
             successThreshold: 1
@@ -97,7 +97,7 @@ spec:
                   name: dominus-config
                   key: READ_TIMEOUT
 
-            - name: IDLE_TIMOUTLOGS
+            - name: IDLE_TIMOUT
               valueFrom:
                 secretKeyRef:
                   name: dominus-config
@@ -133,11 +133,11 @@ spec:
                   name: dominus-config
                   key: DISABLE_HEADER_NAMES_NORMALIZING
 
-            - name: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDEED
+            - name: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDED
               valueFrom:
                 secretKeyRef:
                   name: dominus-config
-                  key: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDEED
+                  key: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDED
 
             - name: NO_DEFAULT_DATE
               valueFrom:
@@ -163,29 +163,11 @@ spec:
                   name: dominus-config
                   key: STREAM_REQUEST_BODY
 
-            - name: DSN
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: DSN
-
             - name: CIDR
               valueFrom:
                 secretKeyRef:
                   name: dominus-config
                   key: CIDR
-
-            - name: DATABASE
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: DATABASE
-
-            - name: COLLECTIONS
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: COLLECTIONS
 
           ports:
             - containerPort: 8000
@@ -199,7 +181,7 @@ spec:
               readOnly: true
             - name: dominus-logs
               mountPath: /var/dominus/logs
-              readOnly: true
+              readOnly: false
 
       volumes:
         - name: dominus-certs
@@ -247,7 +229,7 @@ spec:
   selector:
     app: dominus
   sessionAffinity: None
-  type: ClusterIP
+  type: LoadBalancer
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
@@ -256,23 +238,7 @@ spec:
       protocol: TCP
       port: 8000
       targetPort: 8000 
-
---- 
-apiVersion: v1
-kind: Service
-metadata:
-  name: dominus-grpc
-  namespace: default
-spec:
-  selector:
-    app: dominus
-  type: LoadBalancer
-  sessionAffinity: None
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 10800
-  ports:
-  - name: grpc
-    protocol: TCP
-    port: 5000
-    targetPort: 5000
+    - name: grpc
+      protocol: TCP
+      port: 5000
+      targetPort: 5000

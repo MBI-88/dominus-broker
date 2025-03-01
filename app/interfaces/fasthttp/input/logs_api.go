@@ -10,9 +10,9 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-type manager struct {
+type system struct {
 	router *router.Router
-	service  interactors.ManagerInt
+	service  interactors.SystemServiceInt
 	js     jsoniter.API
 }
 
@@ -26,7 +26,7 @@ type manager struct {
 // @Success 200 {object} map[string][]string "Success response"
 // @Failure 404 {object} map[string]string "Response body {message: error}"
 // @Router /logs [get]
-func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
+func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 	context := NewRestContext(ctx)
 	result, err := r.service.GetLogs(context)
 	if err != nil {
@@ -49,7 +49,7 @@ func (r *manager) getLogs(ctx *fasthttp.RequestCtx) {
 // @Success 200 {object} map[string][]string "Success response"
 // @Failure 404 {object} map[string]string "Error response"
 // @Router /logs-backup [get]
-func (r *manager) getBackup(ctx *fasthttp.RequestCtx) {
+func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 	context := NewRestContext(ctx)
 	result, err := r.service.GetBackup(context)
 	if err != nil {
@@ -70,12 +70,12 @@ func (r *manager) getBackup(ctx *fasthttp.RequestCtx) {
 
 
 
-func (r *manager) path() {
+func (r *system) path() {
 	r.router.GET("/logs", r.getLogs)
 	r.router.GET("/logs-backup", r.getBackup)
 }
 
-func (r *manager) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, statusCode int, er string) []byte {
+func (r *system) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, statusCode int, er string) []byte {
 	ctx.Response.Header.Set("Content-Type", contenType)
 	ctx.Response.Header.SetStatusCode(statusCode)
 	msg := make(map[string]string)
@@ -84,7 +84,7 @@ func (r *manager) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string,
 	return b
 }
 
-func NewManager(r *router.Router, i interactors.ManagerInt) {
-	re := &manager{router: r, service: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
+func NewSystemAPI(r *router.Router, i interactors.SystemServiceInt) {
+	re := &system{router: r, service: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }

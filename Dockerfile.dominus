@@ -9,8 +9,9 @@ RUN go mod tidy && \
 FROM alpine:3.20 as deployment 
 WORKDIR /app 
 
-ENV REST_PORT=${REST_PORT}
-ENV GRPC_PORT=${GRPC_PORT}
+
+ENV REST_PORT=8000
+ENV GRPC_PORT=5000
 
 COPY --from=builder /app/dominus ./dominus  
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
@@ -24,4 +25,4 @@ USER appuser
 EXPOSE ${REST_PORT} 
 EXPOSE ${GRPC_PORT}
 
-CMD ["sh","-c", "./dominus -prod=true migrate && ./dominus -prod=true -banner=false start"]
+CMD ["sh","-c", "./dominus -prod=true -banner=false"]

@@ -82,7 +82,7 @@ metadata:
 spec:
   selector:
     app: grafana
-  type: ClusterIP
+  type: LoadBalancer
   sessionAffinity: None
   sessionAffinityConfig:
     clientIP:

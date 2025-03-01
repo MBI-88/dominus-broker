@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-type connection struct {
+type grpcService struct {
 	rls        rules.RulesInt
 	client     repos.GrpClientInt
 	lg         repos.LogsInt
 	collection string
 }
 
-func (c *connection) SimpleConn(ms repos.GrpRequestMessageInt) error {
+func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
 	subs := ms.GetSubscribers()
 	if len(subs) == 0 {
 		return fmt.Errorf("Subscribers not found")
@@ -31,7 +31,7 @@ func (c *connection) SimpleConn(ms repos.GrpRequestMessageInt) error {
 	return nil
 }
 
-func (c *connection) StreamClientConn(st repos.StreamClientInt) error {
+func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 	stream := make(chan []byte, 0)
 	closed := make(chan struct{}, 0)
 	req, err := st.Recv()
@@ -72,7 +72,7 @@ func (c *connection) StreamClientConn(st repos.StreamClientInt) error {
 	}
 }
 
-func (c *connection) StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error {
+func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error {
 	closed := make(chan struct{}, 0)
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
@@ -122,7 +122,7 @@ func (c *connection) StreamServerConn(req repos.GrpRequestMessageInt, st repos.S
 	}
 }
 
-func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
+func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
 	closedTx := make(chan struct{}, 0)
 	closedRx := make(chan struct{}, 0)
 	req, err := stream.Recv()
@@ -191,7 +191,7 @@ func (c *connection) StreamBiConn(stream repos.StreamBiInt) error {
 	}
 }
 
-type ConnectionInt interface {
+type GrpcServiceInt interface {
 	SimpleConn(ms repos.GrpRequestMessageInt) error
 	StreamClientConn(st repos.StreamClientInt) error
 	StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error

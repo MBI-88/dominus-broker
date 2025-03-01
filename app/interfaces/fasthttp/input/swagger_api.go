@@ -15,7 +15,7 @@ func (s *swagger) path() {
 	s.router.GET("/swagger/{*}", func(ctx *fasthttp.RequestCtx) {fastHttpSwagger.WrapHandler(fastHttpSwagger.InstanceName("swagger"))(ctx)})
 }
 
-func NewSwagger(r *router.Router) {
+func NewSwaggerAPI(r *router.Router) {
 	swg := &swagger{router: r}
 	swg.path()
 }

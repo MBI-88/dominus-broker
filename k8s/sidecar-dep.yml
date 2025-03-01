@@ -43,15 +43,16 @@ spec:
             - containerPort: 80
               name: http
           volumeMounts:
-            - name: nginx-config
+            - name: sidecar-config-volume
               mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf 
               readOnly: true
 
       volumes:
-        - name: nginx-config
+        - name: sidecar-config-volume
           configMap:
-            name: nginx-config
+            name: sidecar-config
+
 
       restartPolicy: Always
 
