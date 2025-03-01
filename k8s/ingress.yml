@@ -7,7 +7,7 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: grafana.dominus.com
+    - host: localhost
       http:
         paths:
           - path: /
@@ -17,29 +17,11 @@ spec:
                 name: grafana
                 port:
                   number: 3000
-                  
-    - host: api.dominus.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
+
+          - path: /manager
+            pathType: Prefix 
             backend:
               service:
-                name: dominus
+                name: dominus-rest
                 port:
                   number: 8000
-
-    - host: grpc.dominus.com
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: dominus
-                port:
-                  number: 5000
-  tls:
-    - hosts:
-        - grpc.dominus.com
-      secretName: grpc-tls-secret

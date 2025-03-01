@@ -1,7 +1,7 @@
 database:
-  username: dominus
-  password: dominus1234
-  name: dominus
+  MONGO_INITDB_DATABASE: dominus
+  MONGO_INITDB_ROOT_PASSWORD: dominus1234
+  MONGO_INITDB_ROOT_USERNAME: dominus
 
 dominus: 
    API_TOKEN: "dominus_example_@10102024KeyServerToken"

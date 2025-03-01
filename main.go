@@ -5,7 +5,7 @@ import (
 	"dominus/app/domain/config"
 	"dominus/app/domain/rules"
 	"dominus/app/interactors"
-	"dominus/app/interfaces/database"
+	"dominus/app/interfaces/databases/mongoDB"
 	_ "dominus/docs"
 	
 
@@ -92,10 +92,10 @@ func run() {
 	//Instances
 	settings := config.NewConfig()
 	env := settings.GetEnvVar(*mode)
-	mongoConfig := database.NewMongoConfig()
+	mongoConfig := mongoDB.NewMongoConfig(env.IsActiveDb)
 	mongoClient := mongoConfig.CreateClient(env.Dsn)
 	rls := rules.NewRules()
-	repo := database.NewRepository(env.Dsn, env.Database, env.Collections, mongoClient)
+	repo := mongoDB.NewRepository(env.Dsn, env.Database, env.Collections, mongoClient, env.IsActiveDb)
 
 	switch args {
 	case "migrate":

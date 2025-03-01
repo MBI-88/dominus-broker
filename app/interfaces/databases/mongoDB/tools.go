@@ -1,4 +1,4 @@
-package database
+package mongoDB
 
 import (
 	"fmt"

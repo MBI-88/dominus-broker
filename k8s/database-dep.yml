@@ -23,7 +23,7 @@ spec:
       containers:
         - name: database
           image: mongo:latest
-          args: ["--auth"]
+          command: ["mongod","--auth"]
           resources:
             requests:
               cpu: 100m
@@ -34,11 +34,22 @@ spec:
 
           env:
             - name: MONGO_INITDB_DATABASE
-              value: dominus
+              valueFrom:
+                secretKeyRef:
+                  name: dominus-config
+                  key: MONGO_INITDB_DATABASE
+
             - name: MONGO_INITDB_ROOT_USERNAME
-              value: dominus
+              valueFrom:
+                secretKeyRef:
+                  name: dominus-config
+                  key: MONGO_INITDB_ROOT_USERNAME
+
             - name: MONGO_INITDB_ROOT_PASSWORD
-              value: dominus1234
+              valueFrom:
+                secretKeyRef:
+                  name: dominus-config
+                  key: MONGO_INITDB_ROOT_PASSWORD
 
           ports:
             - containerPort: 27017
@@ -49,7 +60,7 @@ spec:
       volumes:
         - name: db-storage
           persistentVolumeClaim:
-            claimName: mongo-pvc
+            claimName: db-pvc
 
       restartPolicy: Always
 
@@ -58,7 +69,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mongo-pvc
+  name: db-pvc
 spec:
   accessModes:
     - ReadWriteOnce
