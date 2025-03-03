@@ -39,7 +39,7 @@ paths:
       security:
       - ApiKeyAuth: []
       tags:
-      - Manager
+      - Logs
   /logs-backup:
     get:
       description: <h3>Gets all selected items from the database for making a backup</h3>
@@ -61,7 +61,7 @@ paths:
       security:
       - ApiKeyAuth: []
       tags:
-      - Manager
+      - Logs
 securityDefinitions:
   ApiKeyAuth:
     in: header

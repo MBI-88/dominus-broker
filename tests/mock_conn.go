@@ -10,8 +10,8 @@ import (
 
 func helperErr(flag *simpleconnMock) {
 	time.Sleep(3 * time.Second)
-	adquired.Lock()
-	defer adquired.Unlock()
+	ad.Lock()
+	defer ad.Unlock()
 	flag.err = fmt.Errorf("End")
 }
 
@@ -62,6 +62,8 @@ type clientconnMock struct {
 }
 
 func (c *clientconnMock) Recv() (repos.GrpRequestMessageInt, error) {
+	ad.Lock()
+	defer ad.Unlock()
 	return c.simpleconnMock, c.err
 }
 
@@ -84,6 +86,8 @@ type serverconnMock struct {
 }
 
 func (se *simpleconnMock) Send(payload []byte) error {
+	ad.Lock()
+	defer ad.Unlock()
 	return se.err
 }
 
@@ -111,10 +115,14 @@ type biconnMock struct {
 }
 
 func (b *biconnMock) Recv() (repos.GrpRequestMessageInt, error) {
+	ad.Lock()
+	defer ad.Unlock()
 	return b.simpleconnMock, b.err
 }
 
 func (b *biconnMock) Send(msg []byte) error {
+	ad.Lock()
+	defer ad.Unlock()
 	return b.err
 }
 

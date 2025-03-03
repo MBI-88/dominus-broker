@@ -18,7 +18,7 @@ type system struct {
 
  
 
-// @Tags Manager
+// @Tags Logs
 // @Description <h3>gets all logs fron the database using page and size (required)</h3>
 // @Param page query int true "page"
 // @Param size query int true "size"
@@ -43,7 +43,7 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 }
 
 
-// @Tags Manager
+// @Tags Logs
 // @Description <h3>Gets all selected items from the database for making a backup</h3>
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"

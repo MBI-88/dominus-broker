@@ -5,7 +5,7 @@ import (
 	"dominus/app/domain/config"
 	"dominus/app/domain/rules"
 	"dominus/app/interactors"
-	_ "dominus/docs"
+	"dominus/docs"
 
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
@@ -34,6 +34,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	
 )
 
 var (
@@ -89,9 +90,10 @@ func main() {
 	settings := config.NewConfig()
 	env := settings.GetEnvVar(*mode)
 	rls := rules.NewRules()
-	//Instances
+
 	logs := events.NewLogs(env.Logs)
 	inter := interactors.NewInteractor(logs, rls)
+	docs.SwaggerInfo.Host = env.Host
 
 	// Signals
 	system = make(chan os.Signal, 1)

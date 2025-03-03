@@ -1,9 +1,10 @@
 package tests
 
 import (
+	"context"
 	"dominus/app/domain/repos"
 	"encoding/json"
-	"sync"
+	"fmt"
 	"time"
 )
 
@@ -18,6 +19,7 @@ func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- 
 		select {
 		case _, ok := <-msg:
 			if !ok {
+				sig <- fmt.Errorf("[-] Connection closed")
 				tx <- struct{}{}
 				return
 			}
@@ -26,29 +28,15 @@ func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- 
 
 }
 
-func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, closed <-chan struct{}, tx chan<- struct{}) {
-	open := new(bool)
-	*open = true
-	sync := new(sync.Mutex)
-	go func() {
-		<-closed
-		sync.Lock()
-		defer sync.Unlock()
-		*open = false
-	}()
+func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, ctx context.Context, tx chan<- struct{}) {
 	for {
 		select {
 		case <-time.Tick(1 * time.Second):
 			payload, _ := json.Marshal(data)
-			if *open {
-				msg <- payload
-			} else {
-				for range urls {
-					tx <- struct{}{}
-				}
-				return
-			}
-		case <-time.Tick(10 * time.Second):
+			msg <- payload
+		case <-time.Tick(5 * time.Second):
+		case <-ctx.Done():
+			sig <- fmt.Errorf("[-] Context canceled")
 			for range urls {
 				tx <- struct{}{}
 			}
@@ -58,17 +46,7 @@ func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- [
 
 }
 
-func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
-	open := new(bool)
-	*open = true
-	sync := new(sync.Mutex)
-	go func() {
-		<-rx
-		sync.Lock()
-		defer sync.Unlock()
-		*open = false
-	}()
-
+func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
 	// received
 	go func() {
 		for {
@@ -81,20 +59,15 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 			}
 		}
 	}()
-
+	
+	// subscribers sending messages
 	for {
 		select {
 		case <-time.Tick(1 * time.Second):
 			payload, _ := json.Marshal(data)
-			if *open {
-				subMsg <- payload
-			} else {
-				for range urls {
-					done <- struct{}{}
-				}
-				return
-			}
-		case <-time.Tick(10 * time.Second):
+			subMsg <- payload
+		case <-time.Tick(5 * time.Second):
+		case <-ctx.Done():
 			for range urls {
 				done <- struct{}{}
 			}

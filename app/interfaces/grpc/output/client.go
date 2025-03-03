@@ -6,7 +6,6 @@ import (
 	"dominus/app/domain/rules"
 	pb "dominus/app/interfaces/grpc/proto/builder"
 	"fmt"
-	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -96,16 +95,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 	}
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, closed <-chan struct{}, tx chan<- struct{}) {
-	open := new(bool)
-	*open = true
-	sync := new(sync.Mutex)
-	go func() {
-		<-closed
-		sync.Lock()
-		defer sync.Unlock()
-		*open = false
-	}()
+func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, ctx context.Context, tx chan<- struct{}) {
 	for p, url := range urls {
 		go func(url string, p int) {
 			if ok := g.rls.CheckURI(url); ok {
@@ -116,22 +106,17 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 						Subscribers: nil,
 						Payload:     initalMsg,
 					}
-					stream, err := client.ServerStream(context.Background(), reqMsg)
+					stream, err := client.ServerStream(ctx, reqMsg)
 					if err == nil {
-						go func(client pb.Grpc_ServerStreamClient, p int) {
+						go func(c pb.Grpc_ServerStreamClient, p int) {
 							for {
-								resp, err := client.Recv()
+								resp, err := c.Recv()
 								if err != nil {
 									sig <- err
 									tx <- struct{}{}
 									return
 								} else {
-									if *open {
-										msg <- resp.GetPayload()
-									} else {
-										tx <- struct{}{}
-										return
-									}
+									msg <- resp.GetPayload()
 								}
 							}
 						}(stream, p)
@@ -144,17 +129,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{}) {
-	open := new(bool)
-	*open = true
-	sync := new(sync.Mutex)
-	go func() {
-		<-rx
-		sync.Lock()
-		defer sync.Unlock()
-		*open = false
-	}()
-
+func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
 	arrayMsg := make([]chan []byte, 0, len(urls))
 	for p, url := range urls {
 		ch := make(chan []byte, 0)
@@ -164,22 +139,18 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 				conn, err := grpc.NewClient(url, g.opts...)
 				if err == nil {
 					client := pb.NewGrpcClient(conn)
-					stream, err := client.BidirectionalStream(context.Background())
+					stream, err := client.BidirectionalStream(ctx)
 					if err == nil {
 						//Sends to subscriber
-						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
-							isClose := false
+						go func(c pb.Grpc_BidirectionalStreamClient, p int) {
 							for {
 								select {
 								case payload, ok := <-ch:
 									if ok {
-										if !isClose {
-											if err := client.Send(&pb.RequestMessage{
-												Subscribers: urls,
-												Payload:     payload}); err != nil {
-												errMsg <- err
-												isClose = true
-											}
+										if err := c.Send(&pb.RequestMessage{
+											Subscribers: urls,
+											Payload:     payload}); err != nil {
+											errMsg <- err
 										}
 									} else {
 										return
@@ -189,20 +160,15 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 						}(stream, p)
 
 						//Receives from subscriber
-						go func(client pb.Grpc_BidirectionalStreamClient, p int) {
+						go func(c pb.Grpc_BidirectionalStreamClient, p int) {
 							for {
-								resp, err := client.Recv()
+								resp, err := c.Recv()
 								if err != nil {
 									errMsg <- err
 									done <- struct{}{}
 									return
 								}
-								if *open {
-									subMsg <- resp.GetPayload()
-								} else {
-									done <- struct{}{}
-									return
-								}
+								subMsg <- resp.GetPayload()
 							}
 						}(stream, p)
 					}

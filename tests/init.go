@@ -25,7 +25,7 @@ var (
 		Age:       35,
 		CreatedAt: time.Now(),
 	}
-	adquired = new(sync.Mutex)
+	ad = new(sync.Mutex)
 )
 
 func init() {

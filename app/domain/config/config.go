@@ -18,6 +18,7 @@ type config struct {
 	MaxRequestPerConn                int
 	MaxRequestBodySize               int
 	SleepWhenConcurrencyLimitExceded int
+	Host                             string
 	KeyFile                          string
 	SslCaCert                        string
 	SslCert                          string
@@ -35,7 +36,6 @@ type config struct {
 	DisableHeaderNamesNormalizing    bool
 	DisablePreparseMultipartForm     bool
 	ReduceMemoryUsage                bool
-	IsActiveDb                       bool
 }
 
 func (s *config) setEnv() {
@@ -65,7 +65,7 @@ func (s *config) setEnv() {
 	s.Database = viper.GetString("DATABASE")
 	s.Collections = viper.GetString("COLLECTIONS")
 	s.Logs = viper.GetString("LOGS")
-	s.IsActiveDb = viper.GetBool("IS_ACTIVE_DB")
+	s.Host = viper.GetString("HOST")
 }
 
 func (s config) GetEnvVar(prod bool) config {

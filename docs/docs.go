@@ -28,7 +28,7 @@ const docTemplate = `{
                 ],
                 "description": "\u003ch3\u003egets all logs fron the database using page and size (required)\u003c/h3\u003e",
                 "tags": [
-                    "Manager"
+                    "Logs"
                 ],
                 "parameters": [
                     {
@@ -80,7 +80,7 @@ const docTemplate = `{
                 ],
                 "description": "\u003ch3\u003eGets all selected items from the database for making a backup\u003c/h3\u003e",
                 "tags": [
-                    "Manager"
+                    "Logs"
                 ],
                 "responses": {
                     "200": {

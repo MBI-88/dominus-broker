@@ -49,8 +49,8 @@ type GrpResponseInt interface {
 type GrpClientInt interface {
 	Simple(url string, msg []byte) (GrpResponseInt, error)
 	ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{})
-	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, closed <-chan struct{}, done chan<- struct{})
-	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, rx <-chan struct{}, done chan<- struct{})
+	ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, ctx context.Context, done chan<- struct{})
+	BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{})
 }
 
 type LogsInt interface {

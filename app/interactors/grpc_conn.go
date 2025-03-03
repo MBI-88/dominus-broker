@@ -1,10 +1,10 @@
 package interactors
 
 import (
+	"context"
 	"dominus/app/domain/repos"
 	"dominus/app/domain/rules"
 	"fmt"
-	"time"
 )
 
 type grpcService struct {
@@ -73,7 +73,8 @@ func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 }
 
 func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error {
-	closed := make(chan struct{}, 0)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
 		return fmt.Errorf("Subscribers not found")
@@ -84,7 +85,7 @@ func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.
 	done := make(chan struct{}, total)
 	initialRequest := req.GetPayload()
 
-	go c.client.ServerStream(subscribers, initialRequest, stream, errMsg, closed, done)
+	go c.client.ServerStream(subscribers, initialRequest, stream, errMsg, ctx, done)
 
 	go func(sig <-chan error) {
 		for {
@@ -105,15 +106,13 @@ func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.
 			if ok {
 				if err := st.Send(body); err != nil {
 					go c.lg.WriteLog("StreamServerConn", err.Error())
-					closed <- struct{}{}
+					cancel()
 				}
 			}
 		case <-done:
 			total--
 			if total == 0 {
 				close(done)
-				close(closed)
-				time.Sleep(5 * time.Millisecond)
 				close(stream)
 				close(errMsg)
 				return fmt.Errorf("Connection closed")
@@ -123,8 +122,9 @@ func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.
 }
 
 func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
-	closedTx := make(chan struct{}, 0)
-	closedRx := make(chan struct{}, 0)
+	closed := make(chan struct{}, 0)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	req, err := stream.Recv()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
@@ -152,7 +152,7 @@ func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
 		}
 	}(errMsg)
 
-	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg, closedTx, closedRx, done)
+	go c.client.BidirectionalStream(subscribers, streamProv, streamSub, errMsg, closed, ctx, done)
 	streamProv <- req.GetPayload()
 
 	//Receives from provider
@@ -162,7 +162,7 @@ func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
 			if err != nil {
 				go c.lg.WriteLog("StreamBiConn", err.Error())
 				close(streamProv)
-				<-closedTx
+				<-closed
 				return
 			}
 			streamProv <- req.GetPayload()
@@ -176,7 +176,7 @@ func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
 			if ok {
 				if err := stream.Send(payload); err != nil {
 					go c.lg.WriteLog("StreamBiConn", err.Error())
-					closedRx <- struct{}{}
+					cancel()
 				}
 			}
 		case <-done:
