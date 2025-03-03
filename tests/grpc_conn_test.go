@@ -1,11 +1,17 @@
 package tests
 
 import (
+	"dominus/app/domain/rules"
+	"dominus/app/interactors"
 	"encoding/json"
 	"testing"
 )
 
 func TestSimpleConn(t *testing.T) {
+	rls := rules.NewRules()
+	log := NewEventMock(true)
+	inter := interactors.NewInteractor(log, rls)
+	inter = inter.Set(NewGrpcClientMock())
 	t.Run("Connection-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
 		simple := inter.NewGrpcService()
@@ -26,6 +32,7 @@ func TestSimpleConn(t *testing.T) {
 }
 
 func TestCheckURI(t *testing.T) {
+	rls := rules.NewRules()
 	arrayErr := make([]bool, 0, 2)
 	t.Run("Check-OK", func(t *testing.T) {
 		for _, uri := range subsOk {
@@ -50,6 +57,10 @@ func TestCheckURI(t *testing.T) {
 }
 
 func TestClientStream(t *testing.T) {
+	rls := rules.NewRules()
+	log := NewEventMock(true)
+	inter := interactors.NewInteractor(log, rls)
+	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ClientStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
 		stream := inter.NewGrpcService()
@@ -70,6 +81,10 @@ func TestClientStream(t *testing.T) {
 }
 
 func TestServerStream(t *testing.T) {
+	rls := rules.NewRules()
+	log := NewEventMock(true)
+	inter := interactors.NewInteractor(log, rls)
+	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ServerStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
 		stream := inter.NewGrpcService()
@@ -94,6 +109,10 @@ func TestServerStream(t *testing.T) {
 }
 
 func TestBidirectionalStream(t *testing.T) {
+	rls := rules.NewRules()
+	log := NewEventMock(true)
+	inter := interactors.NewInteractor(log, rls)
+	inter = inter.Set(NewGrpcClientMock())
 	t.Run("BidirectionalStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
 		stream := inter.NewGrpcService()
