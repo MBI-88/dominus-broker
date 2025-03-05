@@ -127,9 +127,9 @@ func main() {
 
 	midF := fm.NewMiddleware()
 	apiToken := fm.NewMiddlewareApiToken(env.ApiToken)
-	allowedHost := fm.NewMiddlewareHost(env.Cidr)
+	allowedOrings := fm.NewMiddlewareHost(env.AllowOrigins)
 
-	midF.AddMiddleware(apiToken, allowedHost)
+	midF.AddMiddleware(apiToken, allowedOrings)
 	router := router.New()
 	fi.NewSystemAPI(router, inter.NewSystemService())
 	fi.NewMonitorAPI(router, reg)

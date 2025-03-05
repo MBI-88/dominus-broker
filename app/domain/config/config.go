@@ -24,7 +24,7 @@ type config struct {
 	SslCert                          string
 	ApiToken                         string
 	Dsn                              string
-	Cidr                             string
+	AllowOrigins                     string
 	ConnectionKey                    string
 	Database                         string
 	Collections                      string
@@ -60,7 +60,7 @@ func (s *config) setEnv() {
 	s.CloseOnShutdown = viper.GetBool("CLOSE_ON_SHUTDOWN")
 	s.StreamRequestBody = viper.GetBool("STREAM_REQUEST_BODY")
 	s.Dsn = viper.GetString("DSN")
-	s.Cidr = viper.GetString("CIDR")
+	s.AllowOrigins = viper.GetString("ALLOW_ORIGINS")
 	s.ConnectionKey = grpcConnKey
 	s.Database = viper.GetString("DATABASE")
 	s.Collections = viper.GetString("COLLECTIONS")

@@ -2,18 +2,21 @@ package middlewares
 
 import (
 	"fmt"
-	"net"
+	"strings"
 
 	"github.com/valyala/fasthttp"
 )
 
 type hostAllowed struct {
-	cidr string
+	origins string
 }
 
 func (h *hostAllowed) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
-	_, allowNet, err := net.ParseCIDR(h.cidr)
-	if err != nil && !allowNet.Contains(ctx.RemoteIP()) {
+	origin := string(ctx.Request.Header.Peek("Origin"))
+	if h.origins != "*" { 
+		if  origin != "" && strings.Contains(h.origins, origin) {
+			return nil 
+		}
 		return fmt.Errorf("Host not allowed")
 	}
 	return nil 
@@ -21,7 +24,13 @@ func (h *hostAllowed) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 
 
 func NewMiddlewareHost(c string) middlewaresInt {
+	var og string
+	if c == "" {
+		og = "*"
+	}else {
+		og = c
+	}
 	return &hostAllowed{
-		cidr: c,
+		origins: og,
 	}
 }
