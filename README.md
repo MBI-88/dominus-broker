@@ -1,5 +1,40 @@
 # DOMINUS
 
+<p align="center">
+  <a href="https://go.dev/" target="blank">
+    <img 
+      src="https://go.dev/blog/go-brand/Go-Logo/PNG/Go-Logo_LightBlue.png" 
+      width="120" 
+      alt="Go Logo" 
+    />
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/circleci/build/github/gin-gonic/gin/master?token=abc123def456" alt="CircleCI Build Status" />
+  <img src="https://img.shields.io/badge/Go-v1.24.0-blue" alt="Go Version" />
+</p>
+
+<p align="center">
+  A high-performance 
+  <a href="https://go.dev/" target="_blank">Go</a> framework for building fast, efficient, and scalable server-side applications.
+</p>
+
+<p align="center">
+  <a href="https://pkg.go.dev/github.com/gin-gonic/gin" target="_blank">
+    <img src="https://img.shields.io/badge/GoDoc-Reference-blue" alt="GoDoc Reference" />
+  </a>
+  <a href="https://github.com/gin-gonic/gin/blob/master/LICENSE" target="_blank">
+    <img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="License" />
+  </a>
+  <a href="https://goreportcard.com/report/github.com/gin-gonic/gin" target="_blank">
+    <img src="https://goreportcard.com/badge/github.com/gin-gonic/gin" alt="Go Report Card" />
+  </a>
+  <a href="https://discord.gg/gin" target="_blank">
+    <img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord" />
+  </a>
+</p>
+
 ## Summary
 
 Dominus is a containerized application designed to function as a bidirectional queue using gRPC. It is managed using Docker Compose and consists of two main services: `dominus` and `sidecar`. The `dominus` service is the core application, while the `sidecar` service uses Nginx as a reverse proxy to manage incoming traffic.
