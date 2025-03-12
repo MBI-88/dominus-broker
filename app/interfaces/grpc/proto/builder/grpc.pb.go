@@ -7,7 +7,7 @@
 package builder
 
 import (
-	_ "dominus/app/interfaces/grpc/proto/validate"
+	_ "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/proto/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

@@ -2,9 +2,9 @@ package output
 
 import (
 	"context"
-	"dominus/app/domain/repos"
-	"dominus/app/domain/rules"
-	pb "dominus/app/interfaces/grpc/proto/builder"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/repos"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/rules"
+	pb "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/proto/builder"
 	"fmt"
 	"time"
 

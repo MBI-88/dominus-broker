@@ -2,20 +2,20 @@ package main
 
 import (
 	"context"
-	"dominus/app/domain/config"
-	"dominus/app/domain/rules"
-	"dominus/app/interactors"
-	"dominus/docs"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/config"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/rules"
+	"github.com/PR0C0D3-MBI/dominus-project/app/interactors"
+	"github.com/PR0C0D3-MBI/dominus-project/docs"
 
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
 
-	"dominus/app/interfaces/events"
-	fi "dominus/app/interfaces/fasthttp/input"
-	fm "dominus/app/interfaces/fasthttp/middlewares"
-	gi "dominus/app/interfaces/grpc/input"
-	gm "dominus/app/interfaces/grpc/middlewares"
-	gt "dominus/app/interfaces/grpc/output"
+	"github.com/PR0C0D3-MBI/dominus-project/app/interfaces/events"
+	fi "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/fasthttp/input"
+	fm "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/fasthttp/middlewares"
+	gi "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/input"
+	gm "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/middlewares"
+	gt "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/output"
 	"flag"
 	"fmt"
 	"log"
@@ -53,7 +53,7 @@ var (
 👉 Github: https://github.com/MBI-88
 🔧 Press CTRL+C to terminate the server
 
-Dominus server is running on`
+github.com/PR0C0D3-MBI/dominus-project server is running on`
 )
 
 // catches inital variables
@@ -62,7 +62,7 @@ func init() {
 	showBanner = flag.Bool("banner", true, "show banner")
 
 	flag.Usage = func() {
-		info := fmt.Sprintf("[*] ***Dominus*** [*]\n")
+		info := fmt.Sprintf("[*] ***github.com/PR0C0D3-MBI/dominus-project*** [*]\n")
 		info += "mode: boolean\n"
 		info += "banner: boolean\n"
 		fmt.Fprintf(os.Stderr, "%s\n", info)
@@ -71,7 +71,7 @@ func init() {
 }
 
 
-// @title Dominus server
+// @title github.com/PR0C0D3-MBI/dominus-project server
 // @description <h3>This server is a bidirectional queue using gRCP. Manager section</h3>
 // @contact.name MBI
 // @contact.email ingmbi8807@gmail.com
@@ -137,7 +137,7 @@ func main() {
 
 	r := fasthttp.Server{
 		Handler:                            midF.Middlewares(router.Handler),
-		Name:                               "Dominus",
+		Name:                               "github.com/PR0C0D3-MBI/dominus-project",
 		ReadTimeout:                        time.Duration(env.ReadTimeout) * time.Second,
 		WriteTimeout:                       time.Duration(env.WriteTimeout) * time.Second,
 		IdleTimeout:                        time.Duration(env.IdleTimeout),
@@ -190,7 +190,7 @@ func main() {
 		}
 		optsS = append(optsS, grpc.Creds(credsS))
 
-		credsD, err := credentials.NewClientTLSFromFile(env.SslCaCert, "dominus.com")
+		credsD, err := credentials.NewClientTLSFromFile(env.SslCaCert, "github.com/PR0C0D3-MBI/dominus-project.com")
 		if err != nil {
 			cancel()
 			panic(err)

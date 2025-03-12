@@ -2,8 +2,8 @@ package interactors
 
 import (
 	"context"
-	"dominus/app/domain/repos"
-	"dominus/app/domain/rules"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/repos"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/rules"
 	"fmt"
 )
 

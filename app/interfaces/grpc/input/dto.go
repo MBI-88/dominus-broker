@@ -2,8 +2,8 @@ package input
 
 import (
 	"context"
-	"dominus/app/domain/repos"
-	pb "dominus/app/interfaces/grpc/proto/builder"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/repos"
+	pb "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/proto/builder"
 )
 
 

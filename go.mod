@@ -1,4 +1,4 @@
-module dominus
+module github.com/PR0C0D3-MBI/dominus-project
 
 go 1.24
 

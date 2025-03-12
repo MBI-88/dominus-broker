@@ -1,8 +1,8 @@
 package tests
 
 import (
-	"dominus/app/domain/rules"
-	"dominus/app/interactors"
+	"github.com/PR0C0D3-MBI/dominus-project/app/domain/rules"
+	"github.com/PR0C0D3-MBI/dominus-project/app/interactors"
 	"encoding/json"
 	"testing"
 )
