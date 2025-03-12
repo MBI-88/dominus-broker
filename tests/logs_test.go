@@ -1,9 +1,9 @@
 package tests
 
 import (
-	"github.com/PR0C0D3-MBI/dominus-project/app/domain/rules"
-	"github.com/PR0C0D3-MBI/dominus-project/app/interactors"
-	"github.com/PR0C0D3-MBI/dominus-project/app/interfaces/fasthttp/input"
+	"dominus-project/app/domain/rules"
+	"dominus-project/app/interactors"
+	"dominus-project/app/interfaces/fasthttp/input"
 	"testing"
 
 	"github.com/fasthttp/router"

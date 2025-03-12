@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
-	"github.com/PR0C0D3-MBI/dominus-project/app/domain/repos"
+	"dominus-project/app/domain/repos"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"

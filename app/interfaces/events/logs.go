@@ -1,7 +1,7 @@
 package events
 
 import (
-	"github.com/PR0C0D3-MBI/dominus-project/app/domain/repos"
+	"dominus-project/app/domain/repos"
 	"fmt"
 	"io"
 	"log"

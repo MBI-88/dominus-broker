@@ -1,7 +1,7 @@
 package input
 
 import (
-	"github.com/PR0C0D3-MBI/dominus-project/app/domain/repos"
+	"dominus-project/app/domain/repos"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"

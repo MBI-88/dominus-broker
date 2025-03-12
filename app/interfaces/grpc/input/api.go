@@ -2,8 +2,8 @@ package input
 
 import (
 	"context"
-	"github.com/PR0C0D3-MBI/dominus-project/app/interactors"
-	pb "github.com/PR0C0D3-MBI/dominus-project/app/interfaces/grpc/proto/builder"
+	"dominus-project/app/interactors"
+	pb "dominus-project/app/interfaces/grpc/proto/builder"
 	"io"
 
 	"google.golang.org/grpc"

@@ -1,7 +1,7 @@
 package input
 
 import (
-	"github.com/PR0C0D3-MBI/dominus-project/app/interactors"
+	"dominus-project/app/interactors"
 	"fmt"
 
 	"github.com/fasthttp/router"
