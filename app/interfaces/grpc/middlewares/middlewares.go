@@ -23,7 +23,7 @@ func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
 	if !ok {
 		return nil, status.Errorf(codes.DataLoss, "Not found arguments")
 	}
-	token := md.Get("API_TOKEN")[0]
+	token := md.Get("x-api-key")[0]
 	hashedTokenRecived := sha256.Sum256([]byte(token))
 	hashedKey := sha256.Sum256(m.token)
 	if subtle.ConstantTimeCompare(hashedTokenRecived[:], hashedKey[:]) == 0 {

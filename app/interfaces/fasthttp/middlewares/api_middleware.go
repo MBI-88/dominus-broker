@@ -18,7 +18,7 @@ func (a *apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	if strings.HasPrefix(path, "/swagger") {
 		return nil 
 	}
-	token := ctx.Request.Header.Peek("API_TOKEN")
+	token := ctx.Request.Header.Peek("x-api-key")
 	hashedToken := sha256.Sum256(token)
 	hashedKey := sha256.Sum256(a.token)
 	if subtle.ConstantTimeCompare(hashedKey[:], hashedToken[:]) == 0 {
