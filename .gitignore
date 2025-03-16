@@ -21,5 +21,4 @@
 *.sum
 #Database
 database/database/*
-*.prod
 *.log
