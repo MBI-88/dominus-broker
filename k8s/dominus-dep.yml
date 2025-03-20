@@ -22,20 +22,21 @@ spec:
     spec:
       containers:
         - name: dominus
-          image: mbi8807/dominus:kubernetes
+          image: dominus:kubernetes
+          imagePullPolicy: IfNotPresent
           resources:
             requests:
               cpu: 1000m
               memory: 1Gi
             limits:
-              cpu: 2000m
-              memory: 2Gi
+              cpu: 3000m
+              memory: 3Gi
           livenessProbe:
             exec:
               command:
                 - sh
                 - -c
-                - "wget -qO- --header='API_TOKEN: $API_TOKEN' http://127.0.0.1:8000/health"
+                - "wget -qO- --header='x-api-key: dominus_example_@10102024KeyServerToken' http://127.0.0.1:8000/health"
             initialDelaySeconds: 60
             timeoutSeconds: 2
             successThreshold: 1

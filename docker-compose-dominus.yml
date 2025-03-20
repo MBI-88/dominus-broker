@@ -24,7 +24,7 @@ services:
       - dominus_certs:/etc/dominus/certs:ro 
       - dominus_logs:/var/dominus/logs:rw
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--header","API_TOKEN: dominus_example_@10102024KeyServerToken","http://localhost:8000/health"]
+      test: ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://localhost:8000/health"]
       interval: 1m
       timeout: 2s
       retries: 3
@@ -124,6 +124,4 @@ volumes:
 
 networks:
   dominus:
-    driver: overlay
-    attachable: true 
-    external: true
+    driver: bridge
