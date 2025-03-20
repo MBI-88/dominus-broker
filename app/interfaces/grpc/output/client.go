@@ -22,6 +22,7 @@ func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, erro
 		if err != nil {
 			return nil, err
 		}
+		defer conn.Close()
 		client := pb.NewGrpcClient(conn)
 		msg := &pb.RequestMessage{
 			Subscribers: nil, Payload: body,
@@ -64,6 +65,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- e
 											}
 										}
 									} else {
+										client.CloseSend()
 										return
 									}
 								}
@@ -114,6 +116,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 								if err != nil {
 									sig <- err
 									tx <- struct{}{}
+									c.CloseSend()
 									return
 								} else {
 									msg <- resp.GetPayload()
@@ -153,6 +156,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 											errMsg <- err
 										}
 									} else {
+										c.CloseSend()
 										return
 									}
 								}

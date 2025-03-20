@@ -13,8 +13,10 @@ services:
         condition: on-failure
         delay: 2s
         max_attempts: 3
-    environment:
-      - .env.prod 
+
+    env_file:
+      - .env.prod
+      
     ports:
       - "8000:8000"
       - "5000:5000"
@@ -24,7 +26,7 @@ services:
       - dominus_certs:/etc/dominus/certs:ro 
       - dominus_logs:/var/dominus/logs:rw
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://localhost:8000/health"]
+      test: ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://127.0.0.1:8000/health"]
       interval: 1m
       timeout: 2s
       retries: 3

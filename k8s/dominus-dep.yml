@@ -86,89 +86,11 @@ spec:
                   name: dominus-config
                   key: LOGS
 
-            - name: WRITE_TIMEOUT
+            - name: ALLOW_ORIGINS
               valueFrom:
                 secretKeyRef:
                   name: dominus-config
-                  key: WRITE_TIMEOUT
-
-            - name: READ_TIMEOUT
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: READ_TIMEOUT
-
-            - name: IDLE_TIMOUT
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: IDLE_TIMOUT
-
-            - name: MAX_CONNS_PER_IP
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: MAX_CONNS_PER_IP
-
-            - name: MAX_REQUEST_PER_CONN
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: MAX_REQUEST_PER_CONN
-
-            - name: MAX_REQUEST_BODY_SIZE
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: MAX_REQUEST_BODY_SIZE
-
-            - name: REDUCE_MEMORY_USAGE
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: REDUCE_MEMORY_USAGE
-
-            - name: DISABLE_HEADER_NAMES_NORMALIZING
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: DISABLE_HEADER_NAMES_NORMALIZING
-
-            - name: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDED
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDED
-
-            - name: NO_DEFAULT_DATE
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: NO_DEFAULT_DATE
-
-            - name: KEEP_HIJACKED_CONNS
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: KEEP_HIJACKED_CONNS
-
-            - name: CLOSE_ON_SHUTDOWN
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: CLOSE_ON_SHUTDOWN
-
-            - name: STREAM_REQUEST_BODY
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: STREAM_REQUEST_BODY
-
-            - name: CIDR
-              valueFrom:
-                secretKeyRef:
-                  name: dominus-config
-                  key: CIDR
+                  key: ALLOW_ORIGINS
 
           ports:
             - containerPort: 8000

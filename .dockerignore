@@ -5,8 +5,12 @@ Dockerfile.*
 *.sum
 .gitignore
 .dockerignore
-*.env
-/doc
-/database
+*.out
 *.yml
 *.log
+k8s/
+*.conf
+*.md
+logs/
+certs/
+.vscode/

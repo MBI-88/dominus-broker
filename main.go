@@ -23,7 +23,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/fasthttp/router"
 	grpcmetrics "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
@@ -138,20 +137,12 @@ func main() {
 	r := fasthttp.Server{
 		Handler:                            midF.Middlewares(router.Handler),
 		Name:                               "dominus-project",
-		ReadTimeout:                        time.Duration(env.ReadTimeout) * time.Second,
-		WriteTimeout:                       time.Duration(env.WriteTimeout) * time.Second,
-		IdleTimeout:                        time.Duration(env.IdleTimeout),
-		MaxConnsPerIP:                      env.MaxConnsPerIp,
-		MaxRequestsPerConn:                 env.MaxRequestPerConn,
-		MaxRequestBodySize:                 env.MaxRequestBodySize,
-		ReduceMemoryUsage:                  env.ReduceMemoryUsage,
-		DisablePreParseMultipartForm:       env.DisablePreparseMultipartForm,
-		DisableHeaderNamesNormalizing:      env.DisableHeaderNamesNormalizing,
-		SleepWhenConcurrencyLimitsExceeded: time.Duration(env.SleepWhenConcurrencyLimitExceded),
-		NoDefaultDate:                      env.NoDefaultDate,
-		KeepHijackedConns:                  env.KeepHijackedConns,
-		CloseOnShutdown:                    env.CloseOnShutdown,
-		StreamRequestBody:                  env.StreamRequestBody,
+		MaxRequestBodySize:                 1000,
+		ReduceMemoryUsage:                  true,
+		DisablePreParseMultipartForm:       true,
+		KeepHijackedConns:                  true,
+		CloseOnShutdown:                    true,
+		StreamRequestBody:                  true,
 		Logger:                             logs,
 	}
 

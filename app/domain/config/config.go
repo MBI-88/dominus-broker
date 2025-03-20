@@ -11,31 +11,14 @@ var (
 type config struct {
 	RestPort                         int64
 	GrpcPort                         int64
-	WriteTimeout                     int
-	ReadTimeout                      int
-	IdleTimeout                      int
-	MaxConnsPerIp                    int
-	MaxRequestPerConn                int
-	MaxRequestBodySize               int
-	SleepWhenConcurrencyLimitExceded int
-	Host                             string
 	KeyFile                          string
 	SslCaCert                        string
 	SslCert                          string
 	ApiToken                         string
-	Dsn                              string
 	AllowOrigins                     string
 	ConnectionKey                    string
-	Database                         string
-	Collections                      string
 	Logs                             string
-	StreamRequestBody                bool
-	CloseOnShutdown                  bool
-	KeepHijackedConns                bool
-	NoDefaultDate                    bool
-	DisableHeaderNamesNormalizing    bool
-	DisablePreparseMultipartForm     bool
-	ReduceMemoryUsage                bool
+	Host                             string
 }
 
 func (s *config) setEnv() {
@@ -45,25 +28,8 @@ func (s *config) setEnv() {
 	s.SslCert = viper.GetString("SSL_CERT")
 	s.SslCaCert = viper.GetString("SSL_CA")
 	s.KeyFile = viper.GetString("KEY_FILE")
-	s.WriteTimeout = viper.GetInt("WRITE_TIMEOUT")
-	s.ReadTimeout = viper.GetInt("READ_TIMEOUT")
-	s.IdleTimeout = viper.GetInt("IDLE_TIMOUT")
-	s.MaxConnsPerIp = viper.GetInt("MAX_CONNS_PER_IP")
-	s.MaxRequestPerConn = viper.GetInt("MAX_REQUEST_PER_CONN")
-	s.MaxRequestBodySize = viper.GetInt("MAX_REQUEST_BODY_SIZE")
-	s.ReduceMemoryUsage = viper.GetBool("REDUCE_MEMORY_USAGE")
-	s.DisablePreparseMultipartForm = viper.GetBool("DISABLE_PREPARSE_MULTIPART_FORM")
-	s.DisableHeaderNamesNormalizing = viper.GetBool("DISABLE_HEADER_NAMES_NORMALIZING")
-	s.SleepWhenConcurrencyLimitExceded = viper.GetInt("SLEEP_WHEN_CONCURRENCY_LIMIT_EXCEDED")
-	s.NoDefaultDate = viper.GetBool("NO_DEFAULT_DATE")
-	s.KeepHijackedConns = viper.GetBool("KEEP_HIJACKED_CONNS")
-	s.CloseOnShutdown = viper.GetBool("CLOSE_ON_SHUTDOWN")
-	s.StreamRequestBody = viper.GetBool("STREAM_REQUEST_BODY")
-	s.Dsn = viper.GetString("DSN")
 	s.AllowOrigins = viper.GetString("ALLOW_ORIGINS")
 	s.ConnectionKey = grpcConnKey
-	s.Database = viper.GetString("DATABASE")
-	s.Collections = viper.GetString("COLLECTIONS")
 	s.Logs = viper.GetString("LOGS")
 	s.Host = viper.GetString("HOST")
 }
@@ -91,7 +57,6 @@ func (s *config) GetEnvVarTest() config {
 		}
 	}
 	s.setEnv()
-	s.Database = "test"
 	return *s
 }
 
