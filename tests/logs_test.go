@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"dominus-project/app/domain/rules"
 	"dominus-project/app/interactors"
 	"dominus-project/app/interfaces/fasthttp/input"
 	"testing"
@@ -11,11 +10,10 @@ import (
 )
 
 func TestGetLogsController(t *testing.T) {
-	rls := rules.NewRules()
 	t.Run("Response_StatusOK", func(t *testing.T) {
 		router := router.New()
 		log := NewEventMock(true)
-		inter := interactors.NewInteractor(log, rls)
+		inter := interactors.NewInteractor(log)
 		inter = inter.Set(NewGrpcClientMock())
 		input.NewSystemAPI(router, inter.NewSystemService())
 		ctx := new(fasthttp.RequestCtx)
@@ -31,7 +29,7 @@ func TestGetLogsController(t *testing.T) {
 	t.Run("Response_Error", func(t *testing.T) {
 		router := router.New()
 		log := NewEventMock(false)
-		inter := interactors.NewInteractor(log, rls)
+		inter := interactors.NewInteractor(log)
 		inter = inter.Set(NewGrpcClientMock())
 		input.NewSystemAPI(router, inter.NewSystemService())
 		ctx := new(fasthttp.RequestCtx)
@@ -46,11 +44,10 @@ func TestGetLogsController(t *testing.T) {
 }
 
 func TestGetBackupController(t *testing.T) {
-	rls := rules.NewRules()
 	t.Run("Response_StatusOK", func(t *testing.T) {
 		router := router.New()
 		log := NewEventMock(true)
-		inter := interactors.NewInteractor(log, rls)
+		inter := interactors.NewInteractor(log)
 		inter = inter.Set(NewGrpcClientMock())
 		input.NewSystemAPI(router, inter.NewSystemService())
 		ctx := new(fasthttp.RequestCtx)
@@ -66,7 +63,7 @@ func TestGetBackupController(t *testing.T) {
 	t.Run("Response_Error", func(t *testing.T) {
 		router := router.New()
 		log := NewEventMock(false)
-		inter := interactors.NewInteractor(log, rls)
+		inter := interactors.NewInteractor(log)
 		inter = inter.Set(NewGrpcClientMock())
 		input.NewSystemAPI(router, inter.NewSystemService())
 		ctx := new(fasthttp.RequestCtx)

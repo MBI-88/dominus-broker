@@ -3,6 +3,7 @@ package tests
 import (
 	"dominus-project/app/domain/repos"
 	"fmt"
+	"log"
 )
 
 
@@ -12,11 +13,11 @@ type eventMock struct {
 }
 
 func (*eventMock) WriteLog(op, dsc string) {
-
+	log.Println(op, " ", dsc)
 }
 
 func (*eventMock) Printf(format string, args ...any) {
-	
+	log.Println(format, " ", args)
 }
 
 func (ev *eventMock) GetLogs() ([]string, error) {

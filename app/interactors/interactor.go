@@ -2,18 +2,15 @@ package interactors
 
 import (
 	"dominus-project/app/domain/repos"
-	"dominus-project/app/domain/rules"
 )
 
 type interactor struct {
 	log     repos.LogsInt
 	gclient repos.GrpClientInt
-	rls     rules.RulesInt
 }
 
 func (i interactor) NewGrpcService() GrpcServiceInt {
 	return &grpcService{
-		rls:    i.rls,
 		lg:     i.log,
 		client: i.gclient,
 	}
@@ -37,9 +34,8 @@ type InteractorInt interface {
 }
 
 // Create a new interactor instance
-func NewInteractor(lg repos.LogsInt, rls rules.RulesInt) InteractorInt {
+func NewInteractor(lg repos.LogsInt) InteractorInt {
 	return &interactor{
 		log: lg,
-		rls: rls,
 	}
 }

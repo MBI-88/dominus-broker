@@ -3,12 +3,10 @@ package interactors
 import (
 	"context"
 	"dominus-project/app/domain/repos"
-	"dominus-project/app/domain/rules"
 	"fmt"
 )
 
 type grpcService struct {
-	rls        rules.RulesInt
 	client     repos.GrpClientInt
 	lg         repos.LogsInt
 	collection string

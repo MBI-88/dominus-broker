@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"dominus-project/app/domain/config"
-	"dominus-project/app/domain/rules"
 	"dominus-project/app/interactors"
 	"dominus-project/docs"
 
@@ -88,10 +87,9 @@ func main() {
 	//Instances
 	settings := config.NewConfig()
 	env := settings.GetEnvVar(*mode)
-	rls := rules.NewRules()
 
 	logs := events.NewLogs(env.Logs)
-	inter := interactors.NewInteractor(logs, rls)
+	inter := interactors.NewInteractor(logs)
 	docs.SwaggerInfo.Host = env.Host
 
 	// Signals

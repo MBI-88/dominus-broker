@@ -1,16 +1,14 @@
 package tests
 
 import (
-	"dominus-project/app/domain/rules"
 	"dominus-project/app/interactors"
 	"encoding/json"
 	"testing"
 )
 
 func TestSimpleConn(t *testing.T) {
-	rls := rules.NewRules()
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, rls)
+	inter := interactors.NewInteractor(log)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("Connection-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -31,35 +29,9 @@ func TestSimpleConn(t *testing.T) {
 	})
 }
 
-func TestCheckURI(t *testing.T) {
-	rls := rules.NewRules()
-	arrayErr := make([]bool, 0, 2)
-	t.Run("Check-OK", func(t *testing.T) {
-		for _, uri := range subsOk {
-			arrayErr = append(arrayErr, rls.CheckURI(uri))
-		}
-
-		if arrayErr[0] != true && arrayErr[1] != true && arrayErr[2] != true && arrayErr[3] != true {
-			t.Fatalf("Expected true but received false")
-		}
-	})
-
-	t.Run("Check-Error", func(t *testing.T) {
-		arrayErr = make([]bool, 0, 2)
-		for _, uri := range subsEr {
-			arrayErr = append(arrayErr, rls.CheckURI(uri))
-		}
-
-		if arrayErr[0] != false && arrayErr[1] != false {
-			t.Fatalf("Expected false but received true")
-		}
-	})
-}
-
 func TestClientStream(t *testing.T) {
-	rls := rules.NewRules()
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, rls)
+	inter := interactors.NewInteractor(log)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ClientStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -81,9 +53,8 @@ func TestClientStream(t *testing.T) {
 }
 
 func TestServerStream(t *testing.T) {
-	rls := rules.NewRules()
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, rls)
+	inter := interactors.NewInteractor(log)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ServerStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -109,9 +80,8 @@ func TestServerStream(t *testing.T) {
 }
 
 func TestBidirectionalStream(t *testing.T) {
-	rls := rules.NewRules()
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, rls)
+	inter := interactors.NewInteractor(log)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("BidirectionalStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
