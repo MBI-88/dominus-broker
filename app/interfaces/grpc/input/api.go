@@ -19,7 +19,7 @@ func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.R
 	if err := s.service.SimpleConn(ms); err != nil {
 		return &pb.Response{Status: uint32(500), Message: err.Error()}, err
 	}
-	return &pb.Response{Status: uint32(200), Message: "[*]Accepted"}, nil
+	return &pb.Response{Status: uint32(200), Message: "[+] Accepted"}, nil
 }
 
 // Receives array messages from client
