@@ -4,6 +4,7 @@ import (
 	"context"
 	"dominus-project/app/domain/repos"
 	pb "dominus-project/app/interfaces/grpc/proto/builder"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
@@ -11,6 +12,7 @@ import (
 
 type grpcClient struct {
 	opts []grpc.DialOption
+	lgs  repos.LogsInt
 }
 
 func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, error) {
@@ -32,93 +34,82 @@ func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, erro
 	return resp, nil
 }
 
-func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{}) {
-	arrayMsg := make([]chan []byte, 0, len(urls))
-
+func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte) {
+	arrayDoQuery := make([]func([]byte), 0, len(urls))
+	lock := new(sync.Mutex)
 	connect := func(url string) (pb.Grpc_ClientStreamClient, error) {
 		conn, _ := grpc.NewClient(url, g.opts...)
 		c := pb.NewGrpcClient(conn)
 		return c.ClientStream(context.Background())
 	}
+	doQuery := func(url string) func([]byte) {
+		stream, errConn := connect(url)
+		return func(payload []byte) {
+			lock.Lock()
+			err := errConn
+			lock.Unlock()
+			if err == nil {
+				if err := stream.Send(&pb.RequestMessage{
+					Subscribers: urls,
+					Payload:     payload}); err != nil {
+					g.lgs.WriteLog("ClientStream", err.Error())
+				}
+			} else {
+				temp, err := connect(url)
+				if err == nil {
+					lock.Lock()
+					stream, errConn = temp, err
+					lock.Unlock()
+				}
+
+			}
+		}
+	}
 
 	for _, url := range urls {
-		ch := make(chan []byte, 0)
-		arrayMsg = append(arrayMsg, ch)
-		go func(url string, ch chan []byte) {
-			stream, errConn := connect(url)
-			for {
-				select {
-				case payload, ok := <-ch:
-					if ok {
-						if errConn == nil {
-							if err := stream.Send(&pb.RequestMessage{
-								Subscribers: urls,
-								Payload:     payload}); err != nil {
-								sig <- err
-								stream, errConn = connect(url)
-							}
-						} else {
-							stream, errConn = connect(url)
-						}
-					} else {
-						if errConn == nil {
-							stream.CloseSend()
-						}
-						return
-					}
-				}
-			}
-		}(url, ch)
+		cls := doQuery(url)
+		arrayDoQuery = append(arrayDoQuery, cls)
 	}
 
 	for {
 		select {
 		case payload, ok := <-msg:
 			if ok {
-				for _, ch := range arrayMsg {
-					ch <- payload
+				for _, cls := range arrayDoQuery {
+					go cls(payload)
 				}
-			} else {
-				for _, ch := range arrayMsg {
-					close(ch)
-				}
-				tx <- struct{}{}
-				return
 			}
 		}
 	}
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, ctx context.Context, tx chan<- struct{}) {
-	for p, url := range urls {
-		go func(url string, p int) {
-			conn, err := grpc.NewClient(url, g.opts...)
-			if err == nil {
-				client := pb.NewGrpcClient(conn)
-				reqMsg := &pb.RequestMessage{
-					Subscribers: nil,
-					Payload:     initalMsg,
-				}
-				stream, err := client.ServerStream(ctx, reqMsg)
-				if err == nil {
-					go func(c pb.Grpc_ServerStreamClient, p int) {
-						for {
-							resp, err := c.Recv()
-							if err != nil {
-								sig <- err
-								tx <- struct{}{}
-								c.CloseSend()
-								return
-							} else {
-								msg <- resp.GetPayload()
-							}
-						}
-					}(stream, p)
-				} else {
-					return
-				}
+func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, ctx context.Context, tx chan<- struct{}) {
+	for _, url := range urls {
+		go func(url string) {
+			conn, _ := grpc.NewClient(url, g.opts...)
+			client := pb.NewGrpcClient(conn)
+			reqMsg := &pb.RequestMessage{
+				Subscribers: nil,
+				Payload:     initalMsg,
 			}
-		}(url, p)
+			stream, err := client.ServerStream(ctx, reqMsg)
+			if err == nil {
+				for {
+					resp, err := stream.Recv()
+					if err != nil {
+						g.lgs.WriteLog("ServerStream", err.Error())
+						tx <- struct{}{}
+						stream.CloseSend()
+						return
+					} else {
+						msg <- resp.GetPayload()
+					}
+				}
+			} else {
+				return
+			}
+
+		}(url)
 	}
 }
 
@@ -187,8 +178,9 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 	}
 }
 
-func NewGrpClient(opts []grpc.DialOption) repos.GrpClientInt {
+func NewGrpClient(opts []grpc.DialOption, lgs repos.LogsInt) repos.GrpClientInt {
 	return &grpcClient{
 		opts: opts,
+		lgs:  lgs,
 	}
 }

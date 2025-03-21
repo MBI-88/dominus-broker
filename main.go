@@ -215,7 +215,7 @@ func main() {
 		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
 	)
 
-	gclient := gt.NewGrpClient(optsD)
+	gclient := gt.NewGrpClient(optsD, logs)
 	inter = inter.Set(gclient)
 	srG := gi.NewGrpcAPI(optsS, inter.NewGrpcService())
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))

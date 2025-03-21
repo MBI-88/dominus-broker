@@ -9,7 +9,6 @@ import (
 type grpcService struct {
 	client     repos.GrpClientInt
 	lg         repos.LogsInt
-	collection string
 }
 
 func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
@@ -31,7 +30,6 @@ func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
 
 func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 	stream := make(chan []byte, 0)
-	closed := make(chan struct{}, 0)
 	req, err := st.Recv()
 	if err != nil {
 		return err
@@ -41,20 +39,7 @@ func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 		return fmt.Errorf("Subscribers not found")
 	}
 
-	errMsg := make(chan error, len(subscribers))
-	go c.client.ClientStream(subscribers, stream, errMsg, closed)
-	go func(sig <-chan error) {
-		for {
-			select {
-			case err, ok := <-sig:
-				if ok {
-					c.lg.WriteLog("StreamClientConn", err.Error())
-				} else {
-					return
-				}
-			}
-		}
-	}(errMsg)
+	go c.client.ClientStream(subscribers, stream)
 
 	stream <- req.GetPayload()
 	for {
@@ -62,8 +47,6 @@ func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 		if err != nil {
 			c.lg.WriteLog("StreamClientConn", err.Error())
 			close(stream)
-			<-closed
-			close(errMsg)
 			return err
 		}
 		stream <- req.GetPayload()
@@ -79,24 +62,10 @@ func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))
-	errMsg := make(chan error, total)
 	done := make(chan struct{}, total)
 	initialRequest := req.GetPayload()
 
-	go c.client.ServerStream(subscribers, initialRequest, stream, errMsg, ctx, done)
-
-	go func(sig <-chan error) {
-		for {
-			select {
-			case err, ok := <-sig:
-				if ok {
-					go c.lg.WriteLog("StreamServerConn", err.Error())
-				} else {
-					return
-				}
-			}
-		}
-	}(errMsg)
+	go c.client.ServerStream(subscribers, initialRequest, stream, ctx, done)
 
 	for {
 		select {
@@ -112,7 +81,6 @@ func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.
 			if total == 0 {
 				close(done)
 				close(stream)
-				close(errMsg)
 				return fmt.Errorf("Connection closed")
 			}
 		}

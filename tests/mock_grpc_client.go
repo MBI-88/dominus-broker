@@ -4,7 +4,6 @@ import (
 	"context"
 	"dominus-project/app/domain/repos"
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -14,13 +13,11 @@ func (grpcClientMock) Simple(url string, msg []byte) (repos.GrpResponseInt, erro
 	return nil, nil
 }
 
-func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{}) {
+func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte) {
 	for {
 		select {
 		case _, ok := <-msg:
 			if !ok {
-				sig <- fmt.Errorf("[-] Connection closed")
-				tx <- struct{}{}
 				return
 			}
 		}
@@ -28,7 +25,7 @@ func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, sig chan<- 
 
 }
 
-func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, sig chan<- error, ctx context.Context, tx chan<- struct{}) {
+func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, ctx context.Context, tx chan<- struct{}) {
 	for {
 		select {
 		case <-time.Tick(1 * time.Second):
@@ -36,7 +33,6 @@ func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- [
 			msg <- payload
 		case <-time.Tick(5 * time.Second):
 		case <-ctx.Done():
-			sig <- fmt.Errorf("[-] Context canceled")
 			for range urls {
 				tx <- struct{}{}
 			}
