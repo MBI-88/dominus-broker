@@ -34,41 +34,41 @@ func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, erro
 
 func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, sig chan<- error, tx chan<- struct{}) {
 	arrayMsg := make([]chan []byte, 0, len(urls))
-	for p, url := range urls {
+
+	connect := func(url string) (pb.Grpc_ClientStreamClient, error) {
+		conn, _ := grpc.NewClient(url, g.opts...)
+		c := pb.NewGrpcClient(conn)
+		return c.ClientStream(context.Background())
+	}
+
+	for _, url := range urls {
 		ch := make(chan []byte, 0)
 		arrayMsg = append(arrayMsg, ch)
-		go func(url string, ch chan []byte, p int) {
-			conn, err := grpc.NewClient(url, g.opts...)
-			if err == nil {
-				client := pb.NewGrpcClient(conn)
-				stream, err := client.ClientStream(context.Background())
-				if err == nil {
-					go func(client pb.Grpc_ClientStreamClient, p int) {
-						isClose := false
-						for {
-							select {
-							case payload, ok := <-ch:
-								if ok {
-									if !isClose {
-										if err := client.Send(&pb.RequestMessage{
-											Subscribers: urls,
-											Payload:     payload}); err != nil {
-											sig <- err
-											isClose = true
-										}
-									}
-								} else {
-									client.CloseSend()
-									return
-								}
+		go func(url string, ch chan []byte) {
+			stream, errConn := connect(url)
+			for {
+				select {
+				case payload, ok := <-ch:
+					if ok {
+						if errConn == nil {
+							if err := stream.Send(&pb.RequestMessage{
+								Subscribers: urls,
+								Payload:     payload}); err != nil {
+								sig <- err
+								stream, errConn = connect(url)
 							}
+						} else {
+							stream, errConn = connect(url)
 						}
-					}(stream, p)
-				} else {
-					return
+					} else {
+						if errConn == nil {
+							stream.CloseSend()
+						}
+						return
+					}
 				}
 			}
-		}(url, ch, p)
+		}(url, ch)
 	}
 
 	for {
