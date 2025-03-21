@@ -52,7 +52,7 @@ var (
 👉 Github: https://github.com/MBI-88
 🔧 Press CTRL+C to terminate the server
 
-dominus-project server is running on`
+dominus server is running on`
 )
 
 // catches inital variables
@@ -181,7 +181,7 @@ func main() {
 		}
 		optsS = append(optsS, grpc.Creds(credsS))
 
-		credsD, err := credentials.NewClientTLSFromFile(env.SslCaCert, "dominus-project.com")
+		credsD, err := credentials.NewClientTLSFromFile(env.SslCaCert, "dominus.com")
 		if err != nil {
 			cancel()
 			panic(err)

@@ -46,6 +46,7 @@ func (s config) GetEnvVar(prod bool) config {
 		}
 	}
 	s.setEnv()
+	s.checkVars()
 	return s
 }
 
@@ -57,15 +58,26 @@ func (s *config) GetEnvVarTest() config {
 		}
 	}
 	s.setEnv()
+	s.checkVars()
 	return *s
 }
 
+func (s *config) checkVars() {
+	if s.GrpcPort == 0 {
+		panic("[-] GrcpPort must be different from 0")
+	}else if s.RestPort == 0 {
+		panic("[-] RestPort must be different from 0")
+	}else if s.ApiToken == "" {
+		panic("[-] ApiToken must be different from empty")
+	}else if s.AllowOrigins == "" {
+		panic("[-] AllowOrigins must be different from empty")
+	}else if s.Logs == "" {
+		panic("[-] Logs must be different from empty")
+	}
+}
+
 type restConfigInt interface {
-	//Get variables for testing
 	GetEnvVarTest() config
-	//Get variables for development/production.
-	//In production mode variables are setted up from system environment
-	//In development mode variables are setted up form env file
 	GetEnvVar(prod bool) config
 }
 
