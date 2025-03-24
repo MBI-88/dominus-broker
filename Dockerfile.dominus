@@ -14,12 +14,10 @@ ENV REST_PORT=8000
 ENV GRPC_PORT=5000
 
 COPY --from=builder /app/dominus ./dominus  
+RUN mkdir -p /var/dominus/logs
+RUN mkdir -p /etc/dominus/certs
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
-    chown appuser:appgroup ./dominus
-RUN mkdir -p /var/dominus/logs && \
-    chown -R appuser:appgroup /var/dominus/logs
-RUN mkdir -p /etc/dominus/certs && \
-    chown -R appuser:appgroup /etc/dominus/certs
+    chown appuser:appgroup /app
 
 USER appuser 
 EXPOSE ${REST_PORT} 
