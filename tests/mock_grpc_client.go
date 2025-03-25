@@ -13,7 +13,7 @@ func (grpcClientMock) Simple(url string, msg []byte) (repos.GrpResponseInt, erro
 	return nil, nil
 }
 
-func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte) {
+func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
 	for {
 		select {
 		case _, ok := <-msg:

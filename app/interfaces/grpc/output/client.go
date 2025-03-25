@@ -4,6 +4,7 @@ import (
 	"context"
 	"dominus-project/app/domain/repos"
 	pb "dominus-project/app/interfaces/grpc/proto/builder"
+	"io"
 	"sync"
 	"time"
 
@@ -34,13 +35,13 @@ func (g *grpcClient) Simple(url string, body []byte) (repos.GrpResponseInt, erro
 	return resp, nil
 }
 
-func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte) {
+func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
 	lock := new(sync.Mutex)
 	connect := func(url string) (pb.Grpc_ClientStreamClient, error) {
 		conn, _ := grpc.NewClient(url, g.opts...)
 		c := pb.NewGrpcClient(conn)
-		return c.ClientStream(context.Background())
+		return c.ClientStream(ctx)
 	}
 	doQuery := func(url string) func([]byte) {
 		stream, errConn := connect(url)
@@ -61,7 +62,6 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte) {
 					stream, errConn = temp, err
 					lock.Unlock()
 				}
-
 			}
 		}
 	}
@@ -92,85 +92,123 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 				Subscribers: nil,
 				Payload:     initalMsg,
 			}
+		connect:
 			stream, err := client.ServerStream(ctx, reqMsg)
 			if err == nil {
 				for {
 					resp, err := stream.Recv()
-					if err != nil {
+					if err == io.EOF {
 						g.lgs.WriteLog("ServerStream", err.Error())
 						tx <- struct{}{}
 						stream.CloseSend()
 						return
+					} else if err != io.EOF {
+						if _, ok := <-ctx.Done(); !ok {
+							return
+						}
+						goto connect
 					} else {
 						msg <- resp.GetPayload()
 					}
 				}
 			} else {
-				return
+				if _, ok := <-ctx.Done(); !ok {
+					return
+				}
+				goto connect
 			}
-
 		}(url)
 	}
 }
 
 func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
-	arrayMsg := make([]chan []byte, 0, len(urls))
-	for p, url := range urls {
-		ch := make(chan []byte, 0)
-		arrayMsg = append(arrayMsg, ch)
-		go func(ch <-chan []byte, p int, sub string) {
-			conn, err := grpc.NewClient(url, g.opts...)
-			if err == nil {
-				client := pb.NewGrpcClient(conn)
-				stream, err := client.BidirectionalStream(ctx)
-				if err == nil {
-					//Sends to subscriber
-					go func(c pb.Grpc_BidirectionalStreamClient, p int) {
-						for {
-							select {
-							case payload, ok := <-ch:
-								if ok {
-									if err := c.Send(&pb.RequestMessage{
-										Subscribers: urls,
-										Payload:     payload}); err != nil {
-										errMsg <- err
-									}
-								} else {
-									c.CloseSend()
-									return
-								}
-							}
-						}
-					}(stream, p)
+	lock := new(sync.Mutex)
+	arrayDoQuery := make([]func([]byte), 0, len(urls))
 
-					//Receives from subscriber
-					go func(c pb.Grpc_BidirectionalStreamClient, p int) {
-						for {
-							resp, err := c.Recv()
-							if err != nil {
-								errMsg <- err
-								done <- struct{}{}
-								return
-							}
-							subMsg <- resp.GetPayload()
-						}
-					}(stream, p)
+	connect := func(url string) (pb.Grpc_BidirectionalStreamClient, error) {
+		conn, _ := grpc.NewClient(url, g.opts...)
+		c := pb.NewGrpcClient(conn)
+		return c.BidirectionalStream(ctx)
+	}
+
+	doQuey := func(url string, stream pb.Grpc_BidirectionalStreamClient, errConn error) func([]byte) {
+		return func(payload []byte) {
+			lock.Lock()
+			err := errConn
+			lock.Unlock()
+			if err == nil {
+				if err := stream.Send(&pb.RequestMessage{
+					Subscribers: urls,
+					Payload:     payload}); err != nil {
+					g.lgs.WriteLog("ClientStream", err.Error())
+				}
+			} else {
+				temp, err := connect(url)
+				if err == nil {
+					lock.Lock()
+					stream, errConn = temp, err
+					lock.Unlock()
 				}
 			}
-		}(ch, p, url)
+		}
+	}
+
+	for _, url := range urls {
+		stream, err := connect(url)
+		cls := doQuey(url, stream, err)
+		arrayDoQuery = append(arrayDoQuery, cls)
+
+		go func(url string, c pb.Grpc_BidirectionalStreamClient, errConn error) {
+		connect:
+			lock.Lock()
+			err := errConn
+			lock.Unlock()
+			if err == nil {
+				for {
+					resp, err := stream.Recv()
+					if err == io.EOF {
+						g.lgs.WriteLog("ServerStream", err.Error())
+						tx <- struct{}{}
+						stream.CloseSend()
+						return
+					} else if err != io.EOF {
+						if _, ok := <-ctx.Done(); !ok {
+							return
+						}
+						temp, err := connect(url)
+						if err == nil {
+							lock.Lock()
+							stream, errConn = temp, err
+							lock.Unlock()
+						}
+						goto connect
+					} else {
+						subMsg <- resp.GetPayload()
+					}
+				}
+			} else {
+				if _, ok := <-ctx.Done(); !ok {
+					return
+				}
+				temp, err := connect(url)
+				if err == nil {
+					lock.Lock()
+					stream, errConn = temp, err
+					lock.Unlock()
+				}
+				goto connect
+			}
+		}(url, stream, err)
 	}
 
 	for {
 		select {
 		case payload, ok := <-provMsg:
 			if ok {
-				for _, ch := range arrayMsg {
-					ch <- payload
+				for _, cls := range arrayDoQuery {
+					go cls(payload)
 				}
 			} else {
-				for _, ch := range arrayMsg {
-					close(ch)
-				}
 				tx <- struct{}{}
 				return
 			}

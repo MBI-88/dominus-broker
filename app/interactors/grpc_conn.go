@@ -29,6 +29,8 @@ func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
 }
 
 func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	stream := make(chan []byte, 0)
 	req, err := st.Recv()
 	if err != nil {
@@ -39,7 +41,7 @@ func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 		return fmt.Errorf("Subscribers not found")
 	}
 
-	go c.client.ClientStream(subscribers, stream)
+	go c.client.ClientStream(subscribers, stream, ctx)
 
 	stream <- req.GetPayload()
 	for {
@@ -47,6 +49,7 @@ func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 		if err != nil {
 			c.lg.WriteLog("StreamClientConn", err.Error())
 			close(stream)
+			cancel()
 			return err
 		}
 		stream <- req.GetPayload()
