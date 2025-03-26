@@ -50,10 +50,16 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, ctx context.
 			err := errConn
 			lock.Unlock()
 			if err == nil {
-				if err := stream.Send(&pb.RequestMessage{
+				lock.Lock()
+				err := stream.Send(&pb.RequestMessage{
 					Subscribers: urls,
-					Payload:     payload}); err != nil {
+					Payload:     payload})
+				lock.Unlock()
+				if err != nil {
 					g.lgs.WriteLog("ClientStream", err.Error())
+					lock.Lock()
+					errConn = err
+					lock.Unlock()
 				}
 			} else {
 				temp, err := connect(url)
@@ -102,20 +108,21 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 						tx <- struct{}{}
 						stream.CloseSend()
 						return
-					} else if err != io.EOF {
-						if _, ok := <-ctx.Done(); !ok {
-							return
-						}
+					} else if err != io.EOF && err != nil {
 						goto connect
 					} else {
 						msg <- resp.GetPayload()
 					}
 				}
 			} else {
-				if _, ok := <-ctx.Done(); !ok {
-					return
+				for {
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.Tick(1 * time.Millisecond):
+						goto connect
+					}
 				}
-				goto connect
 			}
 		}(url)
 	}
@@ -137,10 +144,16 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 			err := errConn
 			lock.Unlock()
 			if err == nil {
-				if err := stream.Send(&pb.RequestMessage{
+				lock.Lock()
+				err := stream.Send(&pb.RequestMessage{
 					Subscribers: urls,
-					Payload:     payload}); err != nil {
+					Payload:     payload})
+				lock.Unlock()
+				if err != nil {
 					g.lgs.WriteLog("ClientStream", err.Error())
+					lock.Lock()
+					errConn = err
+					lock.Unlock()
 				}
 			} else {
 				temp, err := connect(url)
@@ -165,38 +178,29 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 			lock.Unlock()
 			if err == nil {
 				for {
+					lock.Lock()
 					resp, err := stream.Recv()
+					lock.Unlock()
 					if err == io.EOF {
 						g.lgs.WriteLog("ServerStream", err.Error())
 						tx <- struct{}{}
 						stream.CloseSend()
 						return
-					} else if err != io.EOF {
-						if _, ok := <-ctx.Done(); !ok {
-							return
-						}
-						temp, err := connect(url)
-						if err == nil {
-							lock.Lock()
-							stream, errConn = temp, err
-							lock.Unlock()
-						}
+					} else if err != io.EOF && err != nil {
 						goto connect
 					} else {
 						subMsg <- resp.GetPayload()
 					}
 				}
 			} else {
-				if _, ok := <-ctx.Done(); !ok {
-					return
+				for {
+					select {
+					case <-ctx.Done():
+						return
+					case <-time.Tick(1 * time.Millisecond):
+						goto connect
+					}
 				}
-				temp, err := connect(url)
-				if err == nil {
-					lock.Lock()
-					stream, errConn = temp, err
-					lock.Unlock()
-				}
-				goto connect
 			}
 		}(url, stream, err)
 	}
