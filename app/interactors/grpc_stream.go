@@ -6,28 +6,6 @@ import (
 	"fmt"
 )
 
-type grpcService struct {
-	client     repos.GrpClientInt
-	lg         repos.LogsInt
-}
-
-func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
-	subs := ms.GetSubscribers()
-	if len(subs) == 0 {
-		return fmt.Errorf("Subscribers not found")
-	}
-	body := ms.GetPayload()
-	for _, sub := range subs {
-		go func(url string, body []byte) {
-			_, err := c.client.Simple(url, body)
-			if err != nil {
-				c.lg.WriteLog("SimpleConn", err.Error())
-			}
-		}(sub, body)
-	}
-	return nil
-}
-
 func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -158,11 +136,4 @@ func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
 			}
 		}
 	}
-}
-
-type GrpcServiceInt interface {
-	SimpleConn(ms repos.GrpRequestMessageInt) error
-	StreamClientConn(st repos.StreamClientInt) error
-	StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error
-	StreamBiConn(st repos.StreamBiInt) error
 }
