@@ -8,7 +8,6 @@ type RestContextInt interface {
 	BodyParser(obj any) error
 	Queries() map[string]string
 	Params(key string) string
-	QueryInt(key string) int
 }
 
 type GrpRequestMessageInt interface {

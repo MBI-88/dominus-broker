@@ -1,15 +1,15 @@
 package interactors
 
 import (
+	"dominus-project/app/domain/entities"
 	"dominus-project/app/domain/repos"
 )
 
 type grpcService struct {
-	client     repos.GrpClientInt
-	lg         repos.LogsInt
+	client repos.GrpClientInt
+	lg     repos.LogsInt
+	topics entities.TopicsInt
 }
-
-
 
 type GrpcServiceInt interface {
 	SimpleConn(ms repos.GrpRequestMessageInt) error

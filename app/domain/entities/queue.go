@@ -3,7 +3,7 @@ package entities
 import "sync"
 
 var (
-	mutex = new(sync.RWMutex)
+	mutex = new(sync.Mutex)
 )
 
 type node struct {
@@ -12,18 +12,18 @@ type node struct {
 }
 
 func (n *node) Add(data []byte) {
-	mutex.RLocker()
+	mutex.Lock()
 	if n.data == nil {
 		n.data = data
 		n.next = new(node)
 		return
 	}
-	mutex.RUnlock()
+	mutex.Unlock()
 	n.next.Add(data)
 }
 
 func (n *node) Read() []byte {
-	mutex.RLocker()
+	mutex.Lock()
 	if n == nil {
 		return []byte{}
 	}
@@ -32,7 +32,7 @@ func (n *node) Read() []byte {
 		n = n.next
 		return data
 	}
-	mutex.RUnlock()
+	mutex.Unlock()
 	return n.next.Read()
 }
 

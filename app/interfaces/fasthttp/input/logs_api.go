@@ -24,13 +24,12 @@ type system struct {
 // @Param size query int true "size"
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
-// @Failure 404 {object} map[string]string "Response body {message: error}"
+// @Failure 500 {object} map[string]string "Response body {message: error}"
 // @Router /logs [get]
 func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
-	context := NewRestContext(ctx)
-	result, err := r.service.GetLogs(context)
+	result, err := r.service.GetLogs()
 	if err != nil {
-		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
+		b := setErrorResponse(ctx, "application/json", fasthttp.StatusInternalServerError, err.Error())
 		ctx.Response.SetBody(b)
 		return
 	}
@@ -47,13 +46,12 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 // @Description <h3>Gets all selected items from the database for making a backup</h3>
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
-// @Failure 404 {object} map[string]string "Error response"
+// @Failure 500 {object} map[string]string "Error response"
 // @Router /logs-backup [get]
 func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
-	context := NewRestContext(ctx)
-	result, err := r.service.GetBackup(context)
+	result, err := r.service.GetLogs()
 	if err != nil {
-		b := r.setErrorResponse(ctx, "application/json", fasthttp.StatusNotFound, err.Error())
+		b := setErrorResponse(ctx, "application/json", fasthttp.StatusInternalServerError, err.Error())
 		ctx.Response.SetBody(b)
 		return
 	}
@@ -75,14 +73,6 @@ func (r *system) path() {
 	r.router.GET("/logs-backup", r.getBackup)
 }
 
-func (r *system) setErrorResponse(ctx *fasthttp.RequestCtx,  contenType string, statusCode int, er string) []byte {
-	ctx.Response.Header.Set("Content-Type", contenType)
-	ctx.Response.Header.SetStatusCode(statusCode)
-	msg := make(map[string]string)
-	msg["message"] = er
-	b, _ := r.js.Marshal(msg)
-	return b
-}
 
 func NewSystemAPI(r *router.Router, i interactors.SystemServiceInt) {
 	re := &system{router: r, service: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}

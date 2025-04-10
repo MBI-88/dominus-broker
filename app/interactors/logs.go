@@ -8,15 +8,10 @@ type systemService struct {
 	lg         repos.LogsInt
 }
 
-func (m *systemService) GetLogs(ctx repos.RestContextInt) ([]string, error) {
-	return m.lg.GetLogs()
-}
-
-func (m *systemService) GetBackup(ctx repos.RestContextInt) ([]string, error) {
+func (m *systemService) GetLogs() ([]string, error) {
 	return m.lg.GetLogs()
 }
 
 type SystemServiceInt interface {
-	GetLogs(ctx repos.RestContextInt) ([]string, error)
-	GetBackup(ctx repos.RestContextInt) ([]string, error)
+	GetLogs() ([]string, error)
 }
