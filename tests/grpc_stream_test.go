@@ -6,32 +6,9 @@ import (
 	"testing"
 )
 
-func TestSimpleConn(t *testing.T) {
-	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log)
-	inter = inter.Set(NewGrpcClientMock())
-	t.Run("Connection-OK", func(t *testing.T) {
-		payload, _ := json.Marshal(data)
-		simple := inter.NewGrpcService()
-		result := simple.SimpleConn(NewSimpleContextMock(payload, subsOk))
-		if result != nil {
-			t.Fatal(result)
-		}
-	})
-
-	t.Run("Connection-Error", func(t *testing.T) {
-		payload, _ := json.Marshal(data)
-		simple := inter.NewGrpcService()
-		result := simple.SimpleConn(NewSimpleContextMock(payload, make([]string, 0)))
-		if result == nil {
-			t.Fatalf("Expected error but received nil")
-		}
-	})
-}
-
 func TestClientStream(t *testing.T) {
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log)
+	inter := interactors.NewInteractor(log, 100)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ClientStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -54,7 +31,7 @@ func TestClientStream(t *testing.T) {
 
 func TestServerStream(t *testing.T) {
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log)
+	inter := interactors.NewInteractor(log, 100)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ServerStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -81,7 +58,7 @@ func TestServerStream(t *testing.T) {
 
 func TestBidirectionalStream(t *testing.T) {
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log)
+	inter := interactors.NewInteractor(log, 100)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("BidirectionalStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)

@@ -89,7 +89,7 @@ func main() {
 	env := settings.GetEnvVar(*mode)
 
 	logs := events.NewLogs(env.Logs)
-	inter := interactors.NewInteractor(logs)
+	inter := interactors.NewInteractor(logs, env.TopicLimit)
 	docs.SwaggerInfo.Host = env.Host
 
 	// Signals

@@ -50,8 +50,14 @@ func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamS
 	return s.service.StreamBiConn(ctx)
 }
 
+func (s *grpcController) runQueue() {
+	go s.service.RunQueue()
+}
+
 func NewGrpcAPI(opts []grpc.ServerOption, i interactors.GrpcServiceInt) *grpc.Server {
 	s := grpc.NewServer(opts...)
-	pb.RegisterGrpcServer(s, &grpcController{service: i})
+	gsrv := &grpcController{service: i}
+	pb.RegisterGrpcServer(s, gsrv)
+	gsrv.runQueue()
 	return s
 }

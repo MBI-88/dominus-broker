@@ -10,6 +10,7 @@ type interactor struct {
 	log     repos.LogsInt
 	gclient repos.GrpClientInt
 	topics  entities.TopicsInt
+	limit   int
 }
 
 func (i interactor) NewGrpcService() GrpcServiceInt {
@@ -34,8 +35,9 @@ func (i interactor) Set(c repos.GrpClientInt) InteractorInt {
 func (i interactor) NewManagerService() ManagerInt {
 	return &managerService{
 		topics: i.topics,
-		rls: rules.NewValidator(),
-	}	
+		rls:    rules.NewValidator(),
+		limit: int64(i.limit),
+	}
 }
 
 type InteractorInt interface {
@@ -45,9 +47,10 @@ type InteractorInt interface {
 }
 
 // Create a new interactor instance
-func NewInteractor(lg repos.LogsInt) InteractorInt {
+func NewInteractor(lg repos.LogsInt, limit int) InteractorInt {
 	return &interactor{
-		log: lg,
-		topics: entities.NewTopics(),
+		log:    lg,
+		topics: entities.NewTopics(limit),
+		limit: limit,
 	}
 }

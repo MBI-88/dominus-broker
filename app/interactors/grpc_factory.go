@@ -16,4 +16,5 @@ type GrpcServiceInt interface {
 	StreamClientConn(st repos.StreamClientInt) error
 	StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error
 	StreamBiConn(st repos.StreamBiInt) error
+	RunQueue()
 }

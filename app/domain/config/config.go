@@ -1,6 +1,8 @@
 package config
 
 import (
+	"log"
+
 	"github.com/spf13/viper"
 )
 
@@ -11,6 +13,7 @@ var (
 type config struct {
 	RestPort                         int64
 	GrpcPort                         int64
+	TopicLimit                       int
 	KeyFile                          string
 	SslCaCert                        string
 	SslCert                          string
@@ -32,6 +35,7 @@ func (s *config) setEnv() {
 	s.ConnectionKey = grpcConnKey
 	s.Logs = viper.GetString("LOGS")
 	s.Host = viper.GetString("HOST")
+	s.TopicLimit = viper.GetInt("TOPIC_LIMIT")
 }
 
 func (s config) GetEnvVar(prod bool) config {
@@ -64,15 +68,22 @@ func (s *config) GetEnvVarTest() config {
 
 func (s *config) checkVars() {
 	if s.GrpcPort == 0 {
-		panic("[-] GrcpPort must be different from 0")
+		log.Println("[+] GrpcPort was setted to default option 5000")
+		s.GrpcPort = 5000
 	}else if s.RestPort == 0 {
-		panic("[-] RestPort must be different from 0")
+		log.Println("[+] RestPort was setted to default option 8000")
+		s.RestPort = 8000
 	}else if s.ApiToken == "" {
 		panic("[-] ApiToken must be different from empty")
 	}else if s.AllowOrigins == "" {
-		panic("[-] AllowOrigins must be different from empty")
+		log.Println("[+] AllowOrigins was setted to default option 0.0.0.0/24")
+		s.AllowOrigins = "0.0.0.0/24"
 	}else if s.Logs == "" {
-		panic("[-] Logs must be different from empty")
+		log.Println("[+] Logs dir was setted to default option ./logs")
+		s.Logs = "./logs"
+	}else if s.TopicLimit == 0 {
+		log.Println("[+] TopicLimit was setted to default option 100")
+		s.TopicLimit = 100
 	}
 }
 
