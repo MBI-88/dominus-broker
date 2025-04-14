@@ -85,7 +85,7 @@ type serverContextMock struct {
 	*simpleContextMock
 }
 
-func (se *simpleContextMock) Send(payload []byte) error {
+func (se *serverContextMock) Send(payload []byte) error {
 	ad.Lock()
 	defer ad.Unlock()
 	return se.err

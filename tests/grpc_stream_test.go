@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"dominus-project/app/domain/entities"
 	"dominus-project/app/interactors"
 	"encoding/json"
 	"testing"
@@ -8,7 +9,8 @@ import (
 
 func TestClientStream(t *testing.T) {
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, 100)
+	topics := entities.NewTopics(100)
+	inter := interactors.NewInteractor(log, topics, 100)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ClientStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -31,7 +33,8 @@ func TestClientStream(t *testing.T) {
 
 func TestServerStream(t *testing.T) {
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, 100)
+	topics := entities.NewTopics(100)
+	inter := interactors.NewInteractor(log, topics, 100)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("ServerStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)
@@ -58,7 +61,8 @@ func TestServerStream(t *testing.T) {
 
 func TestBidirectionalStream(t *testing.T) {
 	log := NewEventMock(true)
-	inter := interactors.NewInteractor(log, 100)
+	topics := entities.NewTopics(100)
+	inter := interactors.NewInteractor(log, topics, 100)
 	inter = inter.Set(NewGrpcClientMock())
 	t.Run("BidirectionalStream-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(data)

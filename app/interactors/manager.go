@@ -5,6 +5,7 @@ import (
 	"dominus-project/app/domain/repos"
 	"dominus-project/app/domain/rules"
 	"fmt"
+	"sync"
 )
 
 type managerService struct {
@@ -14,8 +15,12 @@ type managerService struct {
 }
 
 func (m *managerService) AddTopic(ctx repos.RestContextInt) error {
-	topic := new(entities.Topic)
-
+	topic := &entities.Topic{
+		Queue: entities.NewQueue(),
+		Lck: new(sync.Mutex),
+		Limit: m.limit,
+	}
+	
 	if err := ctx.BodyParser(topic); err != nil {
 		return err
 	}
@@ -23,9 +28,9 @@ func (m *managerService) AddTopic(ctx repos.RestContextInt) error {
 		return err
 	}
 	if _, err := m.topics.Find(topic.Name); err != nil {
-		topic.Queue = entities.NewQueue(m.limit)
 		return m.topics.Append(topic)
 	}
+	
 	return fmt.Errorf("Topic exists")
 }
 

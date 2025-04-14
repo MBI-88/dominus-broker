@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"dominus-project/app/domain/config"
+	"dominus-project/app/domain/entities"
 	"dominus-project/app/interactors"
 	"dominus-project/docs"
 
@@ -32,7 +33,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
-	
 )
 
 var (
@@ -89,7 +89,8 @@ func main() {
 	env := settings.GetEnvVar(*mode)
 
 	logs := events.NewLogs(env.Logs)
-	inter := interactors.NewInteractor(logs, env.TopicLimit)
+	topics := entities.NewTopics(env.TopicLimit)
+	inter := interactors.NewInteractor(logs, topics, int64(env.TopicLimit))
 	docs.SwaggerInfo.Host = env.Host
 
 	// Signals

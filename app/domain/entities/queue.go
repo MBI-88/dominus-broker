@@ -1,39 +1,21 @@
 package entities
 
-import (
-	"fmt"
-	"sync"
-)
-
-var (
-	mutex = new(sync.Mutex)
-)
 
 type node struct {
 	data []byte
 	next *node
-	limit int64
-	total int64
 }
 
-func (n *node) Push(data []byte) error {
-	mutex.Lock()
+func (n *node) push(data []byte) error {
 	if n.data == nil {
-		if n.isFull() {
-			return fmt.Errorf("Full queue")
-		}
 		n.data = data
 		n.next = new(node)
-		n.total++
 		return nil 
 	}
-	mutex.Unlock()
-	n.next.Push(data)
-	return nil 
+	return n.next.push(data)
 }
 
-func (n *node) Pop() []byte {
-	mutex.Lock()
+func (n *node) pop() []byte {
 	if n == nil {
 		return nil
 	}
@@ -42,24 +24,15 @@ func (n *node) Pop() []byte {
 		n = n.next
 		return data
 	}
-	mutex.Unlock()
-	return n.next.Pop()
+	return n.next.pop()
 }
 
-func (n *node) isFull() bool {
-	if n.total >= n.limit {
-		return true
-	}
-	return false
-}
 
 type QueueInt interface {
-	Pop() []byte
-	Push(data []byte) error
+	pop() []byte
+	push(data []byte) error
 }
 
-func NewQueue(limit int64) QueueInt {
-	return &node{
-		limit: limit,
-	}
+func NewQueue() QueueInt {
+	return new(node)
 }

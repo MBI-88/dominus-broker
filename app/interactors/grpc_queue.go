@@ -8,14 +8,19 @@ import (
 )
 
 func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
-	topic, err := c.topics.Find(ms.GetSubscribers()[0])
+	name := ms.GetSubscribers()
+	if len(name) == 0 {
+		return fmt.Errorf("Topic name empty")
+	}
+	topic, err := c.topics.Find(name[0])
 	if err != nil {
 		return err
 	}
 	if len(topic.Partitions) == 0 {
 		return fmt.Errorf("Partitions are empty")
 	}
-	return topic.Queue.Push(ms.GetPayload())
+
+	return topic.Push(ms.GetPayload())
 }
 
 func (c *grpcService) checkQueue() {
@@ -27,7 +32,7 @@ func (c *grpcService) checkQueue() {
 
 		for _, sub := range t.Partitions {
 			go func(url string, topic entities.Topic) {
-				body := topic.Queue.Pop()
+				body := topic.Pop()
 				resp, err := c.client.Simple(url, body)
 				if err != nil {
 					c.lg.WriteLog("SimpleConn", err.Error())
@@ -48,7 +53,7 @@ func (c *grpcService) glue(name string, msg []byte) {
 		c.lg.WriteLog("glue", err.Error())
 		return
 	}
-	if err := topic.Queue.Push(msg); err != nil {
+	if err := topic.Push(msg); err != nil {
 		c.lg.WriteLog("glue", err.Error())
 	}
 }

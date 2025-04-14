@@ -2,17 +2,20 @@ package entities
 
 import (
 	"fmt"
+	"sync"
 )
+
 
 type topics struct {
 	ar    []*Topic
 	limit int
 	next int
+	mutex *sync.Mutex
 }
 
 func (ts *topics) Append(t *Topic) error {
-	mutex.Lock()
-	defer mutex.Unlock()
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
 	if ts.checkLenght() {
 		ts.ar = append(ts.ar, t)
 		return nil
@@ -21,8 +24,8 @@ func (ts *topics) Append(t *Topic) error {
 }
 
 func (ts *topics) Update(t *Topic) error {
-	mutex.Lock()
-	defer mutex.Unlock()
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
 	p, err := ts.findTopic(t.Name)
 	if err != nil {
 		return err
@@ -32,8 +35,8 @@ func (ts *topics) Update(t *Topic) error {
 }
 
 func (ts *topics) Delete(t *Topic) error {
-	mutex.Lock()
-	defer mutex.Lock()
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
 	p, err := ts.findTopic(t.Name)
 	if err != nil {
 		return err
@@ -47,8 +50,8 @@ func (ts *topics) Delete(t *Topic) error {
 }
 
 func (ts *topics) Find(topic string) (*Topic, error) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	ts.mutex.Lock()
+	defer ts.mutex.Unlock()
 	p, err := ts.findTopic(topic)
 	if err != nil {
 		return nil, err
@@ -57,7 +60,7 @@ func (ts *topics) Find(topic string) (*Topic, error) {
 }
 
 func (ts *topics) findTopic(name string) (int, error) {
-	for i, j := 0, len(ts.ar)-1; i < j; i, j = i+1, j-1 {
+	for i, j := 0, len(ts.ar)-1; i <= j; i, j = i+1, j-1 {
 		if ts.ar[i].Name == name {
 			return i, nil
 		} else if ts.ar[j].Name == name {
@@ -79,9 +82,9 @@ func (ts *topics) Next() (Topic, error) {
 		ts.next = 0
 		return Topic{}, fmt.Errorf("End")
 	}
-	mutex.Lock()
+	ts.mutex.Lock()
 	topic := ts.ar[ts.next]
-	mutex.Unlock()
+	ts.mutex.Unlock()
 	ts.next++
 	return *topic, nil 
 }
@@ -98,5 +101,6 @@ func NewTopics(limit int) TopicsInt {
 	return &topics{
 		ar: make([]*Topic, 0, limit),
 		limit: limit,
+		mutex: new(sync.Mutex),
 	}
 }
