@@ -27,16 +27,18 @@ func (m *managerService) AddTopic(ctx repos.RestContextInt) error {
 	if err := m.rls.ValidateStruct(topic); err != nil {
 		return err
 	}
+	if topic.Name == "" {
+		return fmt.Errorf("Topic name is empty")
+	}
 	if _, err := m.topics.Find(topic.Name); err != nil {
 		return m.topics.Append(topic)
 	}
-	
 	return fmt.Errorf("Topic exists")
 }
 
 func (m *managerService) UpdatePartition(ctx repos.RestContextInt) error {
 	topic := new(entities.Topic)
-	name := ctx.Params("name")
+	name := ctx.Param("name")
 
 	if err := ctx.BodyParser(topic); err != nil {
 		return err
@@ -51,7 +53,10 @@ func (m *managerService) UpdatePartition(ctx repos.RestContextInt) error {
 
 func (m *managerService) DeleteTopic(ctx repos.RestContextInt) error {
 	topic := new(entities.Topic)
-	name := ctx.Params("name")
+	name := ctx.Param("name")
+	if name == "" {
+		return fmt.Errorf("Param empty")
+	}
 	topic.Name = name
 	return m.topics.Delete(topic)
 }

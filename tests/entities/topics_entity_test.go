@@ -1,15 +1,16 @@
-package tests
+package entities_test
 
 import (
 	"dominus-project/app/domain/entities"
+	"dominus-project/tests/mocks"
 	"sync"
 	"testing"
 )
 
 func TestTopics(t *testing.T) {
 	topic := &entities.Topic{
-		Name:       tps,
-		Partitions: subsOk,
+		Name:       mocks.Tps,
+		Partitions: mocks.SubsOk,
 		Queue:      entities.NewQueue(),
 		Lck:        new(sync.Mutex),
 		Limit:      100,
@@ -36,7 +37,7 @@ func TestTopics(t *testing.T) {
 		topics.Append(topic)
 
 		if err := topics.Update(&entities.Topic{
-			Name:       tps,
+			Name:       mocks.Tps,
 			Partitions: []string{"http://localhost:80", "http://localhost:8081"},
 			Queue:      entities.NewQueue(),
 			Lck:        new(sync.Mutex),
@@ -57,7 +58,7 @@ func TestTopics(t *testing.T) {
 		topics := entities.NewTopics(1)
 		topics.Append(topic)
 
-		if _, err := topics.Find(tps); err != nil {
+		if _, err := topics.Find(mocks.Tps); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -65,7 +66,7 @@ func TestTopics(t *testing.T) {
 	t.Run("Find_error", func(t *testing.T) {
 		topics := entities.NewTopics(1)
 
-		if _, err := topics.Find(tps); err == nil {
+		if _, err := topics.Find(mocks.Tps); err == nil {
 			t.Fatal("Error must be different from nil")
 		}
 	})
@@ -79,7 +80,7 @@ func TestTopics(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if tp.Name != tps {
+		if tp.Name != mocks.Tps {
 			t.Fatal("Topic name are differents")
 		}
 	})

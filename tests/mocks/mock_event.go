@@ -1,4 +1,4 @@
-package tests
+package mocks
 
 import (
 	"dominus-project/app/domain/repos"

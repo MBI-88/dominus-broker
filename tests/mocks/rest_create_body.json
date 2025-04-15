@@ -1,0 +1,8 @@
+{
+    "name": "test",
+    "partitions": [
+        "http://localhost:80/api-1",
+        "http://localhost:80/api-2",
+        "http://localhost:80/api-3"
+    ]
+}

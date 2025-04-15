@@ -1,4 +1,4 @@
-package tests
+package mocks
 
 import (
 	"context"
@@ -29,7 +29,7 @@ func (grpcClientMock) ServerStream(urls []string, initalMsg []byte, msg chan<- [
 	for {
 		select {
 		case <-time.Tick(1 * time.Second):
-			payload, _ := json.Marshal(data)
+			payload, _ := json.Marshal(Data)
 			msg <- payload
 		case <-time.Tick(5 * time.Second):
 		case <-ctx.Done():
@@ -60,7 +60,7 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 	for {
 		select {
 		case <-time.Tick(1 * time.Second):
-			payload, _ := json.Marshal(data)
+			payload, _ := json.Marshal(Data)
 			subMsg <- payload
 		case <-time.Tick(5 * time.Second):
 		case <-ctx.Done():

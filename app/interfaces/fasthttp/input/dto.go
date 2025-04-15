@@ -29,7 +29,7 @@ func (r *restContext) Queries() map[string]string {
 	return parameters
 }
 
-func (r *restContext) Params(key string) string {
+func (r *restContext) Param(key string) string {
 	return r.context.UserValue(key).(string)
 }
 

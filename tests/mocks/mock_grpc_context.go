@@ -1,4 +1,4 @@
-package tests
+package mocks
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 
 func helperErr(flag *simpleContextMock) {
 	time.Sleep(3 * time.Second)
-	ad.Lock()
-	defer ad.Unlock()
+	Ad.Lock()
+	defer Ad.Unlock()
 	flag.err = fmt.Errorf("End")
 }
 
@@ -62,8 +62,8 @@ type clientContextMock struct {
 }
 
 func (c *clientContextMock) Recv() (repos.GrpRequestMessageInt, error) {
-	ad.Lock()
-	defer ad.Unlock()
+	Ad.Lock()
+	defer Ad.Unlock()
 	return c.simpleContextMock, c.err
 }
 
@@ -86,8 +86,8 @@ type serverContextMock struct {
 }
 
 func (se *serverContextMock) Send(payload []byte) error {
-	ad.Lock()
-	defer ad.Unlock()
+	Ad.Lock()
+	defer Ad.Unlock()
 	return se.err
 }
 
@@ -115,14 +115,14 @@ type biContextMock struct {
 }
 
 func (b *biContextMock) Recv() (repos.GrpRequestMessageInt, error) {
-	ad.Lock()
-	defer ad.Unlock()
+	Ad.Lock()
+	defer Ad.Unlock()
 	return b.simpleContextMock, b.err
 }
 
 func (b *biContextMock) Send(msg []byte) error {
-	ad.Lock()
-	defer ad.Unlock()
+	Ad.Lock()
+	defer Ad.Unlock()
 	return b.err
 }
 

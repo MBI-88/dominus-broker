@@ -44,6 +44,7 @@ type InteractorInt interface {
 	NewGrpcService() GrpcServiceInt
 	NewSystemService() SystemServiceInt
 	Set(cl repos.GrpClientInt) InteractorInt
+	NewManagerService() ManagerInt
 }
 
 // Create a new interactor instance

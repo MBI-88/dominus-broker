@@ -6,7 +6,7 @@ import (
 )
 
 type Topic struct {
-	Name       string   `json:"name" validate:"required,alpha,lowercase"`
+	Name       string   `json:"name" validate:"omitempty,alpha,lowercase"`
 	Partitions []string `json:"partitions" validate:"required,dive,uri"`
 	Queue      QueueInt
 	Lck        *sync.Mutex
