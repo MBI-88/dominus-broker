@@ -46,3 +46,5 @@ func TestSimpleConn(t *testing.T) {
 		}
 	})
 }
+
+// Probar RunQueue

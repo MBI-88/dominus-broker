@@ -6,7 +6,6 @@ import (
 
 type RestContextInt interface {
 	BodyParser(obj any) error
-	Queries() map[string]string
 	Param(key string) string
 }
 

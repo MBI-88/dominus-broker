@@ -24,13 +24,6 @@ func (r *restContext) BodyParser(obj any) error {
 	return fmt.Errorf("Error parse")
 }
 
-func (r *restContext) Queries() map[string]string {
-	if r.status {
-		return r.queries
-	}
-	return make(map[string]string, 0)
-}
-
 func (r *restContext) Param(key string) string {
 	if r.status {
 		return r.param
@@ -47,7 +40,7 @@ func (r *restContext) readJson() []byte {
 	return file
 }
 
-func NewRestConext(status bool, path, param string, queries map[string]string) repos.RestContextInt {
+func NewRestConext(status bool, path, param string) repos.RestContextInt {
 	return &restContext{
 		status:  status,
 		payload: path,

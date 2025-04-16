@@ -20,15 +20,6 @@ func (r *restContext) BodyParser(obj any) error {
 	return nil
 }
 
-func (r *restContext) Queries() map[string]string {
-	parameters := make(map[string]string)
-	args := r.context.QueryArgs()
-	args.VisitAll(func(key, value []byte) {
-		parameters[string(key)] = string(value)
-	})
-	return parameters
-}
-
 func (r *restContext) Param(key string) string {
 	return r.context.UserValue(key).(string)
 }

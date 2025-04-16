@@ -51,8 +51,8 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 
 func (m *manager) path() {
 	m.router.POST("/add-topic", m.addTopic)
-	m.router.PUT("/update-partition/:name", m.updatePartition)
-	m.router.DELETE("/delete-topic/:name", m.deleteTopic)
+	m.router.PUT("/update-partition/{name}", m.updatePartition)
+	m.router.DELETE("/delete-topic/{name}", m.deleteTopic)
 }
 
 func NewManagerAPI(r *router.Router, srv interactors.ManagerInt) {
