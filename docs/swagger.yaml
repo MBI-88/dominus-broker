@@ -4,9 +4,31 @@ info:
     name: MBI
     url: https://www.pr0c0d3.com/
   description: <h3>This server is a bidirectional queue using gRCP. Manager section</h3>
-  title: Dominus server
+  title: dominus-project server
   version: 1.0.0
 paths:
+  /health:
+    get:
+      description: <h3>get healthCeck</h3>
+      responses:
+        "200":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Monitor
   /logs:
     get:
       description: <h3>gets all logs fron the database using page and size (required)</h3>
@@ -30,7 +52,7 @@ paths:
                 type: string
               type: array
             type: object
-        "404":
+        "406":
           description: 'Response body {message: error}'
           schema:
             additionalProperties:
@@ -52,7 +74,7 @@ paths:
                 type: string
               type: array
             type: object
-        "404":
+        "406":
           description: Error response
           schema:
             additionalProperties:
@@ -62,6 +84,135 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Logs
+  /metrics:
+    get:
+      description: <h3>gets metrics</h3>
+      responses:
+        "200":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Monitor
+  /partition/{name}:
+    put:
+      consumes:
+      - application/json
+      description: <h3>update  a partition</h3>
+      parameters:
+      - description: topic name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: partitions
+        in: body
+        name: partitions
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "204":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Manager
+  /topic:
+    post:
+      consumes:
+      - application/json
+      description: <h3>add a new topic</h3>
+      parameters:
+      - description: topic name
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      - description: partitions
+        in: body
+        name: partitions
+        required: true
+        schema:
+          items:
+            type: string
+          type: array
+      responses:
+        "204":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Manager
+  /topic/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: <h3>delete a topic</h3>
+      parameters:
+      - description: topic name
+        in: path
+        name: name
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Manager
 securityDefinitions:
   ApiKeyAuth:
     in: header

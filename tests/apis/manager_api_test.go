@@ -31,7 +31,7 @@ func TestManagerController(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, inter.NewManagerService())
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/add-topic")
+		ctx.Request.SetRequestURI("/topic")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPost)
 		ctx.Request.SetBody(readJson("./../mocks/rest_create_body.json"))
 		router.Handler(ctx)
@@ -45,13 +45,13 @@ func TestManagerController(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, inter.NewManagerService())
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/add-topic")
+		ctx.Request.SetRequestURI("/topic")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPost)
 		ctx.Request.SetBody(readJson("./../mocks/rest_create_body_error.json"))
 		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusInternalServerError {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusInternalServerError, ctx.Response.StatusCode())
+		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNotAcceptable, ctx.Response.StatusCode())
 		}
 	})
 
@@ -59,7 +59,7 @@ func TestManagerController(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, inter.NewManagerService())
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/update-partition/test")
+		ctx.Request.SetRequestURI("/partition/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPut)
 		ctx.Request.SetBody(readJson("./../mocks/rest_update_body.json"))
 		router.Handler(ctx)
@@ -73,13 +73,13 @@ func TestManagerController(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, inter.NewManagerService())
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/update-partition/test")
+		ctx.Request.SetRequestURI("/partition/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPut)
 		ctx.Request.SetBody(readJson("./../mocks/rest_update_error.json"))
 		router.Handler(ctx) 
 
-		if ctx.Response.StatusCode() != fasthttp.StatusInternalServerError {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusInternalServerError, ctx.Response.StatusCode())
+		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNotAcceptable, ctx.Response.StatusCode())
 		}
 	})
 	
@@ -87,7 +87,7 @@ func TestManagerController(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, inter.NewManagerService())
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/delete-topic/test")
+		ctx.Request.SetRequestURI("/topic/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodDelete)
 		router.Handler(ctx)
 
@@ -100,12 +100,12 @@ func TestManagerController(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, inter.NewManagerService())
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/delete-topic/test")
+		ctx.Request.SetRequestURI("/topic/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodDelete)
 		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusInternalServerError {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusInternalServerError, ctx.Response.StatusCode())
+		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNotAcceptable, ctx.Response.StatusCode())
 		}
 	})
 }

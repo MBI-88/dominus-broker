@@ -24,12 +24,12 @@ type system struct {
 // @Param size query int true "size"
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
-// @Failure 500 {object} map[string]string "Response body {message: error}"
+// @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /logs [get]
 func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 	result, err := r.service.GetLogs()
 	if err != nil {
-		b := setErrorResponse(ctx, "application/json", fasthttp.StatusInternalServerError, err.Error())
+		b := setErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		ctx.Response.SetBody(b)
 		return
 	}
@@ -46,12 +46,12 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 // @Description <h3>Gets all selected items from the database for making a backup</h3>
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
-// @Failure 500 {object} map[string]string "Error response"
+// @Failure 406 {object} map[string]string "Error response"
 // @Router /logs-backup [get]
 func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 	result, err := r.service.GetLogs()
 	if err != nil {
-		b := setErrorResponse(ctx, "application/json", fasthttp.StatusInternalServerError, err.Error())
+		b := setErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		ctx.Response.SetBody(b)
 		return
 	}

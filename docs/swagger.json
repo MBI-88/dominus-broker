@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "\u003ch3\u003eThis server is a bidirectional queue using gRCP. Manager section\u003c/h3\u003e",
-        "title": "Dominus server",
+        "title": "dominus-project server",
         "contact": {
             "name": "MBI",
             "url": "https://www.pr0c0d3.com/",
@@ -11,6 +11,42 @@
         "version": "1.0.0"
     },
     "paths": {
+        "/health": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eget healthCeck\u003c/h3\u003e",
+                "tags": [
+                    "Monitor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/logs": {
             "get": {
                 "security": [
@@ -51,7 +87,7 @@
                             }
                         }
                     },
-                    "404": {
+                    "406": {
                         "description": "Response body {message: error}",
                         "schema": {
                             "type": "object",
@@ -87,8 +123,214 @@
                             }
                         }
                     },
-                    "404": {
+                    "406": {
                         "description": "Error response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/metrics": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003egets metrics\u003c/h3\u003e",
+                "tags": [
+                    "Monitor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/partition/{name}": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eupdate  a partition\u003c/h3\u003e",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Manager"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "topic name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "partitions",
+                        "name": "partitions",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/topic": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eadd a new topic\u003c/h3\u003e",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Manager"
+                ],
+                "parameters": [
+                    {
+                        "description": "topic name",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "partitions",
+                        "name": "partitions",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/topic/{name}": {
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003edelete a topic\u003c/h3\u003e",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Manager"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "topic name",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

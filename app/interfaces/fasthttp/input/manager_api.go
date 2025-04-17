@@ -14,10 +14,19 @@ type manager struct {
 	service interactors.ManagerInt
 }
 
+// @Tags Manager
+// @Description <h3>add a new topic</h3>
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Param name body string true "topic name"
+// @Param partitions body []string true "partitions"
+// @Success 204 {object} map[string][]string "Success response"
+// @Failure 406 {object} map[string]string "Response body {message: error}"
+// @Router /topic [post]
 func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 	ctx := NewRestContext(c)
 	if err := m.service.AddTopic(ctx); err != nil {
-		b := setErrorResponse(c, "application/json", fasthttp.StatusInternalServerError, err.Error())
+		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
 		return
 	}
@@ -25,10 +34,19 @@ func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 	c.Response.Header.SetStatusCode(fasthttp.StatusNoContent)
 }
 
+// @Tags Manager
+// @Description <h3>update  a partition</h3>
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Param name path string true "topic name"
+// @Param partitions body []string true "partitions"
+// @Success 204 {object} map[string][]string "Success response"
+// @Failure 406 {object} map[string]string "Response body {message: error}"
+// @Router /partition/{name} [put]
 func (m *manager) updatePartition(c *fasthttp.RequestCtx) {
 	ctx := NewRestContext(c)
 	if err := m.service.UpdatePartition(ctx); err != nil {
-		b := setErrorResponse(c, "application/json", fasthttp.StatusInternalServerError, err.Error())
+		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
 		return
 	}
@@ -36,10 +54,18 @@ func (m *manager) updatePartition(c *fasthttp.RequestCtx) {
 	c.Response.Header.SetStatusCode(fasthttp.StatusNoContent)
 }
 
+// @Tags Manager
+// @Description <h3>delete a topic</h3>
+// @Security ApiKeyAuth
+// @Accept application/json
+// @Param name path string true "topic name"
+// @Success 204 {object} map[string][]string "Success response"
+// @Failure 406 {object} map[string]string "Response body {message: error}"
+// @Router /topic/{name} [delete]
 func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	ctx := NewRestContext(c)
 	if err := m.service.DeleteTopic(ctx); err != nil {
-		b := setErrorResponse(c, "application/json", fasthttp.StatusInternalServerError, err.Error())
+		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
 		return
 	}
@@ -50,9 +76,9 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 
 
 func (m *manager) path() {
-	m.router.POST("/add-topic", m.addTopic)
-	m.router.PUT("/update-partition/{name}", m.updatePartition)
-	m.router.DELETE("/delete-topic/{name}", m.deleteTopic)
+	m.router.POST("/topic", m.addTopic)
+	m.router.PUT("/partition/{name}", m.updatePartition)
+	m.router.DELETE("/topic/{name}", m.deleteTopic)
 }
 
 func NewManagerAPI(r *router.Router, srv interactors.ManagerInt) {

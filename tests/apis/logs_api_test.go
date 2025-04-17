@@ -41,8 +41,8 @@ func TestGetLogsController(t *testing.T) {
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
 		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusInternalServerError {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusInternalServerError, ctx.Response.StatusCode())
+		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNotAcceptable, ctx.Response.StatusCode())
 		}
 	})
 }
@@ -77,8 +77,8 @@ func TestGetBackupController(t *testing.T) {
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
 		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusInternalServerError {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusInternalServerError, ctx.Response.StatusCode())
+		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNotAcceptable, ctx.Response.StatusCode())
 		}
 	})
 }
