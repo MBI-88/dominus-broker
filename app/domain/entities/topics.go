@@ -30,7 +30,7 @@ func (ts *topics) Update(t *Topic) error {
 	if err != nil {
 		return err
 	}
-	ts.ar[p].Partitions = t.Partitions
+	ts.ar[p].Subscribers = t.Subscribers
 	return nil
 }
 

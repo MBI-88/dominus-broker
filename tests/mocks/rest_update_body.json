@@ -1,3 +1,6 @@
 {
-    "partitions": ["http://localhost:8080/api-1","http://localhost:8080/api-2"]
+    "subscribers": [
+        "server1.api.com",
+        "server2.api.com"
+    ]
 }

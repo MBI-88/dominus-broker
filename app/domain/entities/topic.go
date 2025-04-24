@@ -6,12 +6,12 @@ import (
 )
 
 type Topic struct {
-	Name       string   `json:"name" validate:"omitempty,alpha,lowercase"`
-	Partitions []string `json:"partitions" validate:"required,dive,uri"`
-	Queue      QueueInt
-	Lck        *sync.Mutex
-	Limit      int64
-	total      int64
+	Limit       int64
+	total       int64
+	Name        string   `json:"name" validate:"omitempty,alpha,lowercase"`
+	Subscribers []string `json:"subscribers" validate:"required,dive,hostname"`
+	Queue       QueueInt
+	Lck         *sync.Mutex
 }
 
 func (t *Topic) Push(data []byte) error {

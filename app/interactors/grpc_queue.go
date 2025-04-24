@@ -16,7 +16,7 @@ func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
 	if err != nil {
 		return err
 	}
-	if len(topic.Partitions) == 0 {
+	if len(topic.Subscribers) == 0 {
 		return fmt.Errorf("Partitions are empty")
 	}
 
@@ -30,7 +30,7 @@ func (c *grpcService) checkQueue() {
 			break
 		}
 
-		for _, sub := range t.Partitions {
+		for _, sub := range t.Subscribers {
 			go func(url string, topic entities.Topic) {
 				body := topic.Pop()
 				resp, err := c.client.Simple(url, body)

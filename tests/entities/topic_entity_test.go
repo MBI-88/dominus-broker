@@ -14,11 +14,11 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Push_Ok", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:       mocks.Tps,
-			Partitions: mocks.SubsOk,
-			Queue:      entities.NewQueue(),
-			Lck:        new(sync.Mutex),
-			Limit:      3,
+			Name:        mocks.Tps,
+			Subscribers: mocks.SubsOk,
+			Queue:       entities.NewQueue(),
+			Lck:         new(sync.Mutex),
+			Limit:       3,
 		}
 
 		if err := topic.Push(body); err != nil {
@@ -37,11 +37,11 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Push_error", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:       mocks.Tps,
-			Partitions: mocks.SubsOk,
-			Queue:      entities.NewQueue(),
-			Lck:        new(sync.Mutex),
-			Limit:      1,
+			Name:        mocks.Tps,
+			Subscribers: mocks.SubsOk,
+			Queue:       entities.NewQueue(),
+			Lck:         new(sync.Mutex),
+			Limit:       1,
 		}
 		topic.Push(body)
 
@@ -53,11 +53,11 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Pop_Ok", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:       mocks.Tps,
-			Partitions: mocks.SubsOk,
-			Queue:      entities.NewQueue(),
-			Lck:        new(sync.Mutex),
-			Limit:      1,
+			Name:        mocks.Tps,
+			Subscribers: mocks.SubsOk,
+			Queue:       entities.NewQueue(),
+			Lck:         new(sync.Mutex),
+			Limit:       1,
 		}
 		topic.Push(body)
 		topic.Push(body)
@@ -76,11 +76,11 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Pop_error", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:       mocks.Tps,
-			Partitions: mocks.SubsOk,
-			Queue:      entities.NewQueue(),
-			Lck:        new(sync.Mutex),
-			Limit:      1,
+			Name:        mocks.Tps,
+			Subscribers: mocks.SubsOk,
+			Queue:       entities.NewQueue(),
+			Lck:         new(sync.Mutex),
+			Limit:       1,
 		}
 		body := topic.Pop()
 
@@ -93,30 +93,30 @@ func TestTopic(t *testing.T) {
 
 func TestTopiParallelRW(t *testing.T) {
 	topic := &entities.Topic{
-		Name:       mocks.Tps,
-		Partitions: mocks.SubsOk,
-		Queue:      entities.NewQueue(),
-		Lck:        new(sync.Mutex),
-		Limit:      3,
+		Name:        mocks.Tps,
+		Subscribers: mocks.SubsOk,
+		Queue:       entities.NewQueue(),
+		Lck:         new(sync.Mutex),
+		Limit:       3,
 	}
 	body, _ := json.Marshal(mocks.Data)
 
 	t.Run("Push_Ok", func(t *testing.T) {
 		var (
-			wg = new(sync.WaitGroup)
+			wg   = new(sync.WaitGroup)
 			err1 error
 			err2 error
 		)
 		wg.Add(2)
-		
-		go func ()  {
+
+		go func() {
 			defer wg.Done()
 			if err := topic.Push(body); err != nil {
 				err1 = err
 			}
 		}()
-		go func ()  {
-			defer wg.Done() 
+		go func() {
+			defer wg.Done()
 			if err := topic.Push(body); err != nil {
 				err2 = err
 			}
@@ -134,27 +134,27 @@ func TestTopiParallelRW(t *testing.T) {
 
 	t.Run("Pop_Ok", func(t *testing.T) {
 		var (
-			wg = new(sync.WaitGroup)
+			wg   = new(sync.WaitGroup)
 			err1 error
 			err2 error
 		)
 		wg.Add(2)
-		
-		go func ()  {
+
+		go func() {
 			defer wg.Done()
 			if body := topic.Pop(); len(body) == 0 {
 				err1 = errors.New("Body is empty")
 			}
 		}()
 
-		go func ()  {
-			defer wg.Done() 
+		go func() {
+			defer wg.Done()
 			if body := topic.Pop(); len(body) == 0 {
 				err2 = errors.New("Body is empty")
 			}
 		}()
 
-		wg.Wait() 
+		wg.Wait()
 
 		if err1 != nil {
 			t.Fatal(err1)
