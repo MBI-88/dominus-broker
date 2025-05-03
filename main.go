@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"dominus-project/app/domain/config"
+	"dominus-project/config"
 	"dominus-project/app/domain/entities"
 	"dominus-project/app/interactors"
 	"dominus-project/docs"
