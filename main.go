@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
-	"dominus-project/config"
 	"dominus-project/app/domain/entities"
-	"dominus-project/app/interactors"
+	"dominus-project/app/domain/rules"
+	grpcconn "dominus-project/app/interactors/grpc_conn"
+	"dominus-project/app/interactors/manager"
+	"dominus-project/app/interactors/system"
+	"dominus-project/config"
 	"dominus-project/docs"
 
 	"google.golang.org/grpc/credentials/insecure"
@@ -37,7 +40,7 @@ import (
 
 var (
 	mode       *bool
-	system     chan os.Signal
+	st     chan os.Signal
 	showBanner *bool
 	banner     = `
 ==========================================================	
@@ -90,13 +93,13 @@ func main() {
 
 	logs := events.NewLogs(env.Logs)
 	topics := entities.NewTopics(env.TopicLimit)
-	inter := interactors.NewInteractor(logs, topics, int64(env.TopicLimit))
+	rls := rules.NewValidator()
 	docs.SwaggerInfo.Host = env.Host
 
 	// Signals
-	system = make(chan os.Signal, 1)
-	signal.Notify(system, os.Interrupt, syscall.SIGTERM)
-	defer signal.Stop(system)
+	st = make(chan os.Signal, 1)
+	signal.Notify(st, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(st)
 
 	//context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -127,11 +130,19 @@ func main() {
 	apiToken := fm.NewMiddlewareApiToken(env.ApiToken)
 	allowedOrings := fm.NewMiddlewareHost(env.AllowOrigins)
 
+	// Interactors
+	system := system.NewSystemService(logs)
+	manager := manager.NewManagerService(topics, rls, int64(env.TopicLimit))
+
+
 	midF.AddMiddleware(apiToken, allowedOrings)
 	router := router.New()
-	fi.NewSystemAPI(router, inter.NewSystemService())
+
+	// API
+	fi.NewSystemAPI(router, system)
 	fi.NewMonitorAPI(router, reg)
 	fi.NewSwaggerAPI(router)
+	fi.NewManagerAPI(router, manager)
 
 	r := fasthttp.Server{
 		Handler:                            midF.Middlewares(router.Handler),
@@ -217,8 +228,14 @@ func main() {
 	)
 
 	gclient := gt.NewGrpClient(optsD, logs)
-	inter = inter.Set(gclient)
-	srG := gi.NewGrpcAPI(optsS, inter.NewGrpcService())
+
+	// Interactors
+	grpcC := grpcconn.NewGrpcService(logs, gclient, topics)
+
+	// API
+	srG := gi.NewGrpcAPI(optsS, grpcC)
+
+	// Server
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
 	if err != nil {
 		log.Println(err)
@@ -253,7 +270,7 @@ func main() {
 
 	// Wait for a signal
 	select {
-	case err := <-system:
+	case err := <-st:
 		log.Fatalln(err)
 	case <-ctx.Done():
 		log.Fatalln("[-] Context closed")

@@ -1,7 +1,7 @@
 package input
 
 import (
-	"dominus-project/app/interactors"
+	mg "dominus-project/app/interactors/manager"
 
 	"github.com/fasthttp/router"
 	jsoniter "github.com/json-iterator/go"
@@ -9,9 +9,9 @@ import (
 )
 
 type manager struct {
-	router  *router.Router
-	js      jsoniter.API
-	service interactors.ManagerInt
+	router *router.Router
+	js     jsoniter.API
+	uc     mg.ManagerInt
 }
 
 // @Tags Manager
@@ -25,7 +25,7 @@ type manager struct {
 // @Router /topic [post]
 func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 	ctx := NewRestContext(c)
-	if err := m.service.AddTopic(ctx); err != nil {
+	if err := m.uc.AddTopic(ctx); err != nil {
 		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
 		return
@@ -45,7 +45,7 @@ func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 // @Router /partition/{name} [put]
 func (m *manager) updatePartition(c *fasthttp.RequestCtx) {
 	ctx := NewRestContext(c)
-	if err := m.service.UpdatePartition(ctx); err != nil {
+	if err := m.uc.UpdatePartition(ctx); err != nil {
 		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
 		return
@@ -64,7 +64,7 @@ func (m *manager) updatePartition(c *fasthttp.RequestCtx) {
 // @Router /topic/{name} [delete]
 func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	ctx := NewRestContext(c)
-	if err := m.service.DeleteTopic(ctx); err != nil {
+	if err := m.uc.DeleteTopic(ctx); err != nil {
 		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
 		return
@@ -73,18 +73,16 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	c.Response.Header.SetStatusCode(fasthttp.StatusNoContent)
 }
 
-
-
 func (m *manager) path() {
 	m.router.POST("/topic", m.addTopic)
 	m.router.PUT("/partition/{name}", m.updatePartition)
 	m.router.DELETE("/topic/{name}", m.deleteTopic)
 }
 
-func NewManagerAPI(r *router.Router, srv interactors.ManagerInt) {
+func NewManagerAPI(r *router.Router, uc mg.ManagerInt) {
 	mg := &manager{
-		router: r,
-		service: srv,
+		router:  r,
+		uc: uc,
 	}
 	mg.path()
 }

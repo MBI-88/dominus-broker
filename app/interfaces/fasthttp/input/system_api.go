@@ -1,18 +1,18 @@
 package input
 
 import (
-	"dominus-project/app/interactors"
+	st "dominus-project/app/interactors/system"
 	"fmt"
 
 	"github.com/fasthttp/router"
 	jsoniter "github.com/json-iterator/go"
-	
+
 	"github.com/valyala/fasthttp"
 )
 
 type system struct {
 	router *router.Router
-	service  interactors.SystemServiceInt
+	uc     st.SystemServiceInt
 	js     jsoniter.API
 }
 
@@ -27,7 +27,7 @@ type system struct {
 // @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /logs [get]
 func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
-	result, err := r.service.GetLogs()
+	result, err := r.uc.GetLogs()
 	if err != nil {
 		b := setErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		ctx.Response.SetBody(b)
@@ -49,7 +49,7 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 // @Failure 406 {object} map[string]string "Error response"
 // @Router /logs-backup [get]
 func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
-	result, err := r.service.GetLogs()
+	result, err := r.uc.GetLogs()
 	if err != nil {
 		b := setErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		ctx.Response.SetBody(b)
@@ -74,7 +74,7 @@ func (r *system) path() {
 }
 
 
-func NewSystemAPI(r *router.Router, i interactors.SystemServiceInt) {
-	re := &system{router: r, service: i, js: jsoniter.ConfigCompatibleWithStandardLibrary}
+func NewSystemAPI(r *router.Router, uc st.SystemServiceInt) {
+	re := &system{router: r, uc: uc, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }

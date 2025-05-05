@@ -22,7 +22,7 @@ func (*eventMock) Printf(format string, args ...any) {
 
 func (ev *eventMock) GetLogs() ([]string, error) {
     if ev.statusFlag {
-		return nil, nil
+		return make([]string, 10), nil
 	}
 	return nil, fmt.Errorf("[-] Error response")
 }

@@ -2,7 +2,7 @@ package input
 
 import (
 	"context"
-	"dominus-project/app/interactors"
+	grpcconn "dominus-project/app/interactors/grpc_conn"
 	pb "dominus-project/app/interfaces/grpc/proto/builder"
 	"io"
 
@@ -11,12 +11,12 @@ import (
 
 type grpcController struct {
 	pb.UnimplementedGrpcServer
-	service interactors.GrpcServiceInt
+	uc grpcconn.GrpcServiceInt
 }
 
 // Receives simple messages from client
 func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
-	if err := s.service.SimpleConn(ms); err != nil {
+	if err := s.uc.SimpleConn(ms); err != nil {
 		return &pb.Response{Status: uint32(500), Message: err.Error()}, err
 	}
 	return &pb.Response{Status: uint32(200), Message: "[+] Accepted"}, nil
@@ -25,7 +25,7 @@ func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.R
 // Receives array messages from client
 func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 	ctx := newClientStreamContext(stream)
-	err := s.service.StreamClientConn(ctx)
+	err := s.uc.StreamClientConn(ctx)
 	if err != io.EOF {
 		return stream.SendAndClose(&pb.Response{
 			Status:  uint32(500),
@@ -41,22 +41,22 @@ func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 // Sends array messages to client
 func (s *grpcController) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
 	ctx := newServerStreamContext(stream)
-	return s.service.StreamServerConn(ms, ctx)
+	return s.uc.StreamServerConn(ms, ctx)
 }
 
 // Receives and sends messages from server to client
 func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
 	ctx := newBiStreamConn(stream)
-	return s.service.StreamBiConn(ctx)
+	return s.uc.StreamBiConn(ctx)
 }
 
 func (s *grpcController) runQueue() {
-	go s.service.RunQueue()
+	go s.uc.RunQueue()
 }
 
-func NewGrpcAPI(opts []grpc.ServerOption, i interactors.GrpcServiceInt) *grpc.Server {
+func NewGrpcAPI(opts []grpc.ServerOption, uc grpcconn.GrpcServiceInt) *grpc.Server {
 	s := grpc.NewServer(opts...)
-	gsrv := &grpcController{service: i}
+	gsrv := &grpcController{uc: uc}
 	pb.RegisterGrpcServer(s, gsrv)
 	gsrv.runQueue()
 	return s

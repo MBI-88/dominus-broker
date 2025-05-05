@@ -1,4 +1,4 @@
-package apis_test
+package swagger_test
 
 import (
 	"dominus-project/app/interfaces/fasthttp/input"

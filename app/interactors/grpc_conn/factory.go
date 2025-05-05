@@ -1,27 +1,16 @@
-package interactors
+package grpcconn
 
 import (
 	"dominus-project/app/domain/entities"
 	"dominus-project/app/domain/repos"
-	"fmt"
-	"time"
 )
 
-func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
-	name := ms.GetSubscribers()
-	if len(name) == 0 {
-		return fmt.Errorf("Topic name empty")
-	}
-	topic, err := c.topics.Find(name[0])
-	if err != nil {
-		return err
-	}
-	if len(topic.Subscribers) == 0 {
-		return fmt.Errorf("Partitions are empty")
-	}
-
-	return topic.Push(ms.GetPayload())
+type grpcService struct {
+	client repos.GrpClientInt
+	lg     repos.LogsInt
+	topics entities.TopicsInt
 }
+
 
 func (c *grpcService) checkQueue() {
 	for {
@@ -58,11 +47,19 @@ func (c *grpcService) glue(name string, msg []byte) {
 	}
 }
 
-func (c *grpcService) RunQueue() {
-	for {
-		select {
-		case <-time.Tick(2 * time.Second):
-			c.checkQueue()
-		}
+type GrpcServiceInt interface {
+	SimpleConn(ms repos.GrpRequestMessageInt) error
+	StreamClientConn(st repos.StreamClientInt) error
+	StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error
+	StreamBiConn(st repos.StreamBiInt) error
+	RunQueue()
+}
+
+
+func NewGrpcService( lclient repos.LogsInt, gclient repos.GrpClientInt, topics entities.TopicsInt) GrpcServiceInt {
+	return &grpcService{
+		lg:     lclient,
+		client: gclient,
+		topics: topics,
 	}
 }

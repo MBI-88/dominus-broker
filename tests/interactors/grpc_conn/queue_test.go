@@ -1,8 +1,8 @@
-package interactors_test
+package grpcconn_test
 
 import (
 	"dominus-project/app/domain/entities"
-	"dominus-project/app/interactors"
+	grpcconn "dominus-project/app/interactors/grpc_conn"
 	"dominus-project/tests/mocks"
 	"encoding/json"
 	"sync"
@@ -20,9 +20,8 @@ func TestSimpleConn(t *testing.T) {
 		Limit:       100,
 	}
 	topics.Append(topic)
-	inter := interactors.NewInteractor(log, topics, 100)
-	simple := inter.NewGrpcService()
-
+	simple := grpcconn.NewGrpcService(log, mocks.NewGrpcClientMock(), topics)
+	
 	t.Run("Connection-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(mocks.Data)
 

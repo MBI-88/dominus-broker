@@ -1,4 +1,4 @@
-package apis_test
+package monitor_test
 
 import (
 	"dominus-project/app/interfaces/fasthttp/input"
