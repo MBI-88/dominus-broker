@@ -202,14 +202,13 @@ func main() {
 	}
 
 	optsS = append(optsS,
+		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
-			otelgrpc.UnaryServerInterceptor(),
 			metricserver.UnaryServerInterceptor(),
 			auth.UnaryServerInterceptor(midGs.ApiToken),
 			logging.UnaryServerInterceptor(midGs.LogErrors()),
 		),
 		grpc.ChainStreamInterceptor(
-			otelgrpc.StreamServerInterceptor(),
 			metricserver.StreamServerInterceptor(),
 			auth.StreamServerInterceptor(midGs.ApiToken),
 			logging.StreamServerInterceptor(midGs.LogErrors()),
@@ -217,9 +216,8 @@ func main() {
 	)
 
 	optsD = append(optsD,
-		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 		grpc.WithUnaryInterceptor(metricclient.UnaryClientInterceptor()),
-		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
 		grpc.WithStreamInterceptor(metricclient.StreamClientInterceptor()),
 		grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
 		grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
