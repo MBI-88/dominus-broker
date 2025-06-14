@@ -1,6 +1,6 @@
 module dominus-project
 
-go 1.24
+go 1.24.4
 
 require (
 	github.com/fasthttp/router v1.5.4
