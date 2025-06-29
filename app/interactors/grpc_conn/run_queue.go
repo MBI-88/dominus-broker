@@ -3,7 +3,7 @@ package grpcconn
 import "time"
 
 func (c *grpcService) RunQueue() {
-	for {
+	for  {
 		select {
 		case <-time.Tick(2 * time.Second):
 			c.checkQueue()
