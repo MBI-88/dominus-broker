@@ -1,16 +1,14 @@
 package system_test
 
 import (
-	"dominus-project/app/interactors/system"
-	"dominus-project/app/interfaces/fasthttp/input"
+	"dominus-project/internal/interactors/system"
+	"dominus-project/internal/interfaces/fasthttp/input"
 	"dominus-project/tests/mocks"
 	"testing"
 
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 )
-
-
 
 func TestGetBackupController(t *testing.T) {
 	t.Run("Response_StatusOK", func(t *testing.T) {

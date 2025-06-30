@@ -1,10 +1,10 @@
 package manager_test
 
 import (
-	"dominus-project/app/domain/entities"
-	"dominus-project/app/domain/rules"
-	"dominus-project/app/interactors/manager"
-	"dominus-project/app/interfaces/fasthttp/input"
+	"dominus-project/internal/domain/entities"
+	"dominus-project/internal/domain/rules"
+	"dominus-project/internal/interactors/manager"
+	"dominus-project/internal/interfaces/fasthttp/input"
 	"os"
 	"testing"
 
@@ -20,7 +20,6 @@ func readJson(path string) []byte {
 	file, _ = os.ReadFile(path)
 	return file
 }
-
 
 func TestManagerController(t *testing.T) {
 	topics := entities.NewTopics(100)
@@ -76,13 +75,13 @@ func TestManagerController(t *testing.T) {
 		ctx.Request.SetRequestURI("/partition/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPut)
 		ctx.Request.SetBody(readJson("./../../mocks/rest_update_error.json"))
-		router.Handler(ctx) 
+		router.Handler(ctx)
 
 		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
 			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNotAcceptable, ctx.Response.StatusCode())
 		}
 	})
-	
+
 	t.Run("DeleteTopic_Ok", func(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, manager)

@@ -1,8 +1,8 @@
 package grpcconn_test
 
 import (
-	"dominus-project/app/domain/entities"
-	grpcconn "dominus-project/app/interactors/grpc_conn"
+	"dominus-project/internal/domain/entities"
+	grpcconn "dominus-project/internal/interactors/grpc_conn"
 	"dominus-project/tests/mocks"
 	"encoding/json"
 	"sync"
@@ -21,7 +21,7 @@ func TestSimpleConn(t *testing.T) {
 	}
 	topics.Append(topic)
 	simple := grpcconn.NewGrpcService(log, mocks.NewGrpcClientMock(), topics)
-	
+
 	t.Run("Connection-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(mocks.Data)
 

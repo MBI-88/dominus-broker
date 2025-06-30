@@ -1,9 +1,9 @@
 package interactors_test
 
 import (
-	"dominus-project/app/domain/entities"
-	"dominus-project/app/domain/rules"
-	"dominus-project/app/interactors/manager"
+	"dominus-project/internal/domain/entities"
+	"dominus-project/internal/domain/rules"
+	"dominus-project/internal/interactors/manager"
 	"dominus-project/tests/mocks"
 	"testing"
 )
@@ -51,7 +51,7 @@ func TestManagerCases(t *testing.T) {
 		}
 	})
 
-	// Update 
+	// Update
 	t.Run("UpdatePartition_Ok", func(t *testing.T) {
 		dto := mocks.NewRestConext(true, "./../../mocks/rest_update_body.json", "test")
 
@@ -85,16 +85,16 @@ func TestManagerCases(t *testing.T) {
 
 	})
 
-	// Delete 
+	// Delete
 	t.Run("DeleteTopic_Ok", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "", "test") 
+		dto := mocks.NewRestConext(true, "", "test")
 
 		if err := manager.DeleteTopic(dto); err != nil {
 			t.Fatal(err)
 		}
 
 	})
-	
+
 	t.Run("DeleteTopic_Error", func(t *testing.T) {
 		dto := mocks.NewRestConext(false, "", "")
 
@@ -102,5 +102,5 @@ func TestManagerCases(t *testing.T) {
 			t.Fatal("Error must be different from nil")
 		}
 	})
-	
+
 }

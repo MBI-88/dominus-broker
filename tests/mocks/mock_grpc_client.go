@@ -2,7 +2,7 @@ package mocks
 
 import (
 	"context"
-	"dominus-project/app/domain/repos"
+	"dominus-project/internal/domain/repos"
 	"encoding/json"
 	"time"
 )
@@ -55,7 +55,7 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 			}
 		}
 	}()
-	
+
 	// subscribers sending messages
 	for {
 		select {

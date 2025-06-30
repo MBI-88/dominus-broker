@@ -2,23 +2,23 @@ package main
 
 import (
 	"context"
-	"dominus-project/app/domain/entities"
-	"dominus-project/app/domain/rules"
-	grpcconn "dominus-project/app/interactors/grpc_conn"
-	"dominus-project/app/interactors/manager"
-	"dominus-project/app/interactors/system"
 	"dominus-project/config"
 	"dominus-project/docs"
+	"dominus-project/internal/domain/entities"
+	"dominus-project/internal/domain/rules"
+	grpcconn "dominus-project/internal/interactors/grpc_conn"
+	"dominus-project/internal/interactors/manager"
+	"dominus-project/internal/interactors/system"
 
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
 
-	"dominus-project/app/interfaces/events"
-	fi "dominus-project/app/interfaces/fasthttp/input"
-	fm "dominus-project/app/interfaces/fasthttp/middlewares"
-	gi "dominus-project/app/interfaces/grpc/input"
-	gm "dominus-project/app/interfaces/grpc/middlewares"
-	gt "dominus-project/app/interfaces/grpc/output"
+	"dominus-project/internal/interfaces/events"
+	fi "dominus-project/internal/interfaces/fasthttp/input"
+	fm "dominus-project/internal/interfaces/fasthttp/middlewares"
+	gi "dominus-project/internal/interfaces/grpc/input"
+	gm "dominus-project/internal/interfaces/grpc/middlewares"
+	gt "dominus-project/internal/interfaces/grpc/output"
 	"flag"
 	"fmt"
 	"log"
@@ -40,7 +40,7 @@ import (
 
 var (
 	mode       *bool
-	st     chan os.Signal
+	st         chan os.Signal
 	showBanner *bool
 	banner     = `
 ==========================================================	
@@ -70,7 +70,6 @@ func init() {
 		flag.PrintDefaults()
 	}
 }
-
 
 // @title dominus-project server
 // @description <h3>This server is a bidirectional queue using gRCP. Manager section</h3>
@@ -134,7 +133,6 @@ func main() {
 	system := system.NewSystemService(logs)
 	manager := manager.NewManagerService(topics, rls, int64(env.TopicLimit))
 
-
 	midF.AddMiddleware(apiToken, allowedOrings)
 	router := router.New()
 
@@ -145,15 +143,15 @@ func main() {
 	fi.NewManagerAPI(router, manager)
 
 	r := fasthttp.Server{
-		Handler:                            midF.Middlewares(router.Handler),
-		Name:                               "dominus-project",
-		MaxRequestBodySize:                 1000,
-		ReduceMemoryUsage:                  true,
-		DisablePreParseMultipartForm:       true,
-		KeepHijackedConns:                  true,
-		CloseOnShutdown:                    true,
-		StreamRequestBody:                  true,
-		Logger:                             logs,
+		Handler:                      midF.Middlewares(router.Handler),
+		Name:                         "dominus-project",
+		MaxRequestBodySize:           1000,
+		ReduceMemoryUsage:            true,
+		DisablePreParseMultipartForm: true,
+		KeepHijackedConns:            true,
+		CloseOnShutdown:              true,
+		StreamRequestBody:            true,
+		Logger:                       logs,
 	}
 
 	_, errC := os.Stat(env.SslCert)
@@ -237,7 +235,7 @@ func main() {
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
 	if err != nil {
 		log.Println(err)
-		return 
+		return
 	}
 	go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
 		log.Fatal(sr.Serve(list))

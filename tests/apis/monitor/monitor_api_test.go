@@ -1,7 +1,7 @@
 package monitor_test
 
 import (
-	"dominus-project/app/interfaces/fasthttp/input"
+	"dominus-project/internal/interfaces/fasthttp/input"
 	"testing"
 
 	"github.com/fasthttp/router"
@@ -11,7 +11,7 @@ import (
 
 func TestMonitorController(t *testing.T) {
 	t.Run("Metricts_Ok", func(t *testing.T) {
-		router := router.New() 
+		router := router.New()
 		reg := prometheus.NewRegistry()
 		input.NewMonitorAPI(router, reg)
 		ctx := new(fasthttp.RequestCtx)
@@ -19,13 +19,13 @@ func TestMonitorController(t *testing.T) {
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
 		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() !=  fasthttp.StatusOK {
+		if ctx.Response.StatusCode() != fasthttp.StatusOK {
 			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusOK, ctx.Response.StatusCode())
 		}
 	})
 
 	t.Run("Health", func(t *testing.T) {
-		router := router.New() 
+		router := router.New()
 		reg := prometheus.NewRegistry()
 		input.NewMonitorAPI(router, reg)
 		ctx := new(fasthttp.RequestCtx)
@@ -33,7 +33,7 @@ func TestMonitorController(t *testing.T) {
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
 		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() !=  fasthttp.StatusOK {
+		if ctx.Response.StatusCode() != fasthttp.StatusOK {
 			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusOK, ctx.Response.StatusCode())
 		}
 	})

@@ -1,7 +1,7 @@
 package mocks
 
 import (
-	"dominus-project/app/domain/repos"
+	"dominus-project/internal/domain/repos"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -44,6 +44,6 @@ func NewRestConext(status bool, path, param string) repos.RestContextInt {
 	return &restContext{
 		status:  status,
 		payload: path,
-		param:  param,
+		param:   param,
 	}
 }

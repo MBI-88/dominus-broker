@@ -1,8 +1,8 @@
 package grpcconn_test
 
 import (
-	"dominus-project/app/domain/entities"
-	grpcconn "dominus-project/app/interactors/grpc_conn"
+	"dominus-project/internal/domain/entities"
+	grpcconn "dominus-project/internal/interactors/grpc_conn"
 	"dominus-project/tests/mocks"
 	"encoding/json"
 	"testing"

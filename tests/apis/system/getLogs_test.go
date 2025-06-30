@@ -1,8 +1,8 @@
 package system_test
 
 import (
-	"dominus-project/app/interactors/system"
-	"dominus-project/app/interfaces/fasthttp/input"
+	"dominus-project/internal/interactors/system"
+	"dominus-project/internal/interfaces/fasthttp/input"
 	"dominus-project/tests/mocks"
 	"testing"
 

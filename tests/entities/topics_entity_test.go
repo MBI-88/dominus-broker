@@ -1,7 +1,7 @@
 package entities_test
 
 import (
-	"dominus-project/app/domain/entities"
+	"dominus-project/internal/domain/entities"
 	"dominus-project/tests/mocks"
 	"sync"
 	"testing"

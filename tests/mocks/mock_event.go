@@ -1,12 +1,10 @@
 package mocks
 
 import (
-	"dominus-project/app/domain/repos"
+	"dominus-project/internal/domain/repos"
 	"fmt"
 	"log"
 )
-
-
 
 type eventMock struct {
 	statusFlag bool
@@ -21,13 +19,11 @@ func (*eventMock) Printf(format string, args ...any) {
 }
 
 func (ev *eventMock) GetLogs() ([]string, error) {
-    if ev.statusFlag {
+	if ev.statusFlag {
 		return make([]string, 10), nil
 	}
 	return nil, fmt.Errorf("[-] Error response")
 }
-
-
 
 func NewEventMock(status bool) repos.LogsInt {
 	return &eventMock{

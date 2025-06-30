@@ -1,7 +1,7 @@
 package system_test
 
 import (
-	"dominus-project/app/interactors/system"
+	"dominus-project/internal/interactors/system"
 	"dominus-project/tests/mocks"
 	"testing"
 )
