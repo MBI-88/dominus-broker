@@ -1,4 +1,4 @@
-package input
+package dto
 
 import (
 	"context"
@@ -20,7 +20,7 @@ func (g *grpcBiContextStream) Send(msg []byte) error {
 	})
 }
 
-func newBiStreamConn(sr pb.Grpc_BidirectionalStreamServer) repos.StreamBiInt {
+func NewBiStreamConn(sr pb.Grpc_BidirectionalStreamServer) repos.StreamBiInt {
 	return &grpcBiContextStream{
 		sr: sr,
 	}
@@ -34,7 +34,7 @@ func (g *grpcContextClientStream) Recv() (repos.GrpRequestMessageInt, error) {
 	return g.sr.Recv()
 }
 
-func newClientStreamContext(sr pb.Grpc_ClientStreamServer) repos.StreamClientInt {
+func NewClientStreamContext(sr pb.Grpc_ClientStreamServer) repos.StreamClientInt {
 	return &grpcContextClientStream{
 		sr: sr,
 	}
@@ -54,7 +54,7 @@ func (g *grpcContextServerStream) Context() context.Context {
 	return g.sr.Context()
 }
 
-func newServerStreamContext(sr pb.Grpc_ServerStreamServer) repos.StreamServerInt {
+func NewServerStreamContext(sr pb.Grpc_ServerStreamServer) repos.StreamServerInt {
 	return &grpcContextServerStream{
 		sr: sr,
 	}

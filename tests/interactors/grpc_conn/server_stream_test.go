@@ -3,18 +3,18 @@ package grpcconn_test
 import (
 	"dominus-project/internal/domain/entities"
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
-	"dominus-project/tests/mocks"
+	"dominus-project/tests/env"
 	"encoding/json"
 	"testing"
 )
 
 func TestServerStream(t *testing.T) {
-	log := mocks.NewEventMock(true)
+	log := env.NewEventMock(true)
 	topics := entities.NewTopics(100)
-	stream := grpcconn.NewGrpcService(log, mocks.NewGrpcClientMock(), topics)
+	stream := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true,true), topics)
 	t.Run("ServerStream-OK", func(t *testing.T) {
-		payload, _ := json.Marshal(mocks.Data)
-		msg, ctx := mocks.NewServerContextMock(payload, mocks.SubsOk)
+		payload, _ := json.Marshal(env.Data)
+		msg, ctx := env.NewServerContextMock(payload, env.SubsOk)
 		result := stream.StreamServerConn(msg, ctx)
 		if result.Error() != "Connection closed" {
 			t.Fatal(result)
@@ -23,8 +23,8 @@ func TestServerStream(t *testing.T) {
 	})
 
 	t.Run("ServerStream-Error", func(t *testing.T) {
-		payload, _ := json.Marshal(mocks.Data)
-		msg, ctx := mocks.NewServerContextMock(payload, make([]string, 0))
+		payload, _ := json.Marshal(env.Data)
+		msg, ctx := env.NewServerContextMock(payload, make([]string, 0))
 		result := stream.StreamServerConn(msg, ctx)
 		if result.Error() == "End" {
 			t.Fatalf("Expected error but received nil")

@@ -2,7 +2,7 @@ package entities_test
 
 import (
 	"dominus-project/internal/domain/entities"
-	"dominus-project/tests/mocks"
+	"dominus-project/tests/env"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -10,12 +10,12 @@ import (
 )
 
 func TestTopic(t *testing.T) {
-	body, _ := json.Marshal(mocks.Data)
+	body, _ := json.Marshal(env.Data)
 
 	t.Run("Push_Ok", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:        mocks.Tps,
-			Subscribers: mocks.SubsOk,
+			Name:        env.Tps,
+			Subscribers: env.SubsOk,
 			Queue:       entities.NewQueue(),
 			Lck:         new(sync.Mutex),
 			Limit:       3,
@@ -37,8 +37,8 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Push_error", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:        mocks.Tps,
-			Subscribers: mocks.SubsOk,
+			Name:        env.Tps,
+			Subscribers: env.SubsOk,
 			Queue:       entities.NewQueue(),
 			Lck:         new(sync.Mutex),
 			Limit:       1,
@@ -53,8 +53,8 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Pop_Ok", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:        mocks.Tps,
-			Subscribers: mocks.SubsOk,
+			Name:        env.Tps,
+			Subscribers: env.SubsOk,
 			Queue:       entities.NewQueue(),
 			Lck:         new(sync.Mutex),
 			Limit:       1,
@@ -76,8 +76,8 @@ func TestTopic(t *testing.T) {
 
 	t.Run("Pop_error", func(t *testing.T) {
 		topic := &entities.Topic{
-			Name:        mocks.Tps,
-			Subscribers: mocks.SubsOk,
+			Name:        env.Tps,
+			Subscribers: env.SubsOk,
 			Queue:       entities.NewQueue(),
 			Lck:         new(sync.Mutex),
 			Limit:       1,
@@ -93,13 +93,13 @@ func TestTopic(t *testing.T) {
 
 func TestTopiParallelRW(t *testing.T) {
 	topic := &entities.Topic{
-		Name:        mocks.Tps,
-		Subscribers: mocks.SubsOk,
+		Name:        env.Tps,
+		Subscribers: env.SubsOk,
 		Queue:       entities.NewQueue(),
 		Lck:         new(sync.Mutex),
 		Limit:       3,
 	}
-	body, _ := json.Marshal(mocks.Data)
+	body, _ := json.Marshal(env.Data)
 
 	t.Run("Push_Ok", func(t *testing.T) {
 		var (

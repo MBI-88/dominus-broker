@@ -3,36 +3,37 @@ package grpcconn_test
 import (
 	"dominus-project/internal/domain/entities"
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
-	"dominus-project/tests/mocks"
+	"dominus-project/tests/env"
 	"encoding/json"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestSimpleConn(t *testing.T) {
-	log := mocks.NewEventMock(true)
+	log := env.NewEventMock(true)
 	topics := entities.NewTopics(100)
 	topic := &entities.Topic{
-		Name:        mocks.Tps,
-		Subscribers: mocks.SubsOk,
+		Name:        env.Tps,
+		Subscribers: env.SubsOk,
 		Lck:         new(sync.Mutex),
 		Queue:       entities.NewQueue(),
 		Limit:       100,
 	}
 	topics.Append(topic)
-	simple := grpcconn.NewGrpcService(log, mocks.NewGrpcClientMock(), topics)
+	simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, true), topics)
 
 	t.Run("Connection-OK", func(t *testing.T) {
-		payload, _ := json.Marshal(mocks.Data)
+		payload, _ := json.Marshal(env.Data)
 
-		if err := simple.SimpleConn(mocks.NewSimpleContextMock(payload, []string{mocks.Tps})); err != nil {
+		if err := simple.SimpleConn(env.NewSimpleContextMock(payload, []string{env.Tps})); err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	t.Run("Connection-Error", func(t *testing.T) {
 
-		if err := simple.SimpleConn(mocks.NewSimpleContextMock(nil, make([]string, 0))); err == nil {
+		if err := simple.SimpleConn(env.NewSimpleContextMock(nil, make([]string, 0))); err == nil {
 			t.Fatalf("Expected error but received nil")
 		}
 	})
@@ -40,10 +41,67 @@ func TestSimpleConn(t *testing.T) {
 	t.Run("Connection-Error_2", func(t *testing.T) {
 		topic.Subscribers = make([]string, 0)
 
-		if err := simple.SimpleConn(mocks.NewSimpleContextMock(nil, []string{mocks.Tps})); err == nil {
+		if err := simple.SimpleConn(env.NewSimpleContextMock(nil, []string{env.Tps})); err == nil {
 			t.Fatalf("Expected error but received nil")
 		}
 	})
 }
 
-// Probar RunQueue
+func TestRunQueue(t *testing.T) {
+	log := env.NewEventMock(true)
+	topics := entities.NewTopics(100)
+	topic := &entities.Topic{
+		Name:        env.Tps,
+		Subscribers: env.SubsOk,
+		Lck:         new(sync.Mutex),
+		Queue:       entities.NewQueue(),
+		Limit:       100,
+	}
+	topics.Append(topic)
+
+	t.Run("Find-Topic-OK", func(t *testing.T) {
+		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, true), topics)
+		queue := make(chan struct{})
+		go func() {
+			time.Sleep(3 * time.Second)
+			queue <- struct{}{}
+		}()
+
+		if err := simple.RunQueue(queue); err.Error() != "Queue closed" {
+			t.Fatal("Queue error")
+		}
+
+		close(queue)
+	})
+
+	t.Run("Find-Topic-Error", func(t *testing.T) {
+		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(false, true), topics)
+		queue := make(chan struct{})
+		go func() {
+			time.Sleep(3 * time.Second)
+			queue <- struct{}{}
+		}()
+
+		if err := simple.RunQueue(queue); err.Error() != "Queue closed" {
+			t.Fatal("Queue error")
+		}
+
+		close(queue)
+	})
+	
+	t.Run("Find-Topic-Connection-Error", func(t *testing.T) {
+		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, false), topics)
+		queue := make(chan struct{})
+		go func() {
+			time.Sleep(3 * time.Second)
+			queue <- struct{}{}
+		}()
+
+		if err := simple.RunQueue(queue); err.Error() != "Queue closed" {
+			t.Fatal("Queue error")
+		}
+
+		close(queue)
+	})
+
+}

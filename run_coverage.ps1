@@ -1,10 +1,25 @@
-# Paquete(s) a excluir del coverage
-$excluded = 'tests/mocks'
+# Lista de paquetes a excluir del coverage
+$excluded = @(
+    'tests/env',
+    'docs'
+)
 
 Write-Host "`n🔍 Getting packages list...`n"
 
-# Listar todos los paquetes y excluir los que coincidan con el patrón
-$packages = go list ./... | Where-Object { $_ -notmatch $excluded }
+# Listar todos los paquetes
+$allPackages = go list ./...
+
+# Filtrar los paquetes excluidos
+$packages = $allPackages | Where-Object {
+    $include = $true
+    foreach ($pattern in $excluded) {
+        if ($_ -match $pattern) {
+            $include = $false
+            break
+        }
+    }
+    return $include
+}
 
 Write-Host "✅ Packages included in coverage:`n"
 $packages | ForEach-Object { Write-Host " - $_" }
@@ -15,7 +30,7 @@ $coverpkg = $packages -join ','
 Write-Host "`n🚀 Running test...`n"
 
 # Ejecutar go test y capturar salida línea por línea
-$testOutput = go test -coverpkg="$coverpkg" -covermode=atomic -coverprofile="coverage.out" ./tests/... 2>&1
+$testOutput = go test -race -coverpkg="$coverpkg" -covermode=atomic -coverprofile="coverage.out" ./tests/... 2>&1
 
 # Mostrar cada línea con formato y salto automático
 foreach ($line in $testOutput) {
@@ -30,5 +45,5 @@ foreach ($line in $testOutput) {
     }
 }
 
-Write-Host "`nWhaching output`n"
+Write-Host "`n📊 Watching output`n"
 go tool cover -func="coverage.out"

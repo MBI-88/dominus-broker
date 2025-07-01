@@ -176,6 +176,7 @@ func main() {
 	var (
 		optsS []grpc.ServerOption
 		optsD []grpc.DialOption
+		queue  = make(chan struct{})
 	)
 
 	midGs := gm.NewMiddleware(env.ConnectionKey, logs)
@@ -229,7 +230,7 @@ func main() {
 	grpcC := grpcconn.NewGrpcService(logs, gclient, topics)
 
 	// API
-	srG := gi.NewGrpcAPI(optsS, grpcC)
+	srG := gi.NewGrpcAPI(optsS, grpcC, queue)
 
 	// Server
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", env.GrpcPort))
@@ -271,9 +272,12 @@ func main() {
 	case <-ctx.Done():
 		log.Fatalln("[-] Context closed")
 	}
-
+	
+	queue <- struct{}{}
 	if err := r.Shutdown(); err != nil {
 		log.Fatal(err)
 	}
 	srG.GracefulStop()
+	close(queue)
+	close(st)
 }

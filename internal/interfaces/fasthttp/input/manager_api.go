@@ -2,6 +2,7 @@ package input
 
 import (
 	mg "dominus-project/internal/interactors/manager"
+	"dominus-project/internal/interfaces/fasthttp/dto"
 
 	"github.com/fasthttp/router"
 	jsoniter "github.com/json-iterator/go"
@@ -24,7 +25,7 @@ type manager struct {
 // @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /topic [post]
 func (m *manager) addTopic(c *fasthttp.RequestCtx) {
-	ctx := NewRestContext(c)
+	ctx := dto.NewRestContext(c)
 	if err := m.uc.AddTopic(ctx); err != nil {
 		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
@@ -44,7 +45,7 @@ func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 // @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /partition/{name} [put]
 func (m *manager) updatePartition(c *fasthttp.RequestCtx) {
-	ctx := NewRestContext(c)
+	ctx := dto.NewRestContext(c)
 	if err := m.uc.UpdatePartition(ctx); err != nil {
 		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)
@@ -63,7 +64,7 @@ func (m *manager) updatePartition(c *fasthttp.RequestCtx) {
 // @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /topic/{name} [delete]
 func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
-	ctx := NewRestContext(c)
+	ctx := dto.NewRestContext(c)
 	if err := m.uc.DeleteTopic(ctx); err != nil {
 		b := setErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		c.Response.SetBody(b)

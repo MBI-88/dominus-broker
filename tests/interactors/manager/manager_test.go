@@ -4,7 +4,7 @@ import (
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/rules"
 	"dominus-project/internal/interactors/manager"
-	"dominus-project/tests/mocks"
+	"dominus-project/tests/env"
 	"testing"
 )
 
@@ -14,21 +14,21 @@ func TestManagerCases(t *testing.T) {
 
 	// Create
 	t.Run("AddTopic_Ok", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_create_body.json", "")
+		dto := env.NewRestConext(true, "./../../mocks/rest_create_body.json", "")
 
 		if err := manager.AddTopic(dto); err != nil {
 			t.Fatal(err)
 		}
 	})
 	t.Run("AddTopic_Error_Parse", func(t *testing.T) {
-		dto := mocks.NewRestConext(false, "", "")
+		dto := env.NewRestConext(false, "", "")
 
 		if err := manager.AddTopic(dto); err == nil {
 			t.Fatal("Error must be different from nil")
 		}
 	})
 	t.Run("AddTopic_Error_ValidStruct", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_create_body_error.json", "")
+		dto := env.NewRestConext(true, "./../../mocks/rest_create_body_error.json", "")
 
 		if err := manager.AddTopic(dto); err == nil {
 			t.Fatal("Error must be different from nil")
@@ -36,7 +36,7 @@ func TestManagerCases(t *testing.T) {
 	})
 
 	t.Run("AddTopic_Error_EmptyName", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_create_body_empty_name.json", "")
+		dto := env.NewRestConext(true, "./../../mocks/rest_create_body_empty_name.json", "")
 
 		if err := manager.AddTopic(dto); err == nil {
 			t.Fatal("Error must be different from nil")
@@ -44,7 +44,7 @@ func TestManagerCases(t *testing.T) {
 	})
 
 	t.Run("AddTopic_Error_TopicExist", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_create_body_exist.json", "")
+		dto := env.NewRestConext(true, "./../../mocks/rest_create_body_exist.json", "")
 
 		if err := manager.AddTopic(dto); err == nil {
 			t.Fatal("Error must be different from nil")
@@ -53,7 +53,7 @@ func TestManagerCases(t *testing.T) {
 
 	// Update
 	t.Run("UpdatePartition_Ok", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_update_body.json", "test")
+		dto := env.NewRestConext(true, "./../../mocks/rest_update_body.json", "test")
 
 		if err := manager.UpdatePartition(dto); err != nil {
 			t.Fatal(err)
@@ -61,7 +61,7 @@ func TestManagerCases(t *testing.T) {
 
 	})
 	t.Run("UpdatePartition_ErrorParse", func(t *testing.T) {
-		dto := mocks.NewRestConext(false, "", "")
+		dto := env.NewRestConext(false, "", "")
 
 		if err := manager.UpdatePartition(dto); err == nil {
 			t.Fatal("Error must be different from nil")
@@ -69,7 +69,7 @@ func TestManagerCases(t *testing.T) {
 
 	})
 	t.Run("UpdatePartition_Error_ValidStruct", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_update_error.json", "test")
+		dto := env.NewRestConext(true, "./../../mocks/rest_update_error.json", "test")
 
 		if err := manager.UpdatePartition(dto); err == nil {
 			t.Fatal("Error must be different from nil")
@@ -77,7 +77,7 @@ func TestManagerCases(t *testing.T) {
 
 	})
 	t.Run("UpdatePartition_Error", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "./../../mocks/rest_update_body.json", "")
+		dto := env.NewRestConext(true, "./../../mocks/rest_update_body.json", "")
 
 		if err := manager.UpdatePartition(dto); err == nil {
 			t.Fatal("Error must be different from nil")
@@ -87,7 +87,7 @@ func TestManagerCases(t *testing.T) {
 
 	// Delete
 	t.Run("DeleteTopic_Ok", func(t *testing.T) {
-		dto := mocks.NewRestConext(true, "", "test")
+		dto := env.NewRestConext(true, "", "test")
 
 		if err := manager.DeleteTopic(dto); err != nil {
 			t.Fatal(err)
@@ -96,7 +96,7 @@ func TestManagerCases(t *testing.T) {
 	})
 
 	t.Run("DeleteTopic_Error", func(t *testing.T) {
-		dto := mocks.NewRestConext(false, "", "")
+		dto := env.NewRestConext(false, "", "")
 
 		if err := manager.DeleteTopic(dto); err == nil {
 			t.Fatal("Error must be different from nil")

@@ -77,16 +77,16 @@ func (ts *topics) checkLenght() bool {
 	return true
 }
 
-func (ts *topics) Next() (Topic, error) {
+func (ts *topics) Next() (*Topic, error) {
 	if ts.next > len(ts.ar) - 1 {
 		ts.next = 0
-		return Topic{}, fmt.Errorf("End")
+		return nil, fmt.Errorf("End")
 	}
 	ts.mutex.Lock()
 	topic := ts.ar[ts.next]
 	ts.mutex.Unlock()
 	ts.next++
-	return *topic, nil 
+	return topic, nil 
 }
 
 type TopicsInt interface {
@@ -94,7 +94,7 @@ type TopicsInt interface {
 	Update(t *Topic) error
 	Delete(t *Topic) error
 	Find(topic string) (*Topic, error)
-	Next() (Topic, error) 
+	Next() (*Topic, error) 
 }
 
 func NewTopics(limit int) TopicsInt {

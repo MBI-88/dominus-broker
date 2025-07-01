@@ -1,4 +1,4 @@
-package input
+package dto
 
 import (
 	"dominus-project/internal/domain/repos"

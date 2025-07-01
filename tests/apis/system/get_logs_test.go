@@ -3,21 +3,21 @@ package system_test
 import (
 	"dominus-project/internal/interactors/system"
 	"dominus-project/internal/interfaces/fasthttp/input"
-	"dominus-project/tests/mocks"
+	"dominus-project/tests/env"
 	"testing"
 
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 )
 
-func TestGetBackupController(t *testing.T) {
+func TestGetLogsController(t *testing.T) {
 	t.Run("Response_StatusOK", func(t *testing.T) {
 		router := router.New()
-		log := mocks.NewEventMock(true)
+		log := env.NewEventMock(true)
 		system := system.NewSystemService(log)
 		input.NewSystemAPI(router, system)
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/logs-backup")
+		ctx.Request.SetRequestURI("/logs")
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
 		router.Handler(ctx)
 
@@ -28,11 +28,11 @@ func TestGetBackupController(t *testing.T) {
 
 	t.Run("Response_Error", func(t *testing.T) {
 		router := router.New()
-		log := mocks.NewEventMock(false)
+		log := env.NewEventMock(false)
 		system := system.NewSystemService(log)
 		input.NewSystemAPI(router, system)
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/logs-backup")
+		ctx.Request.SetRequestURI("/logs")
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
 		router.Handler(ctx)
 
