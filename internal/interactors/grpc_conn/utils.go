@@ -18,8 +18,8 @@ func (c *grpcService) checkQueue() {
 			break
 		}
 
-		for _, sub := range t.Subscribers {
-			go func(url string, topic *entities.Topic) {
+		for _, sub := range t.GetSubscribers() {
+			go func(url string, topic entities.TopicInt) {
 				body := topic.GetMessage()
 				if len(body) > 0 {
 					resp, err := c.client.Simple(url, body)

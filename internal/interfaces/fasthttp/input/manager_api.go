@@ -24,7 +24,7 @@ type manager struct {
 // @Param topic body dto.SwaggerTopic true "Topic Info"
 // @Success 204 "No Content"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /topic [post]
+// @Router /topics [post]
 func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 	ctx := dto.NewRestContext(c)
 	if err := m.uc.AddTopic(ctx); err != nil {
@@ -45,7 +45,7 @@ func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 // @Param subscribers body []string true "Subscribers"
 // @Success 204 "No Content"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /subscribers/{name} [put]
+// @Router /subscribers/{name} [patch]
 func (m *manager) updateSubscribers(c *fasthttp.RequestCtx) {
 	ctx := dto.NewRestContext(c)
 	if err := m.uc.UpdateSubscribers(ctx); err != nil {
@@ -65,7 +65,7 @@ func (m *manager) updateSubscribers(c *fasthttp.RequestCtx) {
 // @Param name path string true "topic name"
 // @Success 204 "No Content"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /topic/{name} [delete]
+// @Router /topics/{name} [delete]
 func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	ctx := dto.NewRestContext(c)
 	if err := m.uc.DeleteTopic(ctx); err != nil {
@@ -77,16 +77,40 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	c.Response.Header.SetStatusCode(fasthttp.StatusNoContent)
 }
 
+
+// @Tags Manager
+// @Description <h3>get topics info</h3>
+// @Security ApiKeyAuth
+// @Produce json
+// @Success 200  {object} map[string]any "Topic response"
+// @Failure 406 {object} map[string]string "Response body {message: error}"
+// @Router /topics [get]
+func (m *manager) getTopicsInfo(c *fasthttp.RequestCtx) {
+	resp := m.uc.GetQueueInfo() 
+	c.Response.Header.Set("Content-Type", "application/json")
+	c.Response.Header.SetStatusCode(fasthttp.StatusOK)
+	body, err := m.js.Marshal(resp)
+	if err != nil {
+		b := errors.SetErrorResponse(c, "application/json", fasthttp.StatusNotAcceptable, err.Error())
+		c.Response.SetBody(b)
+		return
+	}
+	c.Response.SetBody(body)
+
+}
+
 func (m *manager) path() {
-	m.router.POST("/topic", m.addTopic)
-	m.router.PUT("/subscribers/{name}", m.updateSubscribers)
-	m.router.DELETE("/topic/{name}", m.deleteTopic)
+	m.router.POST("/topics", m.addTopic)
+	m.router.PATCH("/subscribers/{name}", m.updateSubscribers)
+	m.router.DELETE("/topics/{name}", m.deleteTopic)
+	m.router.GET("/topics", m.getTopicsInfo)
 }
 
 func NewManagerAPI(r *router.Router, uc mg.ManagerInt) {
 	mg := &manager{
 		router: r,
 		uc:     uc,
+		js: jsoniter.ConfigCompatibleWithStandardLibrary,
 	}
 	mg.path()
 }

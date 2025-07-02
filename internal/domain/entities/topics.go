@@ -5,15 +5,14 @@ import (
 	"sync"
 )
 
-
 type topics struct {
-	ar    []*Topic
+	ar    []TopicInt
 	limit int
-	next int
+	next  int
 	mutex *sync.RWMutex
 }
 
-func (ts *topics) Append(t *Topic) error {
+func (ts *topics) Append(t TopicInt) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 	if ts.checkLenght() {
@@ -23,33 +22,33 @@ func (ts *topics) Append(t *Topic) error {
 	return fmt.Errorf("Limit reached")
 }
 
-func (ts *topics) Update(t *Topic) error {
+func (ts *topics) Update(t TopicInt) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
-	p, err := ts.findTopic(t.Name)
+	p, err := ts.findTopic(t.GetName())
 	if err != nil {
 		return err
 	}
-	ts.ar[p].Subscribers = t.Subscribers
+	ts.ar[p].SetSubscribers(t.GetSubscribers())
 	return nil
 }
 
-func (ts *topics) Delete(t *Topic) error {
+func (ts *topics) Delete(t TopicInt) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
-	p, err := ts.findTopic(t.Name)
+	p, err := ts.findTopic(t.GetName())
 	if err != nil {
 		return err
 	}
 	left := ts.ar[:p]
 	right := ts.ar[p+1:]
-	ts.ar = make([]*Topic, 0, ts.limit)
+	ts.ar = make([]TopicInt, 0, ts.limit)
 	ts.ar = append(ts.ar, left...)
 	ts.ar = append(ts.ar, right...)
 	return nil
 }
 
-func (ts *topics) Find(topic string) (*Topic, error) {
+func (ts *topics) Find(topic string) (TopicInt, error) {
 	ts.mutex.RLock()
 	defer ts.mutex.RUnlock()
 	p, err := ts.findTopic(topic)
@@ -61,9 +60,9 @@ func (ts *topics) Find(topic string) (*Topic, error) {
 
 func (ts *topics) findTopic(name string) (int, error) {
 	for i, j := 0, len(ts.ar)-1; i <= j; i, j = i+1, j-1 {
-		if ts.ar[i].Name == name {
+		if ts.ar[i].GetName() == name {
 			return i, nil
-		} else if ts.ar[j].Name == name {
+		} else if ts.ar[j].GetName() == name {
 			return j, nil
 		}
 	}
@@ -77,8 +76,8 @@ func (ts *topics) checkLenght() bool {
 	return true
 }
 
-func (ts *topics) Next() (*Topic, error) {
-	if ts.next > len(ts.ar) - 1 {
+func (ts *topics) Next() (TopicInt, error) {
+	if ts.next > len(ts.ar)-1 {
 		ts.next = 0
 		return nil, fmt.Errorf("End")
 	}
@@ -86,20 +85,44 @@ func (ts *topics) Next() (*Topic, error) {
 	topic := ts.ar[ts.next]
 	ts.mutex.RUnlock()
 	ts.next++
-	return topic, nil 
+	return topic, nil
+}
+
+func (ts *topics) GetTopicsInfo() map[string]any {
+	ts.mutex.RLock()
+	defer ts.mutex.RUnlock()
+
+	var (
+		arrayTopic = make([]map[string]any, 0, len(ts.ar))
+		result = make(map[string]any, 3)
+	)
+
+	for _, tp := range ts.ar {
+		topic := map[string]any{
+			"name":        tp.GetName(),
+			"subscribers": tp.GetSubscribers(),
+			"message":     string(tp.GetMessage()),
+		}
+		arrayTopic = append(arrayTopic, topic)
+	}
+	result["topics"] = arrayTopic
+	result["total"] = len(ts.ar)
+	result["limit"] = ts.limit
+	return result
 }
 
 type TopicsInt interface {
-	Append(t *Topic) error
-	Update(t *Topic) error
-	Delete(t *Topic) error
-	Find(topic string) (*Topic, error)
-	Next() (*Topic, error) 
+	Append(t TopicInt) error
+	Update(t TopicInt) error
+	Delete(t TopicInt) error
+	Find(topic string) (TopicInt, error)
+	Next() (TopicInt, error)
+	GetTopicsInfo() map[string]any
 }
 
 func NewTopics(limit int) TopicsInt {
 	return &topics{
-		ar: make([]*Topic, 0, limit),
+		ar:    make([]TopicInt, 0, limit),
 		limit: limit,
 		mutex: new(sync.RWMutex),
 	}

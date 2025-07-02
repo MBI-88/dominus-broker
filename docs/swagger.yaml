@@ -156,7 +156,27 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Manager
-  /topic:
+  /topics:
+    get:
+      description: <h3>get topics info</h3>
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Topic response
+          schema:
+            additionalProperties: true
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Manager
     post:
       consumes:
       - application/json
@@ -183,7 +203,7 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Manager
-  /topic/{name}:
+  /topics/{name}:
     delete:
       consumes:
       - application/json

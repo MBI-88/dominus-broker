@@ -1,12 +1,6 @@
 package manager
 
-import "dominus-project/internal/domain/repos"
 
-
-
-func (m *managerService) GetQueueInfo(ctx repos.RestContextInt) error {
-
-
-
-	return  nil 
+func (m *managerService) GetQueueInfo() map[string]any {
+	return m.topics.GetTopicsInfo()
 }

@@ -14,7 +14,7 @@ func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
 	if err != nil {
 		return err
 	}
-	if len(topic.Subscribers) == 0 {
+	if len(topic.GetSubscribers()) == 0 {
 		return fmt.Errorf("Subscribers are empty")
 	}
 	

@@ -15,6 +15,7 @@ type ManagerInt interface {
 	AddTopic(ctx repos.RestContextInt) error
 	UpdateSubscribers(ctx repos.RestContextInt) error
 	DeleteTopic(ctx repos.RestContextInt) error
+	GetQueueInfo() map[string]any
 }
 
 func NewManagerService(topics entities.TopicsInt, rls rules.RulesInt) ManagerInt {

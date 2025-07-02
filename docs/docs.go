@@ -233,7 +233,39 @@ const docTemplate = `{
                 }
             }
         },
-        "/topic": {
+        "/topics": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eget topics info\u003c/h3\u003e",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Manager"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Topic response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -277,7 +309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/topic/{name}": {
+        "/topics/{name}": {
             "delete": {
                 "security": [
                     {
