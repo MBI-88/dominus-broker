@@ -16,6 +16,6 @@ func (m *managerService) UpdateSubscribers(ctx repos.RestContextInt) error {
 		return err
 	}
 
-	topic.Name = name
+	topic.SetName(name)
 	return m.topics.Update(topic)
 }

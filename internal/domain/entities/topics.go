@@ -1,18 +1,19 @@
 package entities
 
 import (
+	"dominus-project/internal/domain/repos"
 	"fmt"
 	"sync"
 )
 
 type topics struct {
-	ar    []TopicInt
+	ar    []repos.TopicInt
 	limit int
 	next  int
 	mutex *sync.RWMutex
 }
 
-func (ts *topics) Append(t TopicInt) error {
+func (ts *topics) Append(t repos.TopicInt) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 	if ts.checkLenght() {
@@ -22,7 +23,7 @@ func (ts *topics) Append(t TopicInt) error {
 	return fmt.Errorf("Limit reached")
 }
 
-func (ts *topics) Update(t TopicInt) error {
+func (ts *topics) Update(t repos.TopicInt) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 	p, err := ts.findTopic(t.GetName())
@@ -33,7 +34,7 @@ func (ts *topics) Update(t TopicInt) error {
 	return nil
 }
 
-func (ts *topics) Delete(t TopicInt) error {
+func (ts *topics) Delete(t repos.TopicInt) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 	p, err := ts.findTopic(t.GetName())
@@ -42,13 +43,13 @@ func (ts *topics) Delete(t TopicInt) error {
 	}
 	left := ts.ar[:p]
 	right := ts.ar[p+1:]
-	ts.ar = make([]TopicInt, 0, ts.limit)
+	ts.ar = make([]repos.TopicInt, 0, ts.limit)
 	ts.ar = append(ts.ar, left...)
 	ts.ar = append(ts.ar, right...)
 	return nil
 }
 
-func (ts *topics) Find(topic string) (TopicInt, error) {
+func (ts *topics) Find(topic string) (repos.TopicInt, error) {
 	ts.mutex.RLock()
 	defer ts.mutex.RUnlock()
 	p, err := ts.findTopic(topic)
@@ -76,7 +77,7 @@ func (ts *topics) checkLenght() bool {
 	return true
 }
 
-func (ts *topics) Next() (TopicInt, error) {
+func (ts *topics) Next() (repos.TopicInt, error) {
 	if ts.next > len(ts.ar)-1 {
 		ts.next = 0
 		return nil, fmt.Errorf("End")
@@ -112,17 +113,17 @@ func (ts *topics) GetTopicsInfo() map[string]any {
 }
 
 type TopicsInt interface {
-	Append(t TopicInt) error
-	Update(t TopicInt) error
-	Delete(t TopicInt) error
-	Find(topic string) (TopicInt, error)
-	Next() (TopicInt, error)
+	Append(t repos.TopicInt) error
+	Update(t repos.TopicInt) error
+	Delete(t repos.TopicInt) error
+	Find(topic string) (repos.TopicInt, error)
+	Next() (repos.TopicInt, error)
 	GetTopicsInfo() map[string]any
 }
 
 func NewTopics(limit int) TopicsInt {
 	return &topics{
-		ar:    make([]TopicInt, 0, limit),
+		ar:    make([]repos.TopicInt, 0, limit),
 		limit: limit,
 		mutex: new(sync.RWMutex),
 	}

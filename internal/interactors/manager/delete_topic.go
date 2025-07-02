@@ -12,6 +12,6 @@ func (m *managerService) DeleteTopic(ctx repos.RestContextInt) error {
 	if name == "" {
 		return fmt.Errorf("Param empty")
 	}
-	topic.Name = name
+	topic.SetName(name)
 	return m.topics.Delete(topic)
 }

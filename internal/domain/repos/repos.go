@@ -56,3 +56,13 @@ type LogsInt interface {
 	Printf(format string, args ...any)
 	GetLogs() ([]string, error)
 }
+
+
+type TopicInt interface {
+	SetMessage(data []byte)
+	GetMessage() []byte
+	SetSubscribers(sb []string)
+	GetSubscribers() []string
+	GetName() string
+	SetName(name string)
+}
