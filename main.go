@@ -63,7 +63,7 @@ func init() {
 	showBanner = flag.Bool("banner", true, "show banner")
 
 	flag.Usage = func() {
-		info := fmt.Sprintf("[*] ***dominus-project*** [*]\n")
+		info := "[*] ***dominus-project*** [*]\n"
 		info += "mode: boolean\n"
 		info += "banner: boolean\n"
 		fmt.Fprintf(os.Stderr, "%s\n", info)
@@ -76,10 +76,10 @@ func init() {
 // @contact.name MBI
 // @contact.email ingmbi8807@gmail.com
 // @contact.url https://www.pr0c0d3.com/
-// @version 1.0.0
+// @version 1.1.0
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name API_TOKEN
+// @name x-api-key
 // @host localhost:8000
 // @BasePath /
 func main() {
@@ -131,7 +131,7 @@ func main() {
 
 	// Interactors
 	system := system.NewSystemService(logs)
-	manager := manager.NewManagerService(topics, rls, int64(env.TopicLimit))
+	manager := manager.NewManagerService(topics, rls)
 
 	midF.AddMiddleware(apiToken, allowedOrings)
 	router := router.New()

@@ -10,7 +10,7 @@ type topics struct {
 	ar    []*Topic
 	limit int
 	next int
-	mutex *sync.Mutex
+	mutex *sync.RWMutex
 }
 
 func (ts *topics) Append(t *Topic) error {
@@ -50,8 +50,8 @@ func (ts *topics) Delete(t *Topic) error {
 }
 
 func (ts *topics) Find(topic string) (*Topic, error) {
-	ts.mutex.Lock()
-	defer ts.mutex.Unlock()
+	ts.mutex.RLock()
+	defer ts.mutex.RUnlock()
 	p, err := ts.findTopic(topic)
 	if err != nil {
 		return nil, err
@@ -82,9 +82,9 @@ func (ts *topics) Next() (*Topic, error) {
 		ts.next = 0
 		return nil, fmt.Errorf("End")
 	}
-	ts.mutex.Lock()
+	ts.mutex.RLock()
 	topic := ts.ar[ts.next]
-	ts.mutex.Unlock()
+	ts.mutex.RUnlock()
 	ts.next++
 	return topic, nil 
 }
@@ -101,6 +101,6 @@ func NewTopics(limit int) TopicsInt {
 	return &topics{
 		ar: make([]*Topic, 0, limit),
 		limit: limit,
-		mutex: new(sync.Mutex),
+		mutex: new(sync.RWMutex),
 	}
 }

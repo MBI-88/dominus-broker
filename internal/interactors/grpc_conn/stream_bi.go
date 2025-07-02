@@ -7,7 +7,7 @@ import (
 )
 
 func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
-	closed := make(chan struct{}, 0)
+	closed := make(chan struct{})
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	req, err := stream.Recv()
@@ -17,7 +17,7 @@ func (c *grpcService) StreamBiConn(stream repos.StreamBiInt) error {
 	}
 	total := len(subscribers)
 	done := make(chan struct{}, total)
-	streamProv := make(chan []byte, 0)
+	streamProv := make(chan []byte)
 	streamSub := make(chan []byte, total+int(total*2/3))
 	errMsg := make(chan error, total)
 

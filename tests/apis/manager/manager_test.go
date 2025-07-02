@@ -5,26 +5,19 @@ import (
 	"dominus-project/internal/domain/rules"
 	"dominus-project/internal/interactors/manager"
 	"dominus-project/internal/interfaces/fasthttp/input"
-	"os"
+	"dominus-project/tests/env"
 	"testing"
 
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 )
 
-func readJson(path string) []byte {
-	var file []byte
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		panic(err)
-	}
-	file, _ = os.ReadFile(path)
-	return file
-}
+
 
 func TestManagerController(t *testing.T) {
 	topics := entities.NewTopics(100)
 	rls := rules.NewValidator()
-	manager := manager.NewManagerService(topics, rls, 100)
+	manager := manager.NewManagerService(topics, rls)
 
 	t.Run("AddTopic_Ok", func(t *testing.T) {
 		router := router.New()
@@ -32,7 +25,7 @@ func TestManagerController(t *testing.T) {
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topic")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPost)
-		ctx.Request.SetBody(readJson("./../../mocks/rest_create_body.json"))
+		ctx.Request.SetBody(env.ReadJson("./../../mocks/rest_create_body.json"))
 		router.Handler(ctx)
 
 		if ctx.Response.StatusCode() != fasthttp.StatusNoContent {
@@ -46,7 +39,7 @@ func TestManagerController(t *testing.T) {
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topic")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPost)
-		ctx.Request.SetBody(readJson("./../../mocks/rest_create_body_error.json"))
+		ctx.Request.SetBody(env.ReadJson("./../../mocks/rest_create_body_error.json"))
 		router.Handler(ctx)
 
 		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {
@@ -54,13 +47,13 @@ func TestManagerController(t *testing.T) {
 		}
 	})
 
-	t.Run("UpdatePartition_Ok", func(t *testing.T) {
+	t.Run("UpdateSubscribers_Ok", func(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/partition/test")
+		ctx.Request.SetRequestURI("/subscribers/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPut)
-		ctx.Request.SetBody(readJson("./../../mocks/rest_update_body.json"))
+		ctx.Request.SetBody(env.ReadJson("./../../mocks/rest_update_body.json"))
 		router.Handler(ctx)
 
 		if ctx.Response.StatusCode() != fasthttp.StatusNoContent {
@@ -68,13 +61,13 @@ func TestManagerController(t *testing.T) {
 		}
 
 	})
-	t.Run("UpdatePatition_Error", func(t *testing.T) {
+	t.Run("UpdateSubscribers_Error", func(t *testing.T) {
 		router := router.New()
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/partition/test")
+		ctx.Request.SetRequestURI("/subscribers/test")
 		ctx.Request.Header.SetMethod(fasthttp.MethodPut)
-		ctx.Request.SetBody(readJson("./../../mocks/rest_update_error.json"))
+		ctx.Request.SetBody(env.ReadJson("./../../mocks/rest_update_error.json"))
 		router.Handler(ctx)
 
 		if ctx.Response.StatusCode() != fasthttp.StatusNotAcceptable {

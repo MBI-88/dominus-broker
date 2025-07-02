@@ -6,17 +6,22 @@ import (
 )
 
 func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
-	name := ms.GetSubscribers()
-	if len(name) == 0 {
+	name := c.getTopicName(ms)
+	if name == "" {
 		return fmt.Errorf("Topic name empty")
 	}
-	topic, err := c.topics.Find(name[0])
+	topic, err := c.topics.Find(name)
 	if err != nil {
 		return err
 	}
 	if len(topic.Subscribers) == 0 {
-		return fmt.Errorf("Partitions are empty")
+		return fmt.Errorf("Subscribers are empty")
 	}
-
-	return topic.Push(ms.GetPayload())
+	
+	message := ms.GetPayload()
+	if len(message) == 0 {
+		return  fmt.Errorf("Message empty")
+	}
+	topic.SetMessage(message)
+	return nil
 }

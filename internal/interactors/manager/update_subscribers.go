@@ -5,7 +5,7 @@ import (
 	"dominus-project/internal/domain/repos"
 )
 
-func (m *managerService) UpdatePartition(ctx repos.RestContextInt) error {
+func (m *managerService) UpdateSubscribers(ctx repos.RestContextInt) error {
 	topic := new(entities.Topic)
 	name := ctx.Param("name")
 

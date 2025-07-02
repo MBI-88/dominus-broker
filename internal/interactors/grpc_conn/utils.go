@@ -1,12 +1,16 @@
 package grpcconn
 
-import "dominus-project/internal/domain/entities"
+import (
+	"dominus-project/internal/domain/entities"
+	"dominus-project/internal/domain/repos"
+)
 
 // CheckQueue Check the Queue for new messages
 //
 // Params
 //
 // Empty
+//
 func (c *grpcService) checkQueue() {
 	for {
 		t, err := c.topics.Next()
@@ -16,17 +20,27 @@ func (c *grpcService) checkQueue() {
 
 		for _, sub := range t.Subscribers {
 			go func(url string, topic *entities.Topic) {
-				body := topic.Pop()
-				resp, err := c.client.Simple(url, body)
-				if err != nil {
-					c.lg.WriteLog("SimpleConn", err.Error())
-					topic.Push(body)
-					return
+				body := topic.GetMessage()
+				if len(body) > 0 {
+					resp, err := c.client.Simple(url, body)
+					if err != nil {
+						c.lg.WriteLog("SimpleConn", err.Error())
+						topic.SetMessage(body)
+						return
+					}
+					if resp.GetStatus() != 200 {
+						topic.SetMessage(body)
+					}
 				}
-				if resp.GetStatus() != 200 {
-					topic.Push(body)
-				}
+
 			}(sub, t)
 		}
 	}
+}
+
+func (*grpcService) getTopicName(ms repos.GrpRequestMessageInt) string {
+	if len(ms.GetSubscribers()) > 0 {
+		return  ms.GetSubscribers()[0]
+	}
+	return  ""
 }

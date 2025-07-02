@@ -9,7 +9,7 @@ import (
 func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	stream := make(chan []byte, 0)
+	stream := make(chan []byte)
 	req, err := st.Recv()
 	if err != nil {
 		return err

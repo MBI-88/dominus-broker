@@ -2,6 +2,7 @@ package input
 
 import (
 	st "dominus-project/internal/interactors/system"
+	"dominus-project/internal/interfaces/fasthttp/errors"
 	"fmt"
 
 	"github.com/fasthttp/router"
@@ -27,7 +28,7 @@ type system struct {
 func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 	result, err := r.uc.GetLogs()
 	if err != nil {
-		b := setErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
+		b := errors.SetErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		ctx.Response.SetBody(b)
 		return
 	}
@@ -48,7 +49,7 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 	result, err := r.uc.GetLogs()
 	if err != nil {
-		b := setErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
+		b := errors.SetErrorResponse(ctx, "application/json", fasthttp.StatusNotAcceptable, err.Error())
 		ctx.Response.SetBody(b)
 		return
 	}

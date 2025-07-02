@@ -1,3 +1,19 @@
+definitions:
+  dto.SwaggerTopic:
+    properties:
+      name:
+        description: Name of the topic, e.g., prod.topic, monitoring, etc.
+        example: prod.topic
+        type: string
+      subscribers:
+        description: List of subscriber URLs
+        example:
+        - '[localhost:8080'
+        - ' localhost:8081]'
+        items:
+          type: string
+        type: array
+    type: object
 info:
   contact:
     email: ingmbi8807@gmail.com
@@ -5,7 +21,7 @@ info:
     url: https://www.pr0c0d3.com/
   description: <h3>This server is a bidirectional queue using gRCP. Manager section</h3>
   title: dominus-project server
-  version: 1.0.0
+  version: 1.1.0
 paths:
   /health:
     get:
@@ -106,34 +122,30 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Monitor
-  /partition/{name}:
+  /subscribers/{name}:
     put:
       consumes:
       - application/json
-      description: <h3>update  a partition</h3>
+      description: <h3>update  subscribers</h3>
       parameters:
       - description: topic name
         in: path
         name: name
         required: true
         type: string
-      - description: partitions
+      - description: Subscribers
         in: body
-        name: partitions
+        name: subscribers
         required: true
         schema:
           items:
             type: string
           type: array
+      produces:
+      - application/json
       responses:
         "204":
-          description: Success response
-          schema:
-            additionalProperties:
-              items:
-                type: string
-              type: array
-            type: object
+          description: No Content
         "406":
           description: 'Response body {message: error}'
           schema:
@@ -150,29 +162,17 @@ paths:
       - application/json
       description: <h3>add a new topic</h3>
       parameters:
-      - description: topic name
+      - description: Topic Info
         in: body
-        name: name
+        name: topic
         required: true
         schema:
-          type: string
-      - description: partitions
-        in: body
-        name: partitions
-        required: true
-        schema:
-          items:
-            type: string
-          type: array
+          $ref: '#/definitions/dto.SwaggerTopic'
+      produces:
+      - application/json
       responses:
         "204":
-          description: Success response
-          schema:
-            additionalProperties:
-              items:
-                type: string
-              type: array
-            type: object
+          description: No Content
         "406":
           description: 'Response body {message: error}'
           schema:
@@ -194,15 +194,11 @@ paths:
         name: name
         required: true
         type: string
+      produces:
+      - application/json
       responses:
         "204":
-          description: Success response
-          schema:
-            additionalProperties:
-              items:
-                type: string
-              type: array
-            type: object
+          description: No Content
         "406":
           description: 'Response body {message: error}'
           schema:
@@ -216,6 +212,6 @@ paths:
 securityDefinitions:
   ApiKeyAuth:
     in: header
-    name: API_TOKEN
+    name: x-api-key
     type: apiKey
 swagger: "2.0"

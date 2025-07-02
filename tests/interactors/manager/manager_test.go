@@ -10,7 +10,7 @@ import (
 
 func TestManagerCases(t *testing.T) {
 	topics := entities.NewTopics(100)
-	manager := manager.NewManagerService(topics, rules.NewValidator(), 100)
+	manager := manager.NewManagerService(topics, rules.NewValidator())
 
 	// Create
 	t.Run("AddTopic_Ok", func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestManagerCases(t *testing.T) {
 	t.Run("UpdatePartition_Ok", func(t *testing.T) {
 		dto := env.NewRestConext(true, "./../../mocks/rest_update_body.json", "test")
 
-		if err := manager.UpdatePartition(dto); err != nil {
+		if err := manager.UpdateSubscribers(dto); err != nil {
 			t.Fatal(err)
 		}
 
@@ -63,7 +63,7 @@ func TestManagerCases(t *testing.T) {
 	t.Run("UpdatePartition_ErrorParse", func(t *testing.T) {
 		dto := env.NewRestConext(false, "", "")
 
-		if err := manager.UpdatePartition(dto); err == nil {
+		if err := manager.UpdateSubscribers(dto); err == nil {
 			t.Fatal("Error must be different from nil")
 		}
 
@@ -71,15 +71,15 @@ func TestManagerCases(t *testing.T) {
 	t.Run("UpdatePartition_Error_ValidStruct", func(t *testing.T) {
 		dto := env.NewRestConext(true, "./../../mocks/rest_update_error.json", "test")
 
-		if err := manager.UpdatePartition(dto); err == nil {
+		if err := manager.UpdateSubscribers(dto); err == nil {
 			t.Fatal("Error must be different from nil")
 		}
 
 	})
-	t.Run("UpdatePartition_Error", func(t *testing.T) {
+	t.Run("UpdateSubscribers_Error", func(t *testing.T) {
 		dto := env.NewRestConext(true, "./../../mocks/rest_update_body.json", "")
 
-		if err := manager.UpdatePartition(dto); err == nil {
+		if err := manager.UpdateSubscribers(dto); err == nil {
 			t.Fatal("Error must be different from nil")
 		}
 

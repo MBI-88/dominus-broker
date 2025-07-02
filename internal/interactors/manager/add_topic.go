@@ -9,9 +9,7 @@ import (
 
 func (m *managerService) AddTopic(ctx repos.RestContextInt) error {
 	topic := &entities.Topic{
-		Queue: entities.NewQueue(),
 		Lck:   new(sync.Mutex),
-		Limit: m.limit,
 	}
 
 	if err := ctx.BodyParser(topic); err != nil {

@@ -1,38 +1,36 @@
 package entities
 
 import (
-	"fmt"
 	"sync"
 )
 
 type Topic struct {
-	Limit       int64
-	total       int64
 	Name        string   `json:"name" validate:"omitempty,alpha,lowercase"`
-	Subscribers []string `json:"subscribers" validate:"required,dive,hostname"`
-	Queue       QueueInt
+	Subscribers []string `json:"subscribers" validate:"required,dive,hostname_port"`
+	Message     []byte
 	Lck         *sync.Mutex
 }
 
-func (t *Topic) Push(data []byte) error {
+func (t *Topic) SetMessage(data []byte)  {
 	t.Lck.Lock()
 	defer t.Lck.Unlock()
-	if t.isFull() {
-		return fmt.Errorf("Queue full")
-	}
-	t.total++
-	return t.Queue.push(data)
+	t.Message = data
 }
 
-func (t *Topic) Pop() []byte {
+func (t *Topic) GetSubscribers() []string {
 	t.Lck.Lock()
 	defer t.Lck.Unlock()
-	return t.Queue.pop()
+	return  t.Subscribers
 }
 
-func (t *Topic) isFull() bool {
-	if t.total >= t.Limit {
-		return true
-	}
-	return false
+func (t *Topic) GetName() string {
+	t.Lck.Lock()
+	defer t.Lck.Unlock()
+	return  t.Name
+}
+
+func (t *Topic) GetMessage() []byte {
+	t.Lck.Lock()
+	defer t.Lck.Unlock()
+	return  t.Message
 }

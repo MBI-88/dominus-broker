@@ -11,9 +11,7 @@ func TestTopics(t *testing.T) {
 	topic := &entities.Topic{
 		Name:        env.Tps,
 		Subscribers: env.SubsOk,
-		Queue:       entities.NewQueue(),
 		Lck:         new(sync.Mutex),
-		Limit:       100,
 	}
 
 	t.Run("Append_Ok", func(t *testing.T) {
@@ -39,9 +37,7 @@ func TestTopics(t *testing.T) {
 		if err := topics.Update(&entities.Topic{
 			Name:        env.Tps,
 			Subscribers: []string{"http://localhost:80", "http://localhost:8081"},
-			Queue:       entities.NewQueue(),
 			Lck:         new(sync.Mutex),
-			Limit:       100,
 		}); err != nil {
 			t.Fatal(err)
 		}

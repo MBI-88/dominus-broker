@@ -9,19 +9,17 @@ import (
 type managerService struct {
 	topics entities.TopicsInt
 	rls    rules.RulesInt
-	limit  int64
 }
 
 type ManagerInt interface {
 	AddTopic(ctx repos.RestContextInt) error
-	UpdatePartition(ctx repos.RestContextInt) error
+	UpdateSubscribers(ctx repos.RestContextInt) error
 	DeleteTopic(ctx repos.RestContextInt) error
 }
 
-func NewManagerService(topics entities.TopicsInt, rls rules.RulesInt, limit int64) ManagerInt {
+func NewManagerService(topics entities.TopicsInt, rls rules.RulesInt) ManagerInt {
 	return &managerService{
 		topics: topics,
 		rls:    rls,
-		limit:  limit,
 	}
 }

@@ -17,8 +17,7 @@ func TestSimpleConn(t *testing.T) {
 		Name:        env.Tps,
 		Subscribers: env.SubsOk,
 		Lck:         new(sync.Mutex),
-		Queue:       entities.NewQueue(),
-		Limit:       100,
+		
 	}
 	topics.Append(topic)
 	simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, true), topics)
@@ -54,8 +53,7 @@ func TestRunQueue(t *testing.T) {
 		Name:        env.Tps,
 		Subscribers: env.SubsOk,
 		Lck:         new(sync.Mutex),
-		Queue:       entities.NewQueue(),
-		Limit:       100,
+		
 	}
 	topics.Append(topic)
 

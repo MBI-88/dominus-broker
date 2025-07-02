@@ -179,15 +179,18 @@ const docTemplate = `{
                 }
             }
         },
-        "/partition/{name}": {
+        "/subscribers/{name}": {
             "put": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "\u003ch3\u003eupdate  a partition\u003c/h3\u003e",
+                "description": "\u003ch3\u003eupdate  subscribers\u003c/h3\u003e",
                 "consumes": [
+                    "application/json"
+                ],
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
@@ -202,8 +205,8 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "partitions",
-                        "name": "partitions",
+                        "description": "Subscribers",
+                        "name": "subscribers",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -216,16 +219,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                        "description": "No Content"
                     },
                     "406": {
                         "description": "Response body {message: error}",
@@ -250,44 +244,26 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "Manager"
                 ],
                 "parameters": [
                     {
-                        "description": "topic name",
-                        "name": "name",
+                        "description": "Topic Info",
+                        "name": "topic",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "partitions",
-                        "name": "partitions",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.SwaggerTopic"
                         }
                     }
                 ],
                 "responses": {
                     "204": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                        "description": "No Content"
                     },
                     "406": {
                         "description": "Response body {message: error}",
@@ -312,6 +288,9 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "Manager"
                 ],
@@ -326,16 +305,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "204": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
+                        "description": "No Content"
                     },
                     "406": {
                         "description": "Response body {message: error}",
@@ -350,10 +320,33 @@ const docTemplate = `{
             }
         }
     },
+    "definitions": {
+        "dto.SwaggerTopic": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of the topic, e.g., prod.topic, monitoring, etc.",
+                    "type": "string",
+                    "example": "prod.topic"
+                },
+                "subscribers": {
+                    "description": "List of subscriber URLs",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "[localhost:8080",
+                        " localhost:8081]"
+                    ]
+                }
+            }
+        }
+    },
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "API_TOKEN",
+            "name": "x-api-key",
             "in": "header"
         }
     }
@@ -361,7 +354,7 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "1.0.0",
+	Version:          "1.1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},

@@ -2,6 +2,7 @@ package rules
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -13,8 +14,6 @@ type errorResponse struct {
 	Tag         string
 	Value       any
 }
-
-
 
 type rules struct {
 	validate *validator.Validate
@@ -43,11 +42,35 @@ func (r *rules) ValidateStruct(data any) error {
 }
 
 type RulesInt interface {
-	ValidateStruct(data any) error 
+	ValidateStruct(data any) error
 }
 
 func NewValidator() RulesInt {
+	customValidate := validator.New()
+	customValidate.RegisterValidation("hostname_port", func(fl validator.FieldLevel) bool {
+		value := fl.Field().String()
+		
+		host, port, _ := net.SplitHostPort(value)
+
+		isValidPort := func(port string) bool {
+			if p, err := net.LookupPort("tcp", port); err == nil {
+				return p > 0 && p <= 65535
+			}
+			return false
+		}
+
+		if net.ParseIP(host) != nil && isValidPort(port) {
+			return  true
+		}
+
+		if err := validator.New().Var(value, "hostname"); err == nil {
+			return  true
+		}
+
+		return false
+
+	})
 	return &rules{
-		validate: validator.New(),
+		validate: customValidate,
 	}
 }
