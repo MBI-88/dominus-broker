@@ -3,6 +3,7 @@
     "subscribers": [
         "server1.api.com",
         "server2.api.com",
-        "server3.api.com"
+        "server3.api.com",
+        "127.0.0.1:8080"
     ]
 }

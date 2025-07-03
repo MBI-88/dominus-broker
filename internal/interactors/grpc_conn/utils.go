@@ -1,6 +1,7 @@
 package grpcconn
 
 import (
+	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repos"
 )
 
@@ -17,9 +18,9 @@ func (c *grpcService) checkQueue() {
 			break
 		}
 
+		body := t.GetMessage()
 		for _, sub := range t.GetSubscribers() {
-			go func(url string, topic repos.TopicInt) {
-				body := topic.GetMessage()
+			go func(url string, topic entities.TopicInt) {
 				if len(body) > 0 {
 					resp, err := c.client.Simple(url, body)
 					if err != nil {

@@ -3,12 +3,10 @@ package manager
 import (
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repos"
-	"dominus-project/internal/domain/rules"
 )
 
 type managerService struct {
 	topics entities.TopicsInt
-	rls    rules.RulesInt
 }
 
 type ManagerInt interface {
@@ -18,9 +16,8 @@ type ManagerInt interface {
 	GetQueueInfo() map[string]any
 }
 
-func NewManagerService(topics entities.TopicsInt, rls rules.RulesInt) ManagerInt {
+func NewManagerService(topics entities.TopicsInt) ManagerInt {
 	return &managerService{
 		topics: topics,
-		rls:    rls,
 	}
 }

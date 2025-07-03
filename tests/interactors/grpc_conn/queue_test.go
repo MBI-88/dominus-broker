@@ -5,7 +5,6 @@ import (
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
 	"dominus-project/tests/env"
 	"encoding/json"
-	"sync"
 	"testing"
 	"time"
 )
@@ -13,18 +12,15 @@ import (
 func TestSimpleConn(t *testing.T) {
 	log := env.NewEventMock(true)
 	topics := entities.NewTopics(100)
-	topic := &entities.Topic{
-		Name:        env.Tps,
-		Subscribers: env.SubsOk,
-		Lck:         new(sync.Mutex),
-		
-	}
+	topic := entities.NewTopic(nil)
+	topic.SetName(env.Tps)
+	topic.SetSubscribers(env.SubsOk)
 	topics.Append(topic)
 	simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, true), topics)
 
 	t.Run("Connection-OK", func(t *testing.T) {
 		payload, _ := json.Marshal(env.Data)
-
+		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, true), topics)
 		if err := simple.SimpleConn(env.NewSimpleContextMock(payload, []string{env.Tps})); err != nil {
 			t.Fatal(err)
 		}
@@ -38,8 +34,7 @@ func TestSimpleConn(t *testing.T) {
 	})
 
 	t.Run("Connection-Error_2", func(t *testing.T) {
-		topic.Subscribers = make([]string, 0)
-
+		topic.SetSubscribers(make([]string, 0))
 		if err := simple.SimpleConn(env.NewSimpleContextMock(nil, []string{env.Tps})); err == nil {
 			t.Fatalf("Expected error but received nil")
 		}
@@ -49,16 +44,15 @@ func TestSimpleConn(t *testing.T) {
 func TestRunQueue(t *testing.T) {
 	log := env.NewEventMock(true)
 	topics := entities.NewTopics(100)
-	topic := &entities.Topic{
-		Name:        env.Tps,
-		Subscribers: env.SubsOk,
-		Lck:         new(sync.Mutex),
-		
-	}
+	topic := entities.NewTopic(nil)
+	topic.SetName(env.Tps)
+	topic.SetSubscribers(env.SubsOk)
+	body, _ := json.Marshal(env.Data)
+	topic.SetMessage(body)
 	topics.Append(topic)
 
 	t.Run("Find-Topic-OK", func(t *testing.T) {
-		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, true), topics)
+		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, false), topics)
 		queue := make(chan struct{})
 		go func() {
 			time.Sleep(3 * time.Second)
@@ -72,8 +66,8 @@ func TestRunQueue(t *testing.T) {
 		close(queue)
 	})
 
-	t.Run("Find-Topic-Error", func(t *testing.T) {
-		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(false, true), topics)
+	t.Run("Find-Topic-Connection-Error", func(t *testing.T) {
+		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(false, false), topics)
 		queue := make(chan struct{})
 		go func() {
 			time.Sleep(3 * time.Second)
@@ -87,7 +81,7 @@ func TestRunQueue(t *testing.T) {
 		close(queue)
 	})
 	
-	t.Run("Find-Topic-Connection-Error", func(t *testing.T) {
+	t.Run("Find-Topic-Response-Error", func(t *testing.T) {
 		simple := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true, false), topics)
 		queue := make(chan struct{})
 		go func() {

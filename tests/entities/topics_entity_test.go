@@ -3,16 +3,11 @@ package entities_test
 import (
 	"dominus-project/internal/domain/entities"
 	"dominus-project/tests/env"
-	"sync"
 	"testing"
 )
 
 func TestTopics(t *testing.T) {
-	topic := &entities.Topic{
-		Name:        env.Tps,
-		Subscribers: env.SubsOk,
-		Lck:         new(sync.Mutex),
-	}
+	topic := entities.NewTopic(nil)
 
 	t.Run("Append_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(1)
@@ -32,13 +27,11 @@ func TestTopics(t *testing.T) {
 
 	t.Run("Update_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(1)
+		topic.SetName(env.Tps)
+		topic.SetSubscribers([]string{"http://localhost:80", "http://localhost:8081"})
 		topics.Append(topic)
 
-		if err := topics.Update(&entities.Topic{
-			Name:        env.Tps,
-			Subscribers: []string{"http://localhost:80", "http://localhost:8081"},
-			Lck:         new(sync.Mutex),
-		}); err != nil {
+		if err := topics.Update(topic); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -52,6 +45,7 @@ func TestTopics(t *testing.T) {
 
 	t.Run("Find_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(1)
+		topic.SetName(env.Tps)
 		topics.Append(topic)
 
 		if _, err := topics.Find(env.Tps); err != nil {
@@ -69,14 +63,15 @@ func TestTopics(t *testing.T) {
 
 	t.Run("Next_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(2)
-		topics.Append(topic)
-		topics.Append(topic)
+		topic1 := entities.NewTopic(nil)
+		topic1.SetName(env.Tps)
+		topics.Append(topic1)
 
 		tp, err := topics.Next()
 		if err != nil {
 			t.Fatal(err)
 		}
-		if tp.Name != env.Tps {
+		if tp.GetName() != env.Tps {
 			t.Fatal("Topic name are differents")
 		}
 	})
@@ -95,17 +90,17 @@ func TestTopics(t *testing.T) {
 
 	t.Run("Delete_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(1)
+		topic.SetName("test")
 		topics.Append(topic)
 
-		if err := topics.Delete(topic); err != nil {
+		if err := topics.Delete(topic.GetName()); err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	t.Run("Delete_error", func(t *testing.T) {
 		topics := entities.NewTopics(1)
-
-		if err := topics.Delete(topic); err == nil {
+		if err := topics.Delete(topic.GetName()); err == nil {
 			t.Fatal("Error must be different from nil")
 		}
 	})

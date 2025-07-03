@@ -5,7 +5,6 @@ import (
 	"dominus-project/config"
 	"dominus-project/docs"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/rules"
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
 	"dominus-project/internal/interactors/manager"
 	"dominus-project/internal/interactors/system"
@@ -92,7 +91,6 @@ func main() {
 
 	logs := events.NewLogs(env.Logs)
 	topics := entities.NewTopics(env.TopicLimit)
-	rls := rules.NewValidator()
 	docs.SwaggerInfo.Host = env.Host
 
 	// Signals
@@ -131,7 +129,7 @@ func main() {
 
 	// Interactors
 	system := system.NewSystemService(logs)
-	manager := manager.NewManagerService(topics, rls)
+	manager := manager.NewManagerService(topics)
 
 	midF.AddMiddleware(apiToken, allowedOrings)
 	router := router.New()

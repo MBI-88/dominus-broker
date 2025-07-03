@@ -4,18 +4,15 @@ import (
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repos"
 	"fmt"
-	"sync"
 )
 
 func (m *managerService) AddTopic(ctx repos.RestContextInt) error {
-	topic := &entities.Topic{
-		Lck:   new(sync.Mutex),
-	}
+	topic := entities.NewTopic(ctx)
 
-	if err := ctx.BodyParser(topic); err != nil {
+	if err := topic.FillTopic(); err != nil {
 		return err
 	}
-	if err := m.rls.ValidateStruct(topic); err != nil {
+	if err := topic.ValidateTopic(); err != nil {
 		return err
 	}
 	if topic.GetName() == "" {

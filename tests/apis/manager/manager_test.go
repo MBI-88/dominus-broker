@@ -2,8 +2,8 @@ package manager_test
 
 import (
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/rules"
 	"dominus-project/internal/interactors/manager"
+	"dominus-project/internal/interfaces/fasthttp/dto"
 	"dominus-project/internal/interfaces/fasthttp/input"
 	"dominus-project/tests/env"
 	"encoding/json"
@@ -14,12 +14,11 @@ import (
 )
 
 func TestManagerController(t *testing.T) {
-	rls := rules.NewValidator()
 
 	t.Run("AddTopic_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(100)
 		router := router.New()
-		manager := manager.NewManagerService(topics, rls)
+		manager := manager.NewManagerService(topics)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics")
@@ -35,7 +34,7 @@ func TestManagerController(t *testing.T) {
 	t.Run("AddTopic_Error", func(t *testing.T) {
 		topics := entities.NewTopics(100)
 		router := router.New()
-		manager := manager.NewManagerService(topics, rls)
+		manager := manager.NewManagerService(topics)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics")
@@ -51,31 +50,29 @@ func TestManagerController(t *testing.T) {
 	t.Run("UpdateSubscribers_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(100)
 		router := router.New()
-		topic := new(entities.Topic)
+		c := new(fasthttp.RequestCtx)
+		c.Request.SetRequestURI("/subscribers/test")
+		c.Request.Header.SetMethod(fasthttp.MethodPatch)
+		c.Request.SetBody(env.ReadJson("./../../mocks/rest_update_body.json"))
 
-		data := env.ReadJson("./../../mocks/rest_create_body.json")
-		if err := json.Unmarshal(data, topic); err != nil {
-			t.Fatal(err)
-		}
-
+		ctx := dto.NewRestContext(c)
+		topic := entities.NewTopic(ctx)
+		topic.SetName("test")
 		topics.Append(topic)
-		manager := manager.NewManagerService(topics, rls)
-		input.NewManagerAPI(router, manager)
-		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/subscribers/test")
-		ctx.Request.Header.SetMethod(fasthttp.MethodPatch)
-		ctx.Request.SetBody(env.ReadJson("./../../mocks/rest_update_body.json"))
-		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusNoContent {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNoContent, ctx.Response.StatusCode())
+		manager := manager.NewManagerService(topics)
+		input.NewManagerAPI(router, manager)
+		router.Handler(c)
+
+		if c.Response.StatusCode() != fasthttp.StatusNoContent {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNoContent, c.Response.StatusCode())
 		}
 
 	})
 	t.Run("UpdateSubscribers_Error", func(t *testing.T) {
 		topics := entities.NewTopics(100)
 		router := router.New()
-		manager := manager.NewManagerService(topics, rls)
+		manager := manager.NewManagerService(topics)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/subscribers/test")
@@ -89,32 +86,31 @@ func TestManagerController(t *testing.T) {
 	})
 
 	t.Run("DeleteTopic_Ok", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(10)
 		router := router.New()
-		topic := new(entities.Topic)
+		c := new(fasthttp.RequestCtx)
+		c.Request.SetRequestURI("/topics/test")
+		c.Request.Header.SetMethod(fasthttp.MethodDelete)
 
-		data := env.ReadJson("./../../mocks/rest_create_body.json")
-		if err := json.Unmarshal(data, topic); err != nil {
-			t.Fatal(err)
-		}
 
+		ctx := dto.NewRestContext(c)
+		topic := entities.NewTopic(ctx)
+		topic.SetName("test")
 		topics.Append(topic)
-		manager := manager.NewManagerService(topics, rls)
-		input.NewManagerAPI(router, manager)
-		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/topics/test")
-		ctx.Request.Header.SetMethod(fasthttp.MethodDelete)
-		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusNoContent {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNoContent, ctx.Response.StatusCode())
+		manager := manager.NewManagerService(topics)
+		input.NewManagerAPI(router, manager)
+		router.Handler(c)
+
+		if c.Response.StatusCode() != fasthttp.StatusNoContent {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusNoContent, c.Response.StatusCode())
 		}
 	})
 
 	t.Run("DeleteTopic_Error", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(10)
 		router := router.New()
-		manager := manager.NewManagerService(topics, rls)
+		manager := manager.NewManagerService(topics)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics/test")
@@ -129,25 +125,28 @@ func TestManagerController(t *testing.T) {
 	t.Run("GetTopicInfo_OK", func(t *testing.T) {
 		topics := entities.NewTopics(100)
 		router := router.New()
-		topic := new(entities.Topic)
+		c := new(fasthttp.RequestCtx)
+		c.Request.SetRequestURI("/topics")
+		c.Request.Header.SetMethod(fasthttp.MethodGet)
 
-		data := env.ReadJson("./../../mocks/rest_create_body.json")
-		if err := json.Unmarshal(data, topic); err != nil {
-			t.Fatal(err)
-		}
+		ctx := dto.NewRestContext(c)
+		topic := entities.NewTopic(ctx)
+		topic.SetName("test")
+		topic.SetSubscribers([]string{"server1.api.com","server2.api.com", "server3.api.com"})
+		topic.SetMessage([]byte("test for testing"))
 
 		topics.Append(topic)
-		manager := manager.NewManagerService(topics, rls)
-		input.NewManagerAPI(router, manager)
-		ctx := new(fasthttp.RequestCtx)
-		ctx.Request.SetRequestURI("/topics")
-		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
-		router.Handler(ctx)
 
-		if ctx.Response.StatusCode() != fasthttp.StatusOK {
-			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusOK, ctx.Response.StatusCode())
+		manager := manager.NewManagerService(topics)
+		input.NewManagerAPI(router, manager)
+		
+		
+		router.Handler(c)
+
+		if c.Response.StatusCode() != fasthttp.StatusOK {
+			t.Fatalf("[-] Expected %d received %d", fasthttp.StatusOK, c.Response.StatusCode())
 		}
-		if body := ctx.Response.Body(); len(body) == 0 {
+		if body := c.Response.Body(); len(body) == 0 {
 			t.Fatal("Body must be fullfit")
 		}
 	})
@@ -156,7 +155,7 @@ func TestManagerController(t *testing.T) {
 		topics := entities.NewTopics(100)
 		router := router.New()
 
-		manager := manager.NewManagerService(topics, rls)
+		manager := manager.NewManagerService(topics)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics")

@@ -2,7 +2,6 @@ package interactors_test
 
 import (
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/rules"
 	"dominus-project/internal/interactors/manager"
 	"dominus-project/tests/env"
 	"testing"
@@ -10,7 +9,7 @@ import (
 
 func TestManagerCases(t *testing.T) {
 	topics := entities.NewTopics(100)
-	manager := manager.NewManagerService(topics, rules.NewValidator())
+	manager := manager.NewManagerService(topics)
 
 	// Create
 	t.Run("AddTopic_Ok", func(t *testing.T) {

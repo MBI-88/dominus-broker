@@ -7,30 +7,20 @@ import (
 	"errors"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestTopic(t *testing.T) {
 	body, _ := json.Marshal(env.Data)
 
 	t.Run("SetMessage_Ok", func(t *testing.T) {
-		topic := &entities.Topic{
-			Name:        env.Tps,
-			Subscribers: env.SubsOk,
-			Lck:         new(sync.Mutex),
-		}
-
+		topic := entities.NewTopic(nil)
 		topic.SetMessage(body)
 
 	})
 
 	t.Run("GetMessage_Ok", func(t *testing.T) {
-		topic := &entities.Topic{
-			Name:        env.Tps,
-			Subscribers: env.SubsOk,
-			
-			Lck:         new(sync.Mutex),
-			
-		}
+		topic := entities.NewTopic(nil)
 		topic.SetMessage(body)
 
 		if body := topic.GetMessage(); len(body) == 0 {
@@ -39,12 +29,7 @@ func TestTopic(t *testing.T) {
 	})
 
 	t.Run("GetMessage_error", func(t *testing.T) {
-		topic := &entities.Topic{
-			Name:        env.Tps,
-			Subscribers: env.SubsOk,
-			Lck:         new(sync.Mutex),
-			
-		}
+		topic := entities.NewTopic(nil)
 		body := topic.GetMessage()
 
 		if len(body) != 0 {
@@ -54,17 +39,14 @@ func TestTopic(t *testing.T) {
 
 }
 
-func TestTopiParallelRW(t *testing.T) {
-	topic := &entities.Topic{
-		Name:        env.Tps,
-		Subscribers: env.SubsOk,
-		Lck:         new(sync.Mutex),
-	}
+func TestTopicParallelRW(t *testing.T) {
+	topic := entities.NewTopic(nil)
 	body, _ := json.Marshal(env.Data)
 
-	t.Run("SetMessage_Ok", func(t *testing.T) {
+	t.Run("SetMessage_GetMessage_RW", func(t *testing.T) {
 		var (
-			wg   = new(sync.WaitGroup)
+			wg   = new(sync.WaitGroup) 
+			err error
 		)
 		wg.Add(2)
 
@@ -74,42 +56,16 @@ func TestTopiParallelRW(t *testing.T) {
 		}()
 		go func() {
 			defer wg.Done()
-			topic.SetMessage(body)
-		}()
-
-		wg.Wait()
-	})
-
-	t.Run("GetMessage_Ok", func(t *testing.T) {
-		var (
-			wg   = new(sync.WaitGroup)
-			err1 error
-			err2 error
-		)
-		wg.Add(2)
-
-		go func() {
-			defer wg.Done()
+			time.Sleep(2 * time.Second)
 			if body := topic.GetMessage(); len(body) == 0 {
-				err1 = errors.New("Body is empty")
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			if body := topic.GetMessage(); len(body) == 0 {
-				err2 = errors.New("Body is empty")
+				err = errors.New("Body is empty")
 			}
 		}()
 
 		wg.Wait()
 
-		if err1 != nil {
-			t.Fatal(err1)
-		}
-
-		if err2 != nil {
-			t.Fatal(err2)
+		if err != nil {
+			t.Fatal(err)
 		}
 	})
 
