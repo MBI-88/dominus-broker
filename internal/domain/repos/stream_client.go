@@ -1,11 +1,11 @@
 package repos
 
 
-type StreamBiInt interface {
-	Recv() (GrpRequestMessageInt, error)
+type IStreamBi interface {
+	Recv() (IGrpRequestMessage, error)
 	Send(msg []byte) error
 }
 
-type StreamClientInt interface {
-	Recv() (GrpRequestMessageInt, error)
+type IStreamClient interface {
+	Recv() (IGrpRequestMessage, error)
 }

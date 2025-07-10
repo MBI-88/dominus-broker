@@ -22,4 +22,6 @@ var (
 		CreatedAt: time.Now(),
 	}
 	Ad = new(sync.Mutex)
+	QueueLimit = 100
+	TopicLimit = 100
 )

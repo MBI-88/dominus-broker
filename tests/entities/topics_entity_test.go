@@ -7,7 +7,7 @@ import (
 )
 
 func TestTopics(t *testing.T) {
-	topic := entities.NewTopic(nil)
+	topic := entities.NewTopic(nil, env.QueueLimit)
 
 	t.Run("Append_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(1)
@@ -63,7 +63,7 @@ func TestTopics(t *testing.T) {
 
 	t.Run("Next_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(2)
-		topic1 := entities.NewTopic(nil)
+		topic1 := entities.NewTopic(nil, env.QueueLimit)
 		topic1.SetName(env.Tps)
 		topics.Append(topic1)
 

@@ -25,7 +25,7 @@ func (ev *eventMock) GetLogs() ([]string, error) {
 	return nil, fmt.Errorf("[-] Error response")
 }
 
-func NewEventMock(status bool) repos.LogsInt {
+func NewEventMock(status bool) repos.ILogs {
 	return &eventMock{
 		statusFlag: status,
 	}

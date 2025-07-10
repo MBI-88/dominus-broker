@@ -1,7 +1,7 @@
 package repos
 
 
-type GrpRequestMessageInt interface {
+type IGrpRequestMessage interface {
 	Descriptor() ([]byte, []int)
 	GetPayload() []byte
 	GetSubscribers() []string

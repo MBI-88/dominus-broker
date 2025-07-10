@@ -6,22 +6,22 @@ import (
 )
 
 type grpcService struct {
-	client repos.GrpClientInt
-	lg     repos.LogsInt
-	topics entities.TopicsInt
+	client repos.IGrpClient
+	lg     repos.ILogs
+	topics entities.ITopics
 }
 
 
 
 type GrpcServiceInt interface {
-	SimpleConn(ms repos.GrpRequestMessageInt) error
-	StreamClientConn(st repos.StreamClientInt) error
-	StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error
-	StreamBiConn(st repos.StreamBiInt) error
+	SimpleConn(ms repos.IGrpRequestMessage) error
+	StreamClientConn(st repos.IStreamClient) error
+	StreamServerConn(req repos.IGrpRequestMessage, st repos.IStreamServer) error
+	StreamBiConn(st repos.IStreamBi) error
 	RunQueue(close <-chan struct{}) error
 }
 
-func NewGrpcService(lclient repos.LogsInt, gclient repos.GrpClientInt, topics entities.TopicsInt) GrpcServiceInt {
+func NewGrpcService(lclient repos.ILogs, gclient repos.IGrpClient, topics entities.ITopics) GrpcServiceInt {
 	return &grpcService{
 		lg:     lclient,
 		client: gclient,

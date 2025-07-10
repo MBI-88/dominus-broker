@@ -8,8 +8,8 @@ import (
 )
 
 func TestManagerCases(t *testing.T) {
-	topics := entities.NewTopics(100)
-	manager := manager.NewManagerService(topics)
+	topics := entities.NewTopics(env.TopicLimit)
+	manager := manager.NewManagerService(topics, env.QueueLimit)
 
 	// Create
 	t.Run("AddTopic_Ok", func(t *testing.T) {

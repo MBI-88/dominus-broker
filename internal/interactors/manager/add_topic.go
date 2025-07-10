@@ -6,8 +6,8 @@ import (
 	"fmt"
 )
 
-func (m *managerService) AddTopic(ctx repos.RestContextInt) error {
-	topic := entities.NewTopic(ctx)
+func (m *managerService) AddTopic(ctx repos.IRestContext) error {
+	topic := entities.NewTopic(ctx, m.queueLimit)
 
 	if err := topic.FillTopic(); err != nil {
 		return err

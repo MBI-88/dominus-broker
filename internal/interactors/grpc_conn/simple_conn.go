@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (c *grpcService) SimpleConn(ms repos.GrpRequestMessageInt) error {
+func (c *grpcService) SimpleConn(ms repos.IGrpRequestMessage) error {
 	name := c.getTopicName(ms)
 	if name == "" {
 		return fmt.Errorf("Topic name empty")

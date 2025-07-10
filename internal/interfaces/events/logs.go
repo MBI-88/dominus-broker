@@ -60,7 +60,7 @@ func (l *logs) GetLogs() ([]string, error) {
 	return payloads, nil
 }
 
-func NewLogs(path string) repos.LogsInt {
+func NewLogs(path string) repos.ILogs {
 	file, err := os.CreateTemp(path, "log-*.log")
 	if err != nil {
 		panic(err)

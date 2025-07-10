@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (c *grpcService) StreamServerConn(req repos.GrpRequestMessageInt, st repos.StreamServerInt) error {
+func (c *grpcService) StreamServerConn(req repos.IGrpRequestMessage, st repos.IStreamServer) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	subscribers := req.GetSubscribers()

@@ -39,11 +39,11 @@ func (mockResponse) ValidateAll() error {
 
 
 type grpcClientMock struct{
-	rspo repos.GrpResponseInt
+	rspo repos.IGrpResponse
 	happyPath bool
 }
 
-func (g *grpcClientMock) Simple(url string, msg []byte) (repos.GrpResponseInt, error) {
+func (g *grpcClientMock) Simple(url string, msg []byte) (repos.IGrpResponse, error) {
 	if g.happyPath {
 		return g.rspo, nil
 	}
@@ -110,7 +110,7 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 
 }
 
-func NewGrpcClientMock(happyPathCls, happyPathResp bool) repos.GrpClientInt {
+func NewGrpcClientMock(happyPathCls, happyPathResp bool) repos.IGrpClient {
 	return &grpcClientMock{
 		rspo: &mockResponse{
 			happyPath: happyPathResp,

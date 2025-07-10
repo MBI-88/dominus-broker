@@ -20,7 +20,7 @@ func (c *grpcService) checkQueue() {
 
 		body := t.GetMessage()
 		for _, sub := range t.GetSubscribers() {
-			go func(url string, topic entities.TopicInt) {
+			go func(url string, topic entities.ITopic) {
 				if len(body) > 0 {
 					resp, err := c.client.Simple(url, body)
 					if err != nil {
@@ -38,7 +38,7 @@ func (c *grpcService) checkQueue() {
 	}
 }
 
-func (*grpcService) getTopicName(ms repos.GrpRequestMessageInt) string {
+func (*grpcService) getTopicName(ms repos.IGrpRequestMessage) string {
 	if len(ms.GetSubscribers()) > 0 {
 		return  ms.GetSubscribers()[0]
 	}

@@ -40,7 +40,7 @@ func (r *restContext) readJson() []byte {
 	return file
 }
 
-func NewRestConext(status bool, path, param string) repos.RestContextInt {
+func NewRestConext(status bool, path, param string) repos.IRestContext {
 	return &restContext{
 		status:  status,
 		payload: path,

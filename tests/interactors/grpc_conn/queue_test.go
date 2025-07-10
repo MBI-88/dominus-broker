@@ -11,8 +11,8 @@ import (
 
 func TestSimpleConn(t *testing.T) {
 	log := env.NewEventMock(true)
-	topics := entities.NewTopics(100)
-	topic := entities.NewTopic(nil)
+	topics := entities.NewTopics(env.TopicLimit)
+	topic := entities.NewTopic(nil, env.QueueLimit)
 	topic.SetName(env.Tps)
 	topic.SetSubscribers(env.SubsOk)
 	topics.Append(topic)
@@ -44,7 +44,7 @@ func TestSimpleConn(t *testing.T) {
 func TestRunQueue(t *testing.T) {
 	log := env.NewEventMock(true)
 	topics := entities.NewTopics(100)
-	topic := entities.NewTopic(nil)
+	topic := entities.NewTopic(nil, env.QueueLimit)
 	topic.SetName(env.Tps)
 	topic.SetSubscribers(env.SubsOk)
 	body, _ := json.Marshal(env.Data)

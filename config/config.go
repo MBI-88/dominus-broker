@@ -14,6 +14,7 @@ type config struct {
 	RestPort                         int64
 	GrpcPort                         int64
 	TopicLimit                       int
+	QueueLimit                       int 
 	KeyFile                          string
 	SslCaCert                        string
 	SslCert                          string
@@ -36,6 +37,7 @@ func (s *config) setEnv() {
 	s.Logs = viper.GetString("LOGS")
 	s.Host = viper.GetString("HOST")
 	s.TopicLimit = viper.GetInt("TOPIC_LIMIT")
+	s.QueueLimit = viper.GetInt("QUEUE_LIMIT")
 }
 
 func (s config) GetEnvVar(prod bool) config {

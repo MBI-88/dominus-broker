@@ -1,7 +1,7 @@
 package repos
 
 
-type RestContextInt interface {
+type IRestContext interface {
 	BodyParser(obj any) error
 	Param(key string) string
 }

@@ -1,7 +1,7 @@
 package repos
 
 
-type GrpResponseInt interface {
+type IGrpResponse interface {
 	Descriptor() ([]byte, []int)
 	GetMessage() string
 	GetStatus() uint32

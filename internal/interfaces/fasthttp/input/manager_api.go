@@ -13,7 +13,7 @@ import (
 type manager struct {
 	router *router.Router
 	js     jsoniter.API
-	uc     mg.ManagerInt
+	uc     mg.IManager
 }
 
 // @Tags Manager
@@ -106,7 +106,7 @@ func (m *manager) path() {
 	m.router.GET("/topics", m.getTopicsInfo)
 }
 
-func NewManagerAPI(r *router.Router, uc mg.ManagerInt) {
+func NewManagerAPI(r *router.Router, uc mg.IManager) {
 	mg := &manager{
 		router: r,
 		uc:     uc,

@@ -5,14 +5,14 @@ import (
 )
 
 type systemService struct {
-	lg repos.LogsInt
+	lg repos.ILogs
 }
 
 type SystemServiceInt interface {
 	GetLogs() ([]string, error)
 }
 
-func NewSystemService(clog repos.LogsInt) SystemServiceInt {
+func NewSystemService(clog repos.ILogs) SystemServiceInt {
 	return &systemService{
 		lg: clog,
 	}

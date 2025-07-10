@@ -129,7 +129,7 @@ func main() {
 
 	// Interactors
 	system := system.NewSystemService(logs)
-	manager := manager.NewManagerService(topics)
+	manager := manager.NewManagerService(topics, env.QueueLimit)
 
 	midF.AddMiddleware(apiToken, allowedOrings)
 	router := router.New()

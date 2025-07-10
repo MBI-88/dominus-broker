@@ -9,52 +9,58 @@ import (
 )
 
 type topic struct {
+	queueLimit  int
 	Name        string   `json:"name" validate:"omitempty,alpha,lowercase"`
 	Subscribers []string `json:"subscribers" validate:"required,dive,hostname_port"`
-	Message     []byte
+	queue          IQueue
 	Lck         *sync.RWMutex
 	validate    *validator.Validate
-	parser      paserBodyInt
+	parser      IpaserBody
 }
 
-func (t *topic) SetMessage(data []byte)  {
+func (t *topic) SetMessage(data []byte) error {
 	t.Lck.Lock()
 	defer t.Lck.Unlock()
-	t.Message = data
+	if t.queue.Length() < t.queueLimit {
+		t.queue.Enqueue(data)
+		return  nil 
+	}
+	return  fmt.Errorf("Queue full")
 }
 
 func (t *topic) GetMessage() []byte {
 	t.Lck.RLock()
 	defer t.Lck.RUnlock()
-	message := t.Message
-	t.Message = []byte{}
-	return  message
+	msg, ok := t.queue.Dequeue()
+	if !ok {
+		return  nil
+	}
+	return msg
 }
 
 func (t *topic) GetSubscribers() []string {
 	t.Lck.RLock()
 	defer t.Lck.RUnlock()
-	return  t.Subscribers
+	return t.Subscribers
 }
 
 func (t *topic) SetSubscribers(sb []string) {
 	t.Lck.Lock()
-	defer t.Lck.Unlock() 
+	defer t.Lck.Unlock()
 	t.Subscribers = sb
 }
 
 func (t *topic) GetName() string {
 	t.Lck.RLock()
 	defer t.Lck.RUnlock()
-	return  t.Name
+	return t.Name
 }
 
 func (t *topic) SetName(name string) {
 	t.Lck.Lock()
-	defer t.Lck.Unlock() 
+	defer t.Lck.Unlock()
 	t.Name = name
 }
-
 
 func (t *topic) ValidateTopic() error {
 	t.Lck.RLock()
@@ -81,13 +87,11 @@ func (t *topic) ValidateTopic() error {
 }
 
 func (t *topic) FillTopic() error {
-	return  t.parser.BodyParser(t)
+	return t.parser.BodyParser(t)
 }
 
-
-
-type TopicInt interface {
-	SetMessage(data []byte)
+type ITopic interface {
+	SetMessage(data []byte) error
 	GetMessage() []byte
 	SetSubscribers(sb []string)
 	GetSubscribers() []string
@@ -97,15 +101,15 @@ type TopicInt interface {
 	ValidateTopic() error
 }
 
-type paserBodyInt interface {
+type IpaserBody interface {
 	BodyParser(obj any) error
 }
 
-func NewTopic(dto paserBodyInt) TopicInt {
+func NewTopic(dto IpaserBody, limit int) ITopic {
 	customValidate := validator.New()
 	customValidate.RegisterValidation("hostname_port", func(fl validator.FieldLevel) bool {
 		value := fl.Field().String()
-		
+
 		host, port, _ := net.SplitHostPort(value)
 
 		isValidPort := func(port string) bool {
@@ -116,19 +120,21 @@ func NewTopic(dto paserBodyInt) TopicInt {
 		}
 
 		if net.ParseIP(host) != nil && isValidPort(port) {
-			return  true
+			return true
 		}
 
 		if err := validator.New().Var(value, "hostname"); err == nil {
-			return  true
+			return true
 		}
 
 		return false
 
 	})
-	return  &topic{
+	return &topic{
 		validate: customValidate,
-		Lck: new(sync.RWMutex),
-		parser: dto,
+		Lck:      new(sync.RWMutex),
+		parser:   dto,
+		queue: NewQueue(),
+		queueLimit: limit,
 	}
 }

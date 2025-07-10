@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (c *grpcService) StreamClientConn(st repos.StreamClientInt) error {
+func (c *grpcService) StreamClientConn(st repos.IStreamClient) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	stream := make(chan []byte)

@@ -16,9 +16,9 @@ import (
 func TestManagerController(t *testing.T) {
 
 	t.Run("AddTopic_Ok", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics")
@@ -32,9 +32,9 @@ func TestManagerController(t *testing.T) {
 
 	})
 	t.Run("AddTopic_Error", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics")
@@ -48,7 +48,7 @@ func TestManagerController(t *testing.T) {
 	})
 
 	t.Run("UpdateSubscribers_Ok", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
 		c := new(fasthttp.RequestCtx)
 		c.Request.SetRequestURI("/subscribers/test")
@@ -56,11 +56,11 @@ func TestManagerController(t *testing.T) {
 		c.Request.SetBody(env.ReadJson("./../../mocks/rest_update_body.json"))
 
 		ctx := dto.NewRestContext(c)
-		topic := entities.NewTopic(ctx)
+		topic := entities.NewTopic(ctx,env.QueueLimit)
 		topic.SetName("test")
 		topics.Append(topic)
 
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		router.Handler(c)
 
@@ -70,9 +70,9 @@ func TestManagerController(t *testing.T) {
 
 	})
 	t.Run("UpdateSubscribers_Error", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/subscribers/test")
@@ -94,11 +94,11 @@ func TestManagerController(t *testing.T) {
 
 
 		ctx := dto.NewRestContext(c)
-		topic := entities.NewTopic(ctx)
+		topic := entities.NewTopic(ctx, env.QueueLimit)
 		topic.SetName("test")
 		topics.Append(topic)
 
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		router.Handler(c)
 
@@ -108,9 +108,9 @@ func TestManagerController(t *testing.T) {
 	})
 
 	t.Run("DeleteTopic_Error", func(t *testing.T) {
-		topics := entities.NewTopics(10)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics/test")
@@ -123,21 +123,21 @@ func TestManagerController(t *testing.T) {
 	})
 
 	t.Run("GetTopicInfo_OK", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
 		c := new(fasthttp.RequestCtx)
 		c.Request.SetRequestURI("/topics")
 		c.Request.Header.SetMethod(fasthttp.MethodGet)
 
 		ctx := dto.NewRestContext(c)
-		topic := entities.NewTopic(ctx)
+		topic := entities.NewTopic(ctx, env.QueueLimit)
 		topic.SetName("test")
 		topic.SetSubscribers([]string{"server1.api.com","server2.api.com", "server3.api.com"})
 		topic.SetMessage([]byte("test for testing"))
 
 		topics.Append(topic)
 
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		
 		
@@ -152,10 +152,10 @@ func TestManagerController(t *testing.T) {
 	})
 
 	t.Run("GetTopicInfo_ERROR", func(t *testing.T) {
-		topics := entities.NewTopics(100)
+		topics := entities.NewTopics(env.TopicLimit)
 		router := router.New()
 
-		manager := manager.NewManagerService(topics)
+		manager := manager.NewManagerService(topics, env.QueueLimit)
 		input.NewManagerAPI(router, manager)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/topics")

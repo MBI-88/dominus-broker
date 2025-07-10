@@ -10,7 +10,7 @@ type grpcBiContextStream struct {
 	sr pb.Grpc_BidirectionalStreamServer
 }
 
-func (g *grpcBiContextStream) Recv() (repos.GrpRequestMessageInt, error) {
+func (g *grpcBiContextStream) Recv() (repos.IGrpRequestMessage, error) {
 	return g.sr.Recv()
 }
 
@@ -20,7 +20,7 @@ func (g *grpcBiContextStream) Send(msg []byte) error {
 	})
 }
 
-func NewBiStreamConn(sr pb.Grpc_BidirectionalStreamServer) repos.StreamBiInt {
+func NewBiStreamConn(sr pb.Grpc_BidirectionalStreamServer) repos.IStreamBi {
 	return &grpcBiContextStream{
 		sr: sr,
 	}
@@ -30,11 +30,11 @@ type grpcContextClientStream struct {
 	sr pb.Grpc_ClientStreamServer
 }
 
-func (g *grpcContextClientStream) Recv() (repos.GrpRequestMessageInt, error) {
+func (g *grpcContextClientStream) Recv() (repos.IGrpRequestMessage, error) {
 	return g.sr.Recv()
 }
 
-func NewClientStreamContext(sr pb.Grpc_ClientStreamServer) repos.StreamClientInt {
+func NewClientStreamContext(sr pb.Grpc_ClientStreamServer) repos.IStreamClient {
 	return &grpcContextClientStream{
 		sr: sr,
 	}
@@ -54,7 +54,7 @@ func (g *grpcContextServerStream) Context() context.Context {
 	return g.sr.Context()
 }
 
-func NewServerStreamContext(sr pb.Grpc_ServerStreamServer) repos.StreamServerInt {
+func NewServerStreamContext(sr pb.Grpc_ServerStreamServer) repos.IStreamServer {
 	return &grpcContextServerStream{
 		sr: sr,
 	}

@@ -14,13 +14,13 @@ func TestTopic(t *testing.T) {
 	body, _ := json.Marshal(env.Data)
 
 	t.Run("SetMessage_Ok", func(t *testing.T) {
-		topic := entities.NewTopic(nil)
+		topic := entities.NewTopic(nil, env.QueueLimit)
 		topic.SetMessage(body)
 
 	})
 
 	t.Run("GetMessage_Ok", func(t *testing.T) {
-		topic := entities.NewTopic(nil)
+		topic := entities.NewTopic(nil, env.QueueLimit)
 		topic.SetMessage(body)
 
 		if body := topic.GetMessage(); len(body) == 0 {
@@ -29,7 +29,7 @@ func TestTopic(t *testing.T) {
 	})
 
 	t.Run("GetMessage_error", func(t *testing.T) {
-		topic := entities.NewTopic(nil)
+		topic := entities.NewTopic(nil, env.QueueLimit)
 		body := topic.GetMessage()
 
 		if len(body) != 0 {
@@ -40,7 +40,7 @@ func TestTopic(t *testing.T) {
 }
 
 func TestTopicParallelRW(t *testing.T) {
-	topic := entities.NewTopic(nil)
+	topic := entities.NewTopic(nil, env.QueueLimit)
 	body, _ := json.Marshal(env.Data)
 
 	t.Run("SetMessage_GetMessage_RW", func(t *testing.T) {

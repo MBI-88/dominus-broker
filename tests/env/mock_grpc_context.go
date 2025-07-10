@@ -46,7 +46,7 @@ func (*simpleContextMock) ValidateAll() error {
 	return nil
 }
 
-func NewSimpleContextMock(payload []byte, subs []string) repos.GrpRequestMessageInt {
+func NewSimpleContextMock(payload []byte, subs []string) repos.IGrpRequestMessage {
 	return &simpleContextMock{
 		payload: payload,
 		subs:    subs,
@@ -58,13 +58,13 @@ type clientContextMock struct {
 	*simpleContextMock
 }
 
-func (c *clientContextMock) Recv() (repos.GrpRequestMessageInt, error) {
+func (c *clientContextMock) Recv() (repos.IGrpRequestMessage, error) {
 	Ad.Lock()
 	defer Ad.Unlock()
 	return c.simpleContextMock, c.err
 }
 
-func NewClienContextMock(payload []byte, subs []string) repos.StreamClientInt {
+func NewClienContextMock(payload []byte, subs []string) repos.IStreamClient {
 	stream := &clientContextMock{
 		&simpleContextMock{
 			payload: payload,
@@ -90,7 +90,7 @@ func (se *serverContextMock) Context() context.Context {
 	return context.Background()
 }
 
-func NewServerContextMock(payload []byte, subs []string) (repos.GrpRequestMessageInt, repos.StreamServerInt) {
+func NewServerContextMock(payload []byte, subs []string) (repos.IGrpRequestMessage, repos.IStreamServer) {
 	stream := &serverContextMock{
 		&simpleContextMock{
 			payload: payload,
@@ -106,7 +106,7 @@ type biContextMock struct {
 	*simpleContextMock
 }
 
-func (b *biContextMock) Recv() (repos.GrpRequestMessageInt, error) {
+func (b *biContextMock) Recv() (repos.IGrpRequestMessage, error) {
 	Ad.Lock()
 	defer Ad.Unlock()
 	return b.simpleContextMock, b.err
@@ -118,7 +118,7 @@ func (b *biContextMock) Send(msg []byte) error {
 	return b.err
 }
 
-func NewBiContextMock(payload []byte, subs []string) repos.StreamBiInt {
+func NewBiContextMock(payload []byte, subs []string) repos.IStreamBi {
 	stream := &biContextMock{
 		&simpleContextMock{
 			payload: payload,

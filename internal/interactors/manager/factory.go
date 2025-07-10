@@ -6,18 +6,20 @@ import (
 )
 
 type managerService struct {
-	topics entities.TopicsInt
+	topics entities.ITopics
+	queueLimit int
 }
 
-type ManagerInt interface {
-	AddTopic(ctx repos.RestContextInt) error
-	UpdateSubscribers(ctx repos.RestContextInt) error
-	DeleteTopic(ctx repos.RestContextInt) error
+type IManager interface {
+	AddTopic(ctx repos.IRestContext) error
+	UpdateSubscribers(ctx repos.IRestContext) error
+	DeleteTopic(ctx repos.IRestContext) error
 	GetQueueInfo() map[string]any
 }
 
-func NewManagerService(topics entities.TopicsInt) ManagerInt {
+func NewManagerService(topics entities.ITopics, limit int) IManager {
 	return &managerService{
 		topics: topics,
+		queueLimit: limit,
 	}
 }

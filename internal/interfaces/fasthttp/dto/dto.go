@@ -24,7 +24,7 @@ func (r *restContext) Param(key string) string {
 	return r.context.UserValue(key).(string)
 }
 
-func NewRestContext(ctx *fasthttp.RequestCtx) repos.RestContextInt {
+func NewRestContext(ctx *fasthttp.RequestCtx) repos.IRestContext {
 	return &restContext{
 		context: ctx,
 		js:      jsoniter.ConfigCompatibleWithStandardLibrary,

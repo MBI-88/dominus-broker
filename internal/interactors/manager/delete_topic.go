@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (m *managerService) DeleteTopic(ctx repos.RestContextInt) error {
+func (m *managerService) DeleteTopic(ctx repos.IRestContext) error {
 	name := ctx.Param("name")
 	if name == "" {
 		return fmt.Errorf("Param empty")

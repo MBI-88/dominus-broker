@@ -15,7 +15,7 @@ import (
 
 type middlewares struct {
 	token []byte
-	logs  repos.LogsInt
+	logs  repos.ILogs
 }
 
 func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
@@ -57,7 +57,7 @@ type MiddlewareInt interface {
 	StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
 }
 
-func NewMiddleware(t string, lg repos.LogsInt) MiddlewareInt {
+func NewMiddleware(t string, lg repos.ILogs) MiddlewareInt {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,
