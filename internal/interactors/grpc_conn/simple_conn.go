@@ -22,6 +22,6 @@ func (c *grpcService) SimpleConn(ms repos.IGrpRequestMessage) error {
 	if len(message) == 0 {
 		return  fmt.Errorf("Message empty")
 	}
-	topic.SetMessage(message)
-	return nil
+	
+	return topic.SetMessage(message)
 }

@@ -15,13 +15,28 @@ func TestTopic(t *testing.T) {
 
 	t.Run("SetMessage_Ok", func(t *testing.T) {
 		topic := entities.NewTopic(nil, env.QueueLimit)
-		topic.SetMessage(body)
+		if err := topic.SetMessage(body); err != nil {
+			t.Fatal(err.Error())
+		}
+	})
 
+	t.Run("SetMessage_OK", func(t *testing.T) {
+		topic := entities.NewTopic(nil, 1)
+		if err := topic.SetMessage(body); err != nil {
+			t.Fatal(err.Error())
+		}
+
+		if err := topic.SetMessage(body); err == nil {
+			t.Fatal("SetMessage must return error")
+		}
 	})
 
 	t.Run("GetMessage_Ok", func(t *testing.T) {
 		topic := entities.NewTopic(nil, env.QueueLimit)
-		topic.SetMessage(body)
+
+		if err := topic.SetMessage(body); err != nil {
+			t.Fatal(err.Error())
+		}
 
 		if body := topic.GetMessage(); len(body) == 0 {
 			t.Fatal("Body must be different from 0")
@@ -46,26 +61,29 @@ func TestTopicParallelRW(t *testing.T) {
 	t.Run("SetMessage_GetMessage_RW", func(t *testing.T) {
 		var (
 			wg   = new(sync.WaitGroup) 
-			err error
+			errGet error
+			errSet error
 		)
 		wg.Add(2)
 
 		go func() {
 			defer wg.Done()
-			topic.SetMessage(body)
+			errSet = topic.SetMessage(body)
+			errSet = topic.SetMessage(body)
+			errSet = topic.SetMessage(body)
 		}()
 		go func() {
 			defer wg.Done()
-			time.Sleep(2 * time.Second)
+			time.Sleep(1 * time.Second)
 			if body := topic.GetMessage(); len(body) == 0 {
-				err = errors.New("Body is empty")
+				errGet = errors.New("Body is empty")
 			}
 		}()
 
 		wg.Wait()
 
-		if err != nil {
-			t.Fatal(err)
+		if errGet != nil || errSet != nil {
+			t.Fatal(errGet.Error() + " " + errSet.Error())
 		}
 	})
 

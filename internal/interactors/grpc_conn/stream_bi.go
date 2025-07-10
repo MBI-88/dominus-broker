@@ -25,15 +25,8 @@ func (c *grpcService) StreamBiConn(stream repos.IStreamBi) error {
 		return err
 	}
 	go func(sig <-chan error) {
-		for {
-			select {
-			case err, ok := <-sig:
-				if ok {
-					go c.lg.WriteLog("InsertObject", err.Error())
-				} else {
-					return
-				}
-			}
+		for er := range sig {
+			go c.lg.WriteLog("InsertObject", er.Error())
 		}
 	}(errMsg)
 
