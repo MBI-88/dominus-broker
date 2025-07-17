@@ -1,7 +1,7 @@
 package env
 
 import (
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"fmt"
 	"log"
 )
@@ -25,7 +25,7 @@ func (ev *eventMock) GetLogs() ([]string, error) {
 	return nil, fmt.Errorf("[-] Error response")
 }
 
-func NewEventMock(status bool) repos.ILogs {
+func NewEventMock(status bool) adapters.ILogs {
 	return &eventMock{
 		statusFlag: status,
 	}

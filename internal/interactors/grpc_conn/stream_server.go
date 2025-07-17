@@ -2,11 +2,11 @@ package grpcconn
 
 import (
 	"context"
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"fmt"
 )
 
-func (c *grpcService) StreamServerConn(req repos.IGrpRequestMessage, st repos.IStreamServer) error {
+func (c *grpcService) StreamServerConn(req adapters.IGrpcDto, st adapters.IStreamServer) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	subscribers := req.GetSubscribers()

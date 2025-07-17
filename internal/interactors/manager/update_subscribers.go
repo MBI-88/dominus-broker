@@ -1,11 +1,11 @@
 package manager
 
 import (
+	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repos"
 )
 
-func (m *managerService) UpdateSubscribers(ctx repos.IRestContext) error {
+func (m *managerService) UpdateSubscribers(ctx adapters.IRestDto) error {
 	topic := entities.NewTopic(ctx, m.queueLimit)
 	name := ctx.Param("name")
 	if err := topic.FillTopic(); err != nil {

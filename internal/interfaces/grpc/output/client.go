@@ -2,7 +2,7 @@ package output
 
 import (
 	"context"
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	pb "dominus-project/internal/interfaces/grpc/proto/builder"
 	"io"
 	"sync"
@@ -13,10 +13,10 @@ import (
 
 type grpcClient struct {
 	opts []grpc.DialOption
-	lgs  repos.ILogs
+	lgs  adapters.ILogs
 }
 
-func (g *grpcClient) Simple(url string, body []byte) (repos.IGrpResponse, error) {
+func (g *grpcClient) Simple(url string, body []byte) (adapters.IGrpcResponse, error) {
 	conn, err := grpc.NewClient(url, g.opts...)
 	if err != nil {
 		return nil, err
@@ -220,7 +220,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 	}
 }
 
-func NewGrpClient(opts []grpc.DialOption, lgs repos.ILogs) repos.IGrpClient {
+func NewGrpClient(opts []grpc.DialOption, lgs adapters.ILogs) adapters.IGrpcClient {
 	return &grpcClient{
 		opts: opts,
 		lgs:  lgs,

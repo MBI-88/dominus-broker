@@ -1,16 +1,15 @@
 package grpcconn
 
 import (
+	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repos"
 )
 
 // CheckQueue Check the Queue for new messages
 //
-// Params
+// # Params
 //
 // Empty
-//
 func (c *grpcService) checkQueue() {
 	for {
 		t, err := c.topics.Next()
@@ -38,9 +37,9 @@ func (c *grpcService) checkQueue() {
 	}
 }
 
-func (*grpcService) getTopicName(ms repos.IGrpRequestMessage) string {
+func (*grpcService) getTopicName(ms adapters.IGrpcDto) string {
 	if len(ms.GetSubscribers()) > 0 {
-		return  ms.GetSubscribers()[0]
+		return ms.GetSubscribers()[0]
 	}
-	return  ""
+	return ""
 }

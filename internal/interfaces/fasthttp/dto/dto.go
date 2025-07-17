@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/valyala/fasthttp"
@@ -24,7 +24,7 @@ func (r *restContext) Param(key string) string {
 	return r.context.UserValue(key).(string)
 }
 
-func NewRestContext(ctx *fasthttp.RequestCtx) repos.IRestContext {
+func NewRestContext(ctx *fasthttp.RequestCtx) adapters.IRestDto {
 	return &restContext{
 		context: ctx,
 		js:      jsoniter.ConfigCompatibleWithStandardLibrary,

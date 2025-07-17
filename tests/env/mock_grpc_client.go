@@ -2,7 +2,7 @@ package env
 
 import (
 	"context"
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -13,41 +13,39 @@ type mockResponse struct {
 }
 
 func (mockResponse) Descriptor() ([]byte, []int) {
-	return  []byte("empty"), []int{}
+	return []byte("empty"), []int{}
 }
 func (mockResponse) GetMessage() string {
-	return  ""
+	return ""
 }
-func (m *mockResponse) GetStatus() uint32  {
+func (m *mockResponse) GetStatus() uint32 {
 	if m.happyPath {
-		return  200
+		return 200
 	}
-	return  400
+	return 400
 }
 func (mockResponse) ProtoMessage() {}
-func (mockResponse) Reset() {}
+func (mockResponse) Reset()        {}
 func (mockResponse) String() string {
-	return  ""
+	return ""
 }
 func (mockResponse) Validate() error {
-	return  nil
+	return nil
 }
 func (mockResponse) ValidateAll() error {
-	return  nil
+	return nil
 }
 
-
-
-type grpcClientMock struct{
-	rspo repos.IGrpResponse
+type grpcClientMock struct {
+	rspo      adapters.IGrpcResponse
 	happyPath bool
 }
 
-func (g *grpcClientMock) Simple(url string, msg []byte) (repos.IGrpResponse, error) {
+func (g *grpcClientMock) Simple(url string, msg []byte) (adapters.IGrpcResponse, error) {
 	if g.happyPath {
 		return g.rspo, nil
 	}
-	return  nil, fmt.Errorf("Error")
+	return nil, fmt.Errorf("Error")
 }
 
 func (grpcClientMock) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
@@ -110,7 +108,7 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 
 }
 
-func NewGrpcClientMock(happyPathCls, happyPathResp bool) repos.IGrpClient {
+func NewGrpcClientMock(happyPathCls, happyPathResp bool) adapters.IGrpcClient {
 	return &grpcClientMock{
 		rspo: &mockResponse{
 			happyPath: happyPathResp,

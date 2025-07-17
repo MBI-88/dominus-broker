@@ -1,27 +1,25 @@
 package grpcconn
 
 import (
+	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repos"
 )
 
 type grpcService struct {
-	client repos.IGrpClient
-	lg     repos.ILogs
+	client adapters.IGrpcClient
+	lg     adapters.ILogs
 	topics entities.ITopics
 }
 
-
-
 type GrpcServiceInt interface {
-	SimpleConn(ms repos.IGrpRequestMessage) error
-	StreamClientConn(st repos.IStreamClient) error
-	StreamServerConn(req repos.IGrpRequestMessage, st repos.IStreamServer) error
-	StreamBiConn(st repos.IStreamBi) error
+	SimpleConn(ms adapters.IGrpcDto) error
+	StreamClientConn(st adapters.IStreamClient) error
+	StreamServerConn(req adapters.IGrpcDto, st adapters.IStreamServer) error
+	StreamBiConn(st adapters.IStreamBi) error
 	RunQueue(close <-chan struct{}) error
 }
 
-func NewGrpcService(lclient repos.ILogs, gclient repos.IGrpClient, topics entities.ITopics) GrpcServiceInt {
+func NewGrpcService(lclient adapters.ILogs, gclient adapters.IGrpcClient, topics entities.ITopics) GrpcServiceInt {
 	return &grpcService{
 		lg:     lclient,
 		client: gclient,

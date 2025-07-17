@@ -1,11 +1,11 @@
 package grpcconn
 
 import (
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"fmt"
 )
 
-func (c *grpcService) SimpleConn(ms repos.IGrpRequestMessage) error {
+func (c *grpcService) SimpleConn(ms adapters.IGrpcDto) error {
 	name := c.getTopicName(ms)
 	if name == "" {
 		return fmt.Errorf("Topic name empty")
@@ -17,11 +17,11 @@ func (c *grpcService) SimpleConn(ms repos.IGrpRequestMessage) error {
 	if len(topic.GetSubscribers()) == 0 {
 		return fmt.Errorf("Subscribers are empty")
 	}
-	
+
 	message := ms.GetPayload()
 	if len(message) == 0 {
-		return  fmt.Errorf("Message empty")
+		return fmt.Errorf("Message empty")
 	}
-	
+
 	return topic.SetMessage(message)
 }

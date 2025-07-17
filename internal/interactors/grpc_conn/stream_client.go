@@ -2,11 +2,11 @@ package grpcconn
 
 import (
 	"context"
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"fmt"
 )
 
-func (c *grpcService) StreamClientConn(st repos.IStreamClient) error {
+func (c *grpcService) StreamClientConn(st adapters.IStreamClient) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	stream := make(chan []byte)

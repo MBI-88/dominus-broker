@@ -1,25 +1,25 @@
 package manager
 
 import (
+	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repos"
 )
 
 type managerService struct {
-	topics entities.ITopics
+	topics     entities.ITopics
 	queueLimit int
 }
 
 type IManager interface {
-	AddTopic(ctx repos.IRestContext) error
-	UpdateSubscribers(ctx repos.IRestContext) error
-	DeleteTopic(ctx repos.IRestContext) error
+	AddTopic(ctx adapters.IRestDto) error
+	UpdateSubscribers(ctx adapters.IRestDto) error
+	DeleteTopic(ctx adapters.IRestDto) error
 	GetQueueInfo() map[string]any
 }
 
 func NewManagerService(topics entities.ITopics, limit int) IManager {
 	return &managerService{
-		topics: topics,
+		topics:     topics,
 		queueLimit: limit,
 	}
 }

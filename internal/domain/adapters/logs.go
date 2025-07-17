@@ -1,5 +1,4 @@
-package repos
-
+package adapters
 
 type ILogs interface {
 	WriteLog(op, dsc string)

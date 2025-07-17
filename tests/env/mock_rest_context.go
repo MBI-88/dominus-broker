@@ -1,7 +1,7 @@
 package env
 
 import (
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -40,7 +40,7 @@ func (r *restContext) readJson() []byte {
 	return file
 }
 
-func NewRestConext(status bool, path, param string) repos.IRestContext {
+func NewRestConext(status bool, path, param string) adapters.IRestDto {
 	return &restContext{
 		status:  status,
 		payload: path,

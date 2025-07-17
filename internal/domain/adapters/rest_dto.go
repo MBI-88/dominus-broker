@@ -1,7 +1,6 @@
-package repos
+package adapters
 
-
-type IRestContext interface {
+type IRestDto interface {
 	BodyParser(obj any) error
 	Param(key string) string
 }

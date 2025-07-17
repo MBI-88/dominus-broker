@@ -1,12 +1,12 @@
 package manager
 
 import (
+	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repos"
 	"fmt"
 )
 
-func (m *managerService) AddTopic(ctx repos.IRestContext) error {
+func (m *managerService) AddTopic(ctx adapters.IRestDto) error {
 	topic := entities.NewTopic(ctx, m.queueLimit)
 
 	if err := topic.FillTopic(); err != nil {

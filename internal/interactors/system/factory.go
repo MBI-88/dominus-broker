@@ -1,18 +1,18 @@
 package system
 
 import (
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 )
 
 type systemService struct {
-	lg repos.ILogs
+	lg adapters.ILogs
 }
 
 type SystemServiceInt interface {
 	GetLogs() ([]string, error)
 }
 
-func NewSystemService(clog repos.ILogs) SystemServiceInt {
+func NewSystemService(clog adapters.ILogs) SystemServiceInt {
 	return &systemService{
 		lg: clog,
 	}

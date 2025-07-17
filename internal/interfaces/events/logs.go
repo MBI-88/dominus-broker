@@ -1,7 +1,7 @@
 package events
 
 import (
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"fmt"
 	"io"
 	"log"
@@ -60,7 +60,7 @@ func (l *logs) GetLogs() ([]string, error) {
 	return payloads, nil
 }
 
-func NewLogs(path string) repos.ILogs {
+func NewLogs(path string) adapters.ILogs {
 	file, err := os.CreateTemp(path, "log-*.log")
 	if err != nil {
 		panic(err)

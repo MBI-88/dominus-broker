@@ -1,7 +1,6 @@
-package repos
+package adapters
 
-
-type IGrpRequestMessage interface {
+type IGrpcDto interface {
 	Descriptor() ([]byte, []int)
 	GetPayload() []byte
 	GetSubscribers() []string

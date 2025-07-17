@@ -2,11 +2,11 @@ package grpcconn
 
 import (
 	"context"
-	"dominus-project/internal/domain/repos"
+	"dominus-project/internal/domain/adapters"
 	"fmt"
 )
 
-func (c *grpcService) StreamBiConn(stream repos.IStreamBi) error {
+func (c *grpcService) StreamBiConn(stream adapters.IStreamBi) error {
 	closed := make(chan struct{})
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

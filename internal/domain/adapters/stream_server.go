@@ -1,4 +1,4 @@
-package repos
+package adapters
 
 import "context"
 

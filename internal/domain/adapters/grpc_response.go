@@ -1,7 +1,6 @@
-package repos
+package adapters
 
-
-type IGrpResponse interface {
+type IGrpcResponse interface {
 	Descriptor() ([]byte, []int)
 	GetMessage() string
 	GetStatus() uint32
