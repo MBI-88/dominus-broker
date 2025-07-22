@@ -20,8 +20,12 @@ type simpleContextMock struct {
 	err     error
 }
 
-func (s *simpleContextMock) Descriptor() ([]byte, []int) {
-	return nil, nil
+func NewSimpleContextMock(payload []byte, subs []string) adapters.IGrpcDto {
+	return &simpleContextMock{
+		payload: payload,
+		subs:    subs,
+		err:     nil,
+	}
 }
 
 func (s *simpleContextMock) GetPayload() []byte {
@@ -32,36 +36,8 @@ func (s *simpleContextMock) GetSubscribers() []string {
 	return s.subs
 }
 
-func (*simpleContextMock) Reset() {}
-
-func (*simpleContextMock) String() string {
-	return ""
-}
-
-func (*simpleContextMock) Validate() error {
-	return nil
-}
-
-func (*simpleContextMock) ValidateAll() error {
-	return nil
-}
-
-func NewSimpleContextMock(payload []byte, subs []string) adapters.IGrpcDto {
-	return &simpleContextMock{
-		payload: payload,
-		subs:    subs,
-		err:     nil,
-	}
-}
-
 type clientContextMock struct {
 	*simpleContextMock
-}
-
-func (c *clientContextMock) Recv() (adapters.IGrpcDto, error) {
-	Ad.Lock()
-	defer Ad.Unlock()
-	return c.simpleContextMock, c.err
 }
 
 func NewClienContextMock(payload []byte, subs []string) adapters.IStreamClient {
@@ -76,18 +52,14 @@ func NewClienContextMock(payload []byte, subs []string) adapters.IStreamClient {
 	return stream
 }
 
-type serverContextMock struct {
-	*simpleContextMock
-}
-
-func (se *serverContextMock) Send(payload []byte) error {
+func (c *clientContextMock) Recv() (adapters.IGrpcDto, error) {
 	Ad.Lock()
 	defer Ad.Unlock()
-	return se.err
+	return c.simpleContextMock, c.err
 }
 
-func (se *serverContextMock) Context() context.Context {
-	return context.Background()
+type serverContextMock struct {
+	*simpleContextMock
 }
 
 func NewServerContextMock(payload []byte, subs []string) (adapters.IGrpcDto, adapters.IStreamServer) {
@@ -102,20 +74,18 @@ func NewServerContextMock(payload []byte, subs []string) (adapters.IGrpcDto, ada
 	return stream.simpleContextMock, stream
 }
 
+func (se *serverContextMock) Send(payload []byte) error {
+	Ad.Lock()
+	defer Ad.Unlock()
+	return se.err
+}
+
+func (se *serverContextMock) Context() context.Context {
+	return context.Background()
+}
+
 type biContextMock struct {
 	*simpleContextMock
-}
-
-func (b *biContextMock) Recv() (adapters.IGrpcDto, error) {
-	Ad.Lock()
-	defer Ad.Unlock()
-	return b.simpleContextMock, b.err
-}
-
-func (b *biContextMock) Send(msg []byte) error {
-	Ad.Lock()
-	defer Ad.Unlock()
-	return b.err
 }
 
 func NewBiContextMock(payload []byte, subs []string) adapters.IStreamBi {
@@ -128,4 +98,16 @@ func NewBiContextMock(payload []byte, subs []string) adapters.IStreamBi {
 	}
 	go helperErr(stream.simpleContextMock)
 	return stream
+}
+
+func (b *biContextMock) Recv() (adapters.IGrpcDto, error) {
+	Ad.Lock()
+	defer Ad.Unlock()
+	return b.simpleContextMock, b.err
+}
+
+func (b *biContextMock) Send(msg []byte) error {
+	Ad.Lock()
+	defer Ad.Unlock()
+	return b.err
 }

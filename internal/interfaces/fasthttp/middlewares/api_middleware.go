@@ -13,10 +13,16 @@ type apiMiddleware struct {
 	token []byte
 }
 
+func NewMiddlewareApiToken(t string) IMiddlewares {
+	return &apiMiddleware{
+		token: []byte(t),
+	}
+}
+
 func (a *apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	path := string(ctx.RequestURI())
 	if strings.HasPrefix(path, "/swagger") {
-		return nil 
+		return nil
 	}
 	token := ctx.Request.Header.Peek("x-api-key")
 	hashedToken := sha256.Sum256(token)
@@ -25,11 +31,4 @@ func (a *apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 		return fmt.Errorf("Invalid token")
 	}
 	return nil
-}
-
-
-func NewMiddlewareApiToken(t string) middlewaresInt {
-	return &apiMiddleware{
-		token: []byte(t),
-	}
 }

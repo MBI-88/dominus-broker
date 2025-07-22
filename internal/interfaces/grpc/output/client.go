@@ -16,6 +16,13 @@ type grpcClient struct {
 	lgs  adapters.ILogs
 }
 
+func NewGrpClient(opts []grpc.DialOption, lgs adapters.ILogs) adapters.IGrpcClient {
+	return &grpcClient{
+		opts: opts,
+		lgs:  lgs,
+	}
+}
+
 func (g *grpcClient) Simple(url string, body []byte) (adapters.IGrpcResponse, error) {
 	conn, err := grpc.NewClient(url, g.opts...)
 	if err != nil {
@@ -217,12 +224,5 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 				return
 			}
 		}
-	}
-}
-
-func NewGrpClient(opts []grpc.DialOption, lgs adapters.ILogs) adapters.IGrpcClient {
-	return &grpcClient{
-		opts: opts,
-		lgs:  lgs,
 	}
 }

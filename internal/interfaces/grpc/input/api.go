@@ -12,7 +12,15 @@ import (
 
 type grpcController struct {
 	pb.UnimplementedGrpcServer
-	uc grpcconn.GrpcServiceInt
+	uc grpcconn.IGrpcService
+}
+
+func NewGrpcAPI(opts []grpc.ServerOption, uc grpcconn.IGrpcService, close <-chan struct{}) *grpc.Server {
+	s := grpc.NewServer(opts...)
+	gsrv := &grpcController{uc: uc}
+	pb.RegisterGrpcServer(s, gsrv)
+	gsrv.runQueue(close)
+	return s
 }
 
 // Receives simple messages from client
@@ -51,14 +59,8 @@ func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamS
 	return s.uc.StreamBiConn(ctx)
 }
 
-func (s *grpcController) runQueue(close <- chan struct{}) {
+func (s *grpcController) runQueue(close <-chan struct{}) {
 	go s.uc.RunQueue(close)
 }
 
-func NewGrpcAPI(opts []grpc.ServerOption, uc grpcconn.GrpcServiceInt, close <- chan struct{}) *grpc.Server {
-	s := grpc.NewServer(opts...)
-	gsrv := &grpcController{uc: uc}
-	pb.RegisterGrpcServer(s, gsrv)
-	gsrv.runQueue(close)
-	return s
-}
+

@@ -5,11 +5,28 @@ import (
 	"sync"
 )
 
+type ITopics interface {
+	Append(t ITopic) error
+	Update(t ITopic) error
+	Delete(name string) error
+	Find(topic string) (ITopic, error)
+	Next() (ITopic, error)
+	GetTopicsInfo() map[string]any
+}
+
 type topics struct {
 	ar    []ITopic
 	limit int
 	next  int
 	mutex *sync.RWMutex
+}
+
+func NewTopics(limit int) ITopics {
+	return &topics{
+		ar:    make([]ITopic, 0, limit),
+		limit: limit,
+		mutex: new(sync.RWMutex),
+	}
 }
 
 func (ts *topics) Append(t ITopic) error {
@@ -109,21 +126,4 @@ func (ts *topics) GetTopicsInfo() map[string]any {
 	result["total"] = len(ts.ar)
 	result["limit"] = ts.limit
 	return result
-}
-
-type ITopics interface {
-	Append(t ITopic) error
-	Update(t ITopic) error
-	Delete(name string) error
-	Find(topic string) (ITopic, error)
-	Next() (ITopic, error)
-	GetTopicsInfo() map[string]any
-}
-
-func NewTopics(limit int) ITopics {
-	return &topics{
-		ar:    make([]ITopic, 0, limit),
-		limit: limit,
-		mutex: new(sync.RWMutex),
-	}
 }

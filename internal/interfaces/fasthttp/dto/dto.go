@@ -12,6 +12,13 @@ type restContext struct {
 	js      jsoniter.API
 }
 
+func NewRestContext(ctx *fasthttp.RequestCtx) adapters.IRestDto {
+	return &restContext{
+		context: ctx,
+		js:      jsoniter.ConfigCompatibleWithStandardLibrary,
+	}
+}
+
 func (r *restContext) BodyParser(obj any) error {
 	body := r.context.Request.Body()
 	if err := r.js.Unmarshal(body, obj); err != nil {
@@ -22,11 +29,4 @@ func (r *restContext) BodyParser(obj any) error {
 
 func (r *restContext) Param(key string) string {
 	return r.context.UserValue(key).(string)
-}
-
-func NewRestContext(ctx *fasthttp.RequestCtx) adapters.IRestDto {
-	return &restContext{
-		context: ctx,
-		js:      jsoniter.ConfigCompatibleWithStandardLibrary,
-	}
 }

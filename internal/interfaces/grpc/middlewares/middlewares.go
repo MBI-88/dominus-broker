@@ -13,9 +13,23 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+type IMiddleware interface {
+	ApiToken(ctx context.Context) (context.Context, error)
+	LogErrors() logging.Logger
+	UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error)
+	StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
+}
+
 type middlewares struct {
 	token []byte
 	logs  adapters.ILogs
+}
+
+func NewMiddleware(t string, lg adapters.ILogs) IMiddleware {
+	return &middlewares{
+		token: []byte(t),
+		logs:  lg,
+	}
 }
 
 func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
@@ -48,18 +62,4 @@ func (m *middlewares) LogErrors() logging.Logger {
 			m.logs.WriteLog("Error", msg)
 		}
 	})
-}
-
-type MiddlewareInt interface {
-	ApiToken(ctx context.Context) (context.Context, error)
-	LogErrors() logging.Logger
-	UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error)
-	StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
-}
-
-func NewMiddleware(t string, lg adapters.ILogs) MiddlewareInt {
-	return &middlewares{
-		token: []byte(t),
-		logs:  lg,
-	}
 }

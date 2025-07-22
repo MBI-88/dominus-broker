@@ -44,6 +44,16 @@ type monitor struct {
 	reg    *prometheus.Registry
 }
 
+func NewMonitorAPI(r *router.Router, reg *prometheus.Registry) {
+	reg.MustRegister(cpumetrics, memorymetrics)
+	m := &monitor{
+		router: r,
+		reg:    reg,
+		opts:   promhttp.HandlerOpts{EnableOpenMetrics: true, DisableCompression: true},
+	}
+	m.path()
+}
+
 func (m *monitor) convertToHTTP(ctx *fasthttp.RequestCtx) (*http.Request, error) {
 	req := &http.Request{
 		Method: string(ctx.Method()),
@@ -96,19 +106,7 @@ func (*monitor) getHealthCheck(ctx *fasthttp.RequestCtx) {
 	ctx.Response.SetBody([]byte("Health ok"))
 }
 
-
-
 func (m *monitor) path() {
 	m.router.GET("/metrics", m.getMetrics)
 	m.router.GET("/health", m.getHealthCheck)
-}
-
-func NewMonitorAPI(r *router.Router, reg *prometheus.Registry) {
-	reg.MustRegister(cpumetrics, memorymetrics)
-	m := &monitor{
-		router: r,
-		reg:    reg,
-		opts:   promhttp.HandlerOpts{EnableOpenMetrics: true, DisableCompression: true},
-	}
-	m.path()
 }

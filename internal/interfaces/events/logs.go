@@ -16,6 +16,18 @@ type logs struct {
 	locck *sync.Mutex
 }
 
+func NewLogs(path string) adapters.ILogs {
+	file, err := os.CreateTemp(path, "log-*.log")
+	if err != nil {
+		panic(err)
+	}
+	return &logs{
+		path:  path,
+		lg:    log.New(file, "LOG: ", log.LstdFlags),
+		locck: new(sync.Mutex),
+	}
+}
+
 func (l *logs) WriteLog(op, dsc string) {
 	l.locck.Lock()
 	defer l.locck.Unlock()
@@ -58,16 +70,4 @@ func (l *logs) GetLogs() ([]string, error) {
 		}
 	}
 	return payloads, nil
-}
-
-func NewLogs(path string) adapters.ILogs {
-	file, err := os.CreateTemp(path, "log-*.log")
-	if err != nil {
-		panic(err)
-	}
-	return &logs{
-		path:  path,
-		lg:    log.New(file, "LOG: ", log.LstdFlags),
-		locck: new(sync.Mutex),
-	}
 }

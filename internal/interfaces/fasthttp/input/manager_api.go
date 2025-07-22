@@ -16,6 +16,15 @@ type manager struct {
 	uc     mg.IManager
 }
 
+func NewManagerAPI(r *router.Router, uc mg.IManager) {
+	mg := &manager{
+		router: r,
+		uc:     uc,
+		js: jsoniter.ConfigCompatibleWithStandardLibrary,
+	}
+	mg.path()
+}
+
 // @Tags Manager
 // @Description <h3>add a new topic</h3>
 // @Security ApiKeyAuth
@@ -104,13 +113,4 @@ func (m *manager) path() {
 	m.router.PATCH("/subscribers/{name}", m.updateSubscribers)
 	m.router.DELETE("/topics/{name}", m.deleteTopic)
 	m.router.GET("/topics", m.getTopicsInfo)
-}
-
-func NewManagerAPI(r *router.Router, uc mg.IManager) {
-	mg := &manager{
-		router: r,
-		uc:     uc,
-		js: jsoniter.ConfigCompatibleWithStandardLibrary,
-	}
-	mg.path()
 }

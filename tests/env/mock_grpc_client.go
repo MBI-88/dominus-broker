@@ -12,9 +12,6 @@ type mockResponse struct {
 	happyPath bool
 }
 
-func (mockResponse) Descriptor() ([]byte, []int) {
-	return []byte("empty"), []int{}
-}
 func (mockResponse) GetMessage() string {
 	return ""
 }
@@ -24,21 +21,19 @@ func (m *mockResponse) GetStatus() uint32 {
 	}
 	return 400
 }
-func (mockResponse) ProtoMessage() {}
-func (mockResponse) Reset()        {}
-func (mockResponse) String() string {
-	return ""
-}
-func (mockResponse) Validate() error {
-	return nil
-}
-func (mockResponse) ValidateAll() error {
-	return nil
-}
 
 type grpcClientMock struct {
 	rspo      adapters.IGrpcResponse
 	happyPath bool
+}
+
+func NewGrpcClientMock(happyPathCls, happyPathResp bool) adapters.IGrpcClient {
+	return &grpcClientMock{
+		rspo: &mockResponse{
+			happyPath: happyPathResp,
+		},
+		happyPath: happyPathCls,
+	}
 }
 
 func (g *grpcClientMock) Simple(url string, msg []byte) (adapters.IGrpcResponse, error) {
@@ -108,11 +103,4 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 
 }
 
-func NewGrpcClientMock(happyPathCls, happyPathResp bool) adapters.IGrpcClient {
-	return &grpcClientMock{
-		rspo: &mockResponse{
-			happyPath: happyPathResp,
-		},
-		happyPath: happyPathCls,
-	}
-}
+

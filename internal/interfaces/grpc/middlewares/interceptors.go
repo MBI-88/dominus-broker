@@ -7,8 +7,21 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+type IInterceptor interface {
+	StreamAuthInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string,
+		streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error)
+	UnaryAuthInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
+		invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error
+}
+
 type interceptor struct {
 	apiToken string
+}
+
+func NewInterceptor(token string) IInterceptor {
+	return &interceptor{
+		apiToken: token,
+	}
 }
 
 func (i *interceptor) UnaryAuthInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
@@ -26,18 +39,4 @@ func (i *interceptor) StreamAuthInterceptor(ctx context.Context, desc *grpc.Stre
 		return nil, err
 	}
 	return s, nil
-}
-
-type InterceptorInt interface {
-	StreamAuthInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string,
-		streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error)
-	UnaryAuthInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
-		invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error
-}
-
-
-func NewInterceptor(token string) InterceptorInt {
-	return &interceptor{
-		apiToken: token,
-	}
 }

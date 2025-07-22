@@ -4,15 +4,15 @@ import (
 	"dominus-project/internal/domain/adapters"
 )
 
+type ISystemService interface {
+	GetLogs() ([]string, error)
+}
+
 type systemService struct {
 	lg adapters.ILogs
 }
 
-type SystemServiceInt interface {
-	GetLogs() ([]string, error)
-}
-
-func NewSystemService(clog adapters.ILogs) SystemServiceInt {
+func NewSystemService(clog adapters.ILogs) ISystemService {
 	return &systemService{
 		lg: clog,
 	}
