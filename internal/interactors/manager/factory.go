@@ -5,10 +5,10 @@ import (
 	"dominus-project/internal/domain/entities"
 )
 
-type IManager interface {
-	AddTopic(ctx adapters.IRestDto) error
-	UpdateSubscribers(ctx adapters.IRestDto) error
-	DeleteTopic(ctx adapters.IRestDto) error
+type ManagerService interface {
+	AddTopic(ctx adapters.RestDto) error
+	UpdateSubscribers(ctx adapters.RestDto) error
+	DeleteTopic(ctx adapters.RestDto) error
 	GetQueueInfo() map[string]any
 }
 
@@ -17,7 +17,7 @@ type managerService struct {
 	queueLimit int
 }
 
-func NewManagerService(topics entities.ITopics, limit int) IManager {
+func NewManagerService(topics entities.ITopics, limit int) ManagerService {
 	return &managerService{
 		topics:     topics,
 		queueLimit: limit,

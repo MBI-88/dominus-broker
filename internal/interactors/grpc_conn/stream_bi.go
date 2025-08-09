@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (c *grpcService) StreamBiConn(stream adapters.IStreamBi) error {
+func (c *grpcService) StreamBiConn(stream adapters.StreamBi) error {
 	closed := make(chan struct{})
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

@@ -12,7 +12,7 @@ type restContext struct {
 	js      jsoniter.API
 }
 
-func NewRestContext(ctx *fasthttp.RequestCtx) adapters.IRestDto {
+func NewRestContext(ctx *fasthttp.RequestCtx) adapters.RestDto {
 	return &restContext{
 		context: ctx,
 		js:      jsoniter.ConfigCompatibleWithStandardLibrary,

@@ -13,17 +13,17 @@ import (
 
 type grpcClient struct {
 	opts []grpc.DialOption
-	lgs  adapters.ILogs
+	lgs  adapters.Logs
 }
 
-func NewGrpClient(opts []grpc.DialOption, lgs adapters.ILogs) adapters.IGrpcClient {
+func NewGrpClient(opts []grpc.DialOption, lgs adapters.Logs) adapters.GrpcClient {
 	return &grpcClient{
 		opts: opts,
 		lgs:  lgs,
 	}
 }
 
-func (g *grpcClient) Simple(url string, body []byte) (adapters.IGrpcResponse, error) {
+func (g *grpcClient) Simple(url string, body []byte) (adapters.GrpcResponse, error) {
 	conn, err := grpc.NewClient(url, g.opts...)
 	if err != nil {
 		return nil, err

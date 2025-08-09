@@ -10,13 +10,13 @@ type grpcBiContextStream struct {
 	sr pb.Grpc_BidirectionalStreamServer
 }
 
-func NewBiStreamConn(sr pb.Grpc_BidirectionalStreamServer) adapters.IStreamBi {
+func NewBiStreamConn(sr pb.Grpc_BidirectionalStreamServer) adapters.StreamBi {
 	return &grpcBiContextStream{
 		sr: sr,
 	}
 }
 
-func (g *grpcBiContextStream) Recv() (adapters.IGrpcDto, error) {
+func (g *grpcBiContextStream) Recv() (adapters.GrpcDto, error) {
 	return g.sr.Recv()
 }
 
@@ -30,13 +30,13 @@ type grpcContextClientStream struct {
 	sr pb.Grpc_ClientStreamServer
 }
 
-func NewClientStreamContext(sr pb.Grpc_ClientStreamServer) adapters.IStreamClient {
+func NewClientStreamContext(sr pb.Grpc_ClientStreamServer) adapters.StreamClient {
 	return &grpcContextClientStream{
 		sr: sr,
 	}
 }
 
-func (g *grpcContextClientStream) Recv() (adapters.IGrpcDto, error) {
+func (g *grpcContextClientStream) Recv() (adapters.GrpcDto, error) {
 	return g.sr.Recv()
 }
 
@@ -44,7 +44,7 @@ type grpcContextServerStream struct {
 	sr pb.Grpc_ServerStreamServer
 }
 
-func NewServerStreamContext(sr pb.Grpc_ServerStreamServer) adapters.IStreamServer {
+func NewServerStreamContext(sr pb.Grpc_ServerStreamServer) adapters.StreamServer {
 	return &grpcContextServerStream{
 		sr: sr,
 	}

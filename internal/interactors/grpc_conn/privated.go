@@ -37,7 +37,7 @@ func (c *grpcService) checkQueue() {
 	}
 }
 
-func (*grpcService) getTopicName(ms adapters.IGrpcDto) string {
+func (*grpcService) getTopicName(ms adapters.GrpcDto) string {
 	if len(ms.GetSubscribers()) > 0 {
 		return ms.GetSubscribers()[0]
 	}

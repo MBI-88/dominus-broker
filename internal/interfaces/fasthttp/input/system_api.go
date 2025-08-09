@@ -13,7 +13,7 @@ import (
 
 type system struct {
 	router *router.Router
-	uc     st.ISystemService
+	uc     st.SystemService
 	js     jsoniter.API
 }
 
@@ -69,7 +69,7 @@ func (r *system) path() {
 	r.router.GET("/logs-backup", r.getBackup)
 }
 
-func NewSystemAPI(r *router.Router, uc st.ISystemService) {
+func NewSystemAPI(r *router.Router, uc st.SystemService) {
 	re := &system{router: r, uc: uc, js: jsoniter.ConfigCompatibleWithStandardLibrary}
 	re.path()
 }

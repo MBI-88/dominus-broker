@@ -5,7 +5,7 @@ import (
 	"dominus-project/internal/domain/entities"
 )
 
-func (m *managerService) UpdateSubscribers(ctx adapters.IRestDto) error {
+func (m *managerService) UpdateSubscribers(ctx adapters.RestDto) error {
 	topic := entities.NewTopic(ctx, m.queueLimit)
 	name := ctx.Param("name")
 	if err := topic.FillTopic(); err != nil {

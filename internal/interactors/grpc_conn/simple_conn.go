@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (c *grpcService) SimpleConn(ms adapters.IGrpcDto) error {
+func (c *grpcService) SimpleConn(ms adapters.GrpcDto) error {
 	name := c.getTopicName(ms)
 	if name == "" {
 		return fmt.Errorf("Topic name empty")

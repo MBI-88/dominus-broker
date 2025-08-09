@@ -9,17 +9,17 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-type apiMiddleware struct {
+type apMiddleware struct {
 	token []byte
 }
 
-func NewMiddlewareApiToken(t string) IMiddlewares {
-	return &apiMiddleware{
+func NewMiddlewareApiToken(t string) Middlewares {
+	return &apMiddleware{
 		token: []byte(t),
 	}
 }
 
-func (a *apiMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
+func (a *apMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	path := string(ctx.RequestURI())
 	if strings.HasPrefix(path, "/swagger") {
 		return nil

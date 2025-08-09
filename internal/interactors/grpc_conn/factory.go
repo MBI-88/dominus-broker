@@ -5,21 +5,21 @@ import (
 	"dominus-project/internal/domain/entities"
 )
 
-type IGrpcService interface {
-	SimpleConn(ms adapters.IGrpcDto) error
-	StreamClientConn(st adapters.IStreamClient) error
-	StreamServerConn(req adapters.IGrpcDto, st adapters.IStreamServer) error
-	StreamBiConn(st adapters.IStreamBi) error
+type GrpcService interface {
+	SimpleConn(ms adapters.GrpcDto) error
+	StreamClientConn(st adapters.StreamClient) error
+	StreamServerConn(req adapters.GrpcDto, st adapters.StreamServer) error
+	StreamBiConn(st adapters.StreamBi) error
 	RunQueue(close <-chan struct{}) error
 }
 
 type grpcService struct {
-	client adapters.IGrpcClient
-	lg     adapters.ILogs
+	client adapters.GrpcClient
+	lg     adapters.Logs
 	topics entities.ITopics
 }
 
-func NewGrpcService(lclient adapters.ILogs, gclient adapters.IGrpcClient, topics entities.ITopics) IGrpcService {
+func NewGrpcService(lclient adapters.Logs, gclient adapters.GrpcClient, topics entities.ITopics) GrpcService {
 	return &grpcService{
 		lg:     lclient,
 		client: gclient,

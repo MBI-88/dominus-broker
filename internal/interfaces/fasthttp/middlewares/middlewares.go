@@ -4,26 +4,26 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-type IMiddleware interface {
+type Middleware interface {
 	Middlewares(handler fasthttp.RequestHandler) fasthttp.RequestHandler
-	AddMiddleware(mid ...IMiddlewares)
+	AddMiddleware(mid ...Middlewares)
 }
 
-type IMiddlewares interface {
+type Middlewares interface {
 	CheckMiddleware(ctx *fasthttp.RequestCtx) error
 }
 
 type middleware struct {
-	mids []IMiddlewares
+	mids []Middlewares
 }
 
-func NewMiddleware() IMiddleware {
+func NewMiddleware() Middleware {
 	return &middleware{
-		mids: []IMiddlewares{},
+		mids: []Middlewares{},
 	}
 }
 
-func (m *middleware) AddMiddleware(mid ...IMiddlewares) {
+func (m *middleware) AddMiddleware(mid ...Middlewares) {
 	m.mids = append(m.mids, mid...)
 }
 

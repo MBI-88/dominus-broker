@@ -1,10 +1,10 @@
 package adapters
 
-type IStreamBi interface {
-	Recv() (IGrpcDto, error)
+type StreamBi interface {
+	Recv() (GrpcDto, error)
 	Send(msg []byte) error
 }
 
-type IStreamClient interface {
-	Recv() (IGrpcDto, error)
+type StreamClient interface {
+	Recv() (GrpcDto, error)
 }

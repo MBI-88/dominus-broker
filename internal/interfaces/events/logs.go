@@ -16,7 +16,7 @@ type logs struct {
 	locck *sync.Mutex
 }
 
-func NewLogs(path string) adapters.ILogs {
+func NewLogs(path string) adapters.Logs {
 	file, err := os.CreateTemp(path, "log-*.log")
 	if err != nil {
 		panic(err)

@@ -13,14 +13,14 @@ import (
 type manager struct {
 	router *router.Router
 	js     jsoniter.API
-	uc     mg.IManager
+	uc     mg.ManagerService
 }
 
-func NewManagerAPI(r *router.Router, uc mg.IManager) {
+func NewManagerAPI(r *router.Router, uc mg.ManagerService) {
 	mg := &manager{
 		router: r,
 		uc:     uc,
-		js: jsoniter.ConfigCompatibleWithStandardLibrary,
+		js:     jsoniter.ConfigCompatibleWithStandardLibrary,
 	}
 	mg.path()
 }
@@ -86,7 +86,6 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	c.Response.Header.SetStatusCode(fasthttp.StatusNoContent)
 }
 
-
 // @Tags Manager
 // @Description <h3>get topics info</h3>
 // @Security ApiKeyAuth
@@ -95,7 +94,7 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 // @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /topics [get]
 func (m *manager) getTopicsInfo(c *fasthttp.RequestCtx) {
-	resp := m.uc.GetQueueInfo() 
+	resp := m.uc.GetQueueInfo()
 	c.Response.Header.Set("Content-Type", "application/json")
 	c.Response.Header.SetStatusCode(fasthttp.StatusOK)
 	body, err := m.js.Marshal(resp)

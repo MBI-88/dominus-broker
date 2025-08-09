@@ -26,7 +26,7 @@ message ResponseMessage {
 
 //Response
 message Response {
-    uint32  status = 1;
+    int64  status = 1;
     string  message = 2;
 }
 

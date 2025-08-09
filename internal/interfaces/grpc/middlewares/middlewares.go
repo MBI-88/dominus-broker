@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type IMiddleware interface {
+type Middleware interface {
 	ApiToken(ctx context.Context) (context.Context, error)
 	LogErrors() logging.Logger
 	UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error)
@@ -22,10 +22,10 @@ type IMiddleware interface {
 
 type middlewares struct {
 	token []byte
-	logs  adapters.ILogs
+	logs  adapters.Logs
 }
 
-func NewMiddleware(t string, lg adapters.ILogs) IMiddleware {
+func NewMiddleware(t string, lg adapters.Logs) Middleware {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,

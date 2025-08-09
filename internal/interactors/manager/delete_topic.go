@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (m *managerService) DeleteTopic(ctx adapters.IRestDto) error {
+func (m *managerService) DeleteTopic(ctx adapters.RestDto) error {
 	name := ctx.Param("name")
 	if name == "" {
 		return fmt.Errorf("Param empty")

@@ -23,11 +23,11 @@ func (m *mockResponse) GetStatus() uint32 {
 }
 
 type grpcClientMock struct {
-	rspo      adapters.IGrpcResponse
+	rspo      adapters.GrpcResponse
 	happyPath bool
 }
 
-func NewGrpcClientMock(happyPathCls, happyPathResp bool) adapters.IGrpcClient {
+func NewGrpcClientMock(happyPathCls, happyPathResp bool) adapters.GrpcClient {
 	return &grpcClientMock{
 		rspo: &mockResponse{
 			happyPath: happyPathResp,
@@ -36,7 +36,7 @@ func NewGrpcClientMock(happyPathCls, happyPathResp bool) adapters.IGrpcClient {
 	}
 }
 
-func (g *grpcClientMock) Simple(url string, msg []byte) (adapters.IGrpcResponse, error) {
+func (g *grpcClientMock) Simple(url string, msg []byte) (adapters.GrpcResponse, error) {
 	if g.happyPath {
 		return g.rspo, nil
 	}
@@ -102,5 +102,3 @@ func (grpcClientMock) BidirectionalStream(urls []string, provMsg <-chan []byte, 
 	}
 
 }
-
-

@@ -40,7 +40,7 @@ func (r *restContext) readJson() []byte {
 	return file
 }
 
-func NewRestConext(status bool, path, param string) adapters.IRestDto {
+func NewRestConext(status bool, path, param string) adapters.RestDto {
 	return &restContext{
 		status:  status,
 		payload: path,

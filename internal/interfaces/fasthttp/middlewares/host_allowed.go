@@ -11,7 +11,7 @@ type hostAllowed struct {
 	cidr string
 }
 
-func NewMiddlewareHost(c string) IMiddlewares {
+func NewMiddlewareHost(c string) Middlewares {
 	return &hostAllowed{
 		cidr: c,
 	}

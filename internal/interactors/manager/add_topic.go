@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (m *managerService) AddTopic(ctx adapters.IRestDto) error {
+func (m *managerService) AddTopic(ctx adapters.RestDto) error {
 	topic := entities.NewTopic(ctx, m.queueLimit)
 
 	if err := topic.FillTopic(); err != nil {

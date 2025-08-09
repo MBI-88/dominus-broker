@@ -2,7 +2,7 @@ package adapters
 
 import "context"
 
-type IStreamServer interface {
+type StreamServer interface {
 	Send(payload []byte) error
 	Context() context.Context
 }

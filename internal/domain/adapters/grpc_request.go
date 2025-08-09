@@ -1,6 +1,6 @@
 package adapters
 
-type IGrpcDto interface {
+type GrpcDto interface {
 	GetPayload() []byte
 	GetSubscribers() []string
 }

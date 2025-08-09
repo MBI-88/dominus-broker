@@ -1,6 +1,6 @@
 package adapters
 
-type IRestDto interface {
+type RestDto interface {
 	BodyParser(obj any) error
 	Param(key string) string
 }

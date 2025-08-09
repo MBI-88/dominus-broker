@@ -20,7 +20,7 @@ type simpleContextMock struct {
 	err     error
 }
 
-func NewSimpleContextMock(payload []byte, subs []string) adapters.IGrpcDto {
+func NewSimpleContextMock(payload []byte, subs []string) adapters.GrpcDto {
 	return &simpleContextMock{
 		payload: payload,
 		subs:    subs,
@@ -40,7 +40,7 @@ type clientContextMock struct {
 	*simpleContextMock
 }
 
-func NewClienContextMock(payload []byte, subs []string) adapters.IStreamClient {
+func NewClienContextMock(payload []byte, subs []string) adapters.StreamClient {
 	stream := &clientContextMock{
 		&simpleContextMock{
 			payload: payload,
@@ -52,7 +52,7 @@ func NewClienContextMock(payload []byte, subs []string) adapters.IStreamClient {
 	return stream
 }
 
-func (c *clientContextMock) Recv() (adapters.IGrpcDto, error) {
+func (c *clientContextMock) Recv() (adapters.GrpcDto, error) {
 	Ad.Lock()
 	defer Ad.Unlock()
 	return c.simpleContextMock, c.err
@@ -62,7 +62,7 @@ type serverContextMock struct {
 	*simpleContextMock
 }
 
-func NewServerContextMock(payload []byte, subs []string) (adapters.IGrpcDto, adapters.IStreamServer) {
+func NewServerContextMock(payload []byte, subs []string) (adapters.GrpcDto, adapters.StreamServer) {
 	stream := &serverContextMock{
 		&simpleContextMock{
 			payload: payload,
@@ -88,7 +88,7 @@ type biContextMock struct {
 	*simpleContextMock
 }
 
-func NewBiContextMock(payload []byte, subs []string) adapters.IStreamBi {
+func NewBiContextMock(payload []byte, subs []string) adapters.StreamBi {
 	stream := &biContextMock{
 		&simpleContextMock{
 			payload: payload,
@@ -100,7 +100,7 @@ func NewBiContextMock(payload []byte, subs []string) adapters.IStreamBi {
 	return stream
 }
 
-func (b *biContextMock) Recv() (adapters.IGrpcDto, error) {
+func (b *biContextMock) Recv() (adapters.GrpcDto, error) {
 	Ad.Lock()
 	defer Ad.Unlock()
 	return b.simpleContextMock, b.err
