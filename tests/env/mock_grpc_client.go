@@ -15,7 +15,7 @@ type mockResponse struct {
 func (mockResponse) GetMessage() string {
 	return ""
 }
-func (m *mockResponse) GetStatus() uint32 {
+func (m *mockResponse) GetStatus() int64 {
 	if m.happyPath {
 		return 200
 	}

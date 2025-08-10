@@ -3,8 +3,8 @@ package input
 import (
 	"context"
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
+	pb "dominus-project/internal/interfaces/grpc/config/proto"
 	"dominus-project/internal/interfaces/grpc/dto"
-	pb "dominus-project/internal/interfaces/grpc/proto/builder"
 	"io"
 
 	"google.golang.org/grpc"
@@ -26,9 +26,9 @@ func NewGrpcAPI(opts []grpc.ServerOption, uc grpcconn.GrpcService, close <-chan 
 // Receives simple messages from client
 func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.Response, error) {
 	if err := s.uc.SimpleConn(ms); err != nil {
-		return &pb.Response{Status: uint32(500), Message: err.Error()}, err
+		return &pb.Response{Status: 500, Message: err.Error()}, err
 	}
-	return &pb.Response{Status: uint32(200), Message: "[+] Accepted"}, nil
+	return &pb.Response{Status: 200, Message: "[+] Accepted"}, nil
 }
 
 // Receives array messages from client
@@ -37,12 +37,12 @@ func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 	err := s.uc.StreamClientConn(ctx)
 	if err != io.EOF {
 		return stream.SendAndClose(&pb.Response{
-			Status:  uint32(500),
+			Status:  500,
 			Message: err.Error(),
 		})
 	}
 	return stream.SendAndClose(&pb.Response{
-		Status:  uint32(200),
+		Status:  200,
 		Message: "[*]Connection closed",
 	})
 }

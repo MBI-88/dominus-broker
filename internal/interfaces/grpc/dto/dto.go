@@ -3,7 +3,7 @@ package dto
 import (
 	"context"
 	"dominus-project/internal/domain/adapters"
-	pb "dominus-project/internal/interfaces/grpc/proto/builder"
+	pb "dominus-project/internal/interfaces/grpc/config/proto"
 )
 
 type grpcBiContextStream struct {

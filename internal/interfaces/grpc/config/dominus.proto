@@ -1,26 +1,18 @@
 syntax = "proto3";
 
-package builder;
+package dominus;
 
-import "validate.proto";
-
-option go_package = "dominus/app/interfaces/grpc/proto/builder";
+option go_package = "dominus/app/interfaces/grpc/proto/dominus";
 
 
 //Message
 message RequestMessage {
-    repeated string subscribers = 1 [(validate.rules).repeated = {items: {string: {uri:true}}}];
-    bytes payload = 2 [(validate.rules).bytes = {
-        min_len: 1,          
-        max_len: 65535         
-    }];
+    repeated string subscribers = 1;
+    bytes payload = 2;
 }
 
 message ResponseMessage {
-    bytes payload = 1 [(validate.rules).bytes = {
-        min_len: 1,          
-        max_len: 65535         
-    }];
+    bytes payload = 1;
 }
 
 
