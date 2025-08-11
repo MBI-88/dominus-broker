@@ -15,12 +15,13 @@ require (
 	github.com/swaggo/swag v1.16.4
 	github.com/valyala/fasthttp v1.62.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.61.0
-	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/grpc v1.74.2
+	google.golang.org/protobuf v1.36.7
 )
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/PR0C0D3-MBI/dominus-proto-definition v1.0.0 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

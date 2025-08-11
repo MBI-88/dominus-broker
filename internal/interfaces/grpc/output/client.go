@@ -3,7 +3,7 @@ package output
 import (
 	"context"
 	"dominus-project/internal/domain/adapters"
-	pb "dominus-project/internal/interfaces/grpc/config/proto"
+	pb "github.com/PR0C0D3-MBI/dominus-proto-definition/src/dominus"
 	"io"
 	"sync"
 	"time"

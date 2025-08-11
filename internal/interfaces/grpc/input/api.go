@@ -3,7 +3,7 @@ package input
 import (
 	"context"
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
-	pb "dominus-project/internal/interfaces/grpc/config/proto"
+	pb "github.com/PR0C0D3-MBI/dominus-proto-definition/src/dominus"
 	"dominus-project/internal/interfaces/grpc/dto"
 	"io"
 
