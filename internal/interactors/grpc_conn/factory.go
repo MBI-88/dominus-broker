@@ -16,10 +16,10 @@ type GrpcService interface {
 type grpcService struct {
 	client adapters.GrpcClient
 	lg     adapters.Logs
-	topics entities.ITopics
+	topics entities.Topics
 }
 
-func NewGrpcService(lclient adapters.Logs, gclient adapters.GrpcClient, topics entities.ITopics) GrpcService {
+func NewGrpcService(lclient adapters.Logs, gclient adapters.GrpcClient, topics entities.Topics) GrpcService {
 	return &grpcService{
 		lg:     lclient,
 		client: gclient,

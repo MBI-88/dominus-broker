@@ -5,31 +5,31 @@ import (
 	"sync"
 )
 
-type ITopics interface {
-	Append(t ITopic) error
-	Update(t ITopic) error
+type Topics interface {
+	Append(t Topic) error
+	Update(t Topic) error
 	Delete(name string) error
-	Find(topic string) (ITopic, error)
-	Next() (ITopic, error)
+	Find(topic string) (Topic, error)
+	Next() (Topic, error)
 	GetTopicsInfo() map[string]any
 }
 
 type topics struct {
-	ar    []ITopic
+	ar    []Topic
 	limit int
 	next  int
 	mutex *sync.RWMutex
 }
 
-func NewTopics(limit int) ITopics {
+func NewTopics(limit int) Topics {
 	return &topics{
-		ar:    make([]ITopic, 0, limit),
+		ar:    make([]Topic, 0, limit),
 		limit: limit,
 		mutex: new(sync.RWMutex),
 	}
 }
 
-func (ts *topics) Append(t ITopic) error {
+func (ts *topics) Append(t Topic) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 	if ts.checkLenght() {
@@ -39,7 +39,7 @@ func (ts *topics) Append(t ITopic) error {
 	return fmt.Errorf("Limit reached")
 }
 
-func (ts *topics) Update(t ITopic) error {
+func (ts *topics) Update(t Topic) error {
 	ts.mutex.Lock()
 	defer ts.mutex.Unlock()
 	p, err := ts.findTopic(t.GetName())
@@ -59,13 +59,13 @@ func (ts *topics) Delete(name string) error {
 	}
 	left := ts.ar[:p]
 	right := ts.ar[p+1:]
-	ts.ar = make([]ITopic, 0, ts.limit)
+	ts.ar = make([]Topic, 0, ts.limit)
 	ts.ar = append(ts.ar, left...)
 	ts.ar = append(ts.ar, right...)
 	return nil
 }
 
-func (ts *topics) Find(topic string) (ITopic, error) {
+func (ts *topics) Find(topic string) (Topic, error) {
 	ts.mutex.RLock()
 	defer ts.mutex.RUnlock()
 	p, err := ts.findTopic(topic)
@@ -93,7 +93,7 @@ func (ts *topics) checkLenght() bool {
 	return true
 }
 
-func (ts *topics) Next() (ITopic, error) {
+func (ts *topics) Next() (Topic, error) {
 	if ts.next > len(ts.ar)-1 {
 		ts.next = 0
 		return nil, fmt.Errorf("End")
@@ -111,7 +111,7 @@ func (ts *topics) GetTopicsInfo() map[string]any {
 
 	var (
 		arrayTopic = make([]map[string]any, 0, len(ts.ar))
-		result = make(map[string]any, 3)
+		result     = make(map[string]any, 3)
 	)
 
 	for _, tp := range ts.ar {

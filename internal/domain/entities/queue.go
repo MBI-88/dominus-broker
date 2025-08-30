@@ -1,6 +1,6 @@
 package entities
 
-type IQueue interface {
+type Queue interface {
 	Enqueue(ms []byte)
 	Length() int
 	Dequeue() ([]byte, bool)
@@ -8,7 +8,7 @@ type IQueue interface {
 
 type queue [][]byte
 
-func NewQueue() IQueue {
+func NewQueue() Queue {
 	return new(queue)
 }
 

@@ -13,11 +13,11 @@ type ManagerService interface {
 }
 
 type managerService struct {
-	topics     entities.ITopics
+	topics     entities.Topics
 	queueLimit int
 }
 
-func NewManagerService(topics entities.ITopics, limit int) ManagerService {
+func NewManagerService(topics entities.Topics, limit int) ManagerService {
 	return &managerService{
 		topics:     topics,
 		queueLimit: limit,

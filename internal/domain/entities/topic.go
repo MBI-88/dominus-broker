@@ -8,7 +8,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type ITopic interface {
+type Topic interface {
 	SetMessage(data []byte) error
 	GetMessage() []byte
 	SetSubscribers(sb []string)
@@ -19,7 +19,7 @@ type ITopic interface {
 	ValidateTopic() error
 }
 
-type IpaserBody interface {
+type parserBody interface {
 	BodyParser(obj any) error
 }
 
@@ -27,13 +27,13 @@ type topic struct {
 	queueLimit  int
 	Name        string   `json:"name" validate:"omitempty,alpha,lowercase"`
 	Subscribers []string `json:"subscribers" validate:"required,dive,hostname_port"`
-	queue       IQueue
+	queue       Queue
 	Lck         *sync.RWMutex
 	validate    *validator.Validate
-	parser      IpaserBody
+	parser      parserBody
 }
 
-func NewTopic(dto IpaserBody, limit int) ITopic {
+func NewTopic(dto parserBody, limit int) Topic {
 	customValidate := validator.New()
 	customValidate.RegisterValidation("hostname_port", func(fl validator.FieldLevel) bool {
 		value := fl.Field().String()
