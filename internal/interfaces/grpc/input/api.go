@@ -11,6 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -23,6 +24,7 @@ func NewGrpcAPI(opts []grpc.ServerOption, uc grpcconn.GrpcService, close <-chan 
 	s := grpc.NewServer(opts...)
 	gsrv := &grpcController{uc: uc}
 	pb.RegisterGrpcServer(s, gsrv)
+	reflection.Register(s)
 	gsrv.runQueue(close)
 	return s
 }
