@@ -1,0 +1,88 @@
+# ==============================================================================
+# See https://pre-commit.com            for more information
+# See https://pre-commit.com/hooks.html for more hooks
+# ==============================================================================
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+  #      - id: check-yaml
+
+  # Validación de Conventional Commits
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.3
+    hooks:
+      - id: commitizen
+        stages: [commit-msg]
+      - id: commitizen-branch
+        stages: [pre-push]
+
+
+  # Golang pre-commit hooks
+  # https://golangci-lint.run/welcome/install/#local-installation
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: go fmt
+        entry: go fmt ./...
+        language: system
+        pass_filenames: false
+        types: [go]
+
+      - id: go-vet
+        name: go vet
+        entry: go vet ./...
+        language: system
+        pass_filenames: false
+        types: [go]
+
+      - id: go-mod-tidy
+        name: go mod tidy
+        entry: go mod tidy
+        language: system
+        pass_filenames: false
+        types: [go]
+
+      - id: golangci-lint
+        name: golangci-lint
+        entry: golangci-lint run ./...
+        language: system
+        pass_filenames: false
+        types: [go]
+
+  # Bash helper hooks (local)
+  #
+#  - repo: local
+#    hooks:
+#      # shellcheck (aliased to shck)
+#      #
+#      - id: shellcheck
+#        name: Run static analysis (shellcheck)
+#        entry: shellcheck
+#        language: system
+#        files: \.(sh|bash)$
+#        types: [file]
+#        alias: shck
+#        args: ["-x", "-e", "SC2034"]
+#      # shfmt
+#      #
+#      - id: shfmt
+#        name: Run lint check (shfmt -d)
+#        entry: shfmt
+#        language: system
+#        files: \.(sh|bash)$
+#        types: [file]
+#        args: ["-i", "0", "-ci", "-sr", "-d"]
+#      # shfmt -w (must manually invoke)
+#      #
+#      - id: shfmtw
+#        name: Auto-fix lint errors (shfmt -w)
+#        entry: shfmt
+#        language: system
+#        stages: [manual]
+#        files: \.(sh|bash)$
+#        types: [file]
+#        args: ["-i", "0", "-ci", "-sr", "-kp", "-w"]
