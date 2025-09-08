@@ -9,17 +9,17 @@ import (
 func (m *managerService) AddTopic(ctx adapters.RestDto) error {
 	topic := entities.NewTopic(ctx, m.queueLimit)
 
-	if err := topic.FillTopic(); err != nil {
+	if err := topic.ParseTopic(); err != nil {
 		return err
 	}
 	if err := topic.ValidateTopic(); err != nil {
 		return err
 	}
 	if topic.GetName() == "" {
-		return fmt.Errorf("Topic name is empty")
+		return fmt.Errorf("topic name is empty")
 	}
 	if _, err := m.topics.Find(topic.GetName()); err != nil {
 		return m.topics.Append(topic)
 	}
-	return fmt.Errorf("Topic exists")
+	return fmt.Errorf("topic exists")
 }

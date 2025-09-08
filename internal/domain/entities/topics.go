@@ -83,7 +83,7 @@ func (ts *topics) findTopic(name string) (int, error) {
 			return j, nil
 		}
 	}
-	return 0, fmt.Errorf("Nod found")
+	return 0, fmt.Errorf("nod found")
 }
 
 func (ts *topics) checkLenght() bool {

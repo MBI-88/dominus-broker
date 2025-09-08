@@ -15,7 +15,7 @@ type Topic interface {
 	GetSubscribers() []string
 	GetName() string
 	SetName(name string)
-	FillTopic() error
+	ParseTopic() error
 	ValidateTopic() error
 }
 
@@ -74,7 +74,7 @@ func (t *topic) SetMessage(data []byte) error {
 		t.queue.Enqueue(data)
 		return nil
 	}
-	return fmt.Errorf("Queue full")
+	return fmt.Errorf("queue full")
 }
 
 func (t *topic) GetMessage() []byte {
@@ -135,6 +135,6 @@ func (t *topic) ValidateTopic() error {
 	return nil
 }
 
-func (t *topic) FillTopic() error {
+func (t *topic) ParseTopic() error {
 	return t.parser.BodyParser(t)
 }

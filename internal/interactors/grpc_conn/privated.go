@@ -38,8 +38,8 @@ func (c *grpcService) checkQueue() {
 }
 
 func (*grpcService) getTopicName(ms adapters.GrpcDto) string {
-	if len(ms.GetSubscribers()) > 0 {
-		return ms.GetSubscribers()[0]
+	if subs := ms.GetSubscribers(); len(subs) > 0 {
+		return subs[0]
 	}
 	return ""
 }

@@ -8,7 +8,7 @@ import (
 func (m *managerService) DeleteTopic(ctx adapters.RestDto) error {
 	name := ctx.Param("name")
 	if name == "" {
-		return fmt.Errorf("Param empty")
+		return fmt.Errorf("param empty")
 	}
 	return m.topics.Delete(name)
 }

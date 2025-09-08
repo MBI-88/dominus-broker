@@ -11,7 +11,7 @@ func (c *grpcService) RunQueue(close <-chan struct{}) error {
 		case <-time.Tick(600 * time.Millisecond):
 			c.checkQueue()
 		case <-close:
-			return fmt.Errorf("Queue closed")
+			return fmt.Errorf("queue closed")
 		}
 	}
 }

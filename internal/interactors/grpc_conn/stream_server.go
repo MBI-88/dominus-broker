@@ -11,7 +11,7 @@ func (c *grpcService) StreamServerConn(req adapters.GrpcDto, st adapters.StreamS
 	defer cancel()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("Subscribers not found")
+		return fmt.Errorf("subscribers not found")
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))
@@ -34,7 +34,7 @@ func (c *grpcService) StreamServerConn(req adapters.GrpcDto, st adapters.StreamS
 			if total == 0 {
 				close(done)
 				close(stream)
-				return fmt.Errorf("Connection closed")
+				return fmt.Errorf("connection closed")
 			}
 		}
 	}

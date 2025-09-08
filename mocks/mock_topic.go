@@ -39,20 +39,6 @@ func (m *MockTopic) EXPECT() *MockTopicMockRecorder {
 	return m.recorder
 }
 
-// FillTopic mocks base method.
-func (m *MockTopic) FillTopic() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FillTopic")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// FillTopic indicates an expected call of FillTopic.
-func (mr *MockTopicMockRecorder) FillTopic() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FillTopic", reflect.TypeOf((*MockTopic)(nil).FillTopic))
-}
-
 // GetMessage mocks base method.
 func (m *MockTopic) GetMessage() []byte {
 	m.ctrl.T.Helper()
@@ -93,6 +79,20 @@ func (m *MockTopic) GetSubscribers() []string {
 func (mr *MockTopicMockRecorder) GetSubscribers() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscribers", reflect.TypeOf((*MockTopic)(nil).GetSubscribers))
+}
+
+// ParseTopic mocks base method.
+func (m *MockTopic) ParseTopic() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ParseTopic")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ParseTopic indicates an expected call of ParseTopic.
+func (mr *MockTopicMockRecorder) ParseTopic() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ParseTopic", reflect.TypeOf((*MockTopic)(nil).ParseTopic))
 }
 
 // SetMessage mocks base method.

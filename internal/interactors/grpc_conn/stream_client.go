@@ -16,7 +16,7 @@ func (c *grpcService) StreamClientConn(st adapters.StreamClient) error {
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("Subscribers not found")
+		return fmt.Errorf("subscribers not found")
 	}
 
 	go c.client.ClientStream(subscribers, stream, ctx)

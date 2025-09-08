@@ -63,7 +63,7 @@ func (c *grpcService) StreamBiConn(stream adapters.StreamBi) error {
 				close(streamSub)
 				close(errMsg)
 				close(done)
-				return fmt.Errorf("Connection closed")
+				return fmt.Errorf("connection closed")
 			}
 		}
 	}
