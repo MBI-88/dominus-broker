@@ -3,26 +3,24 @@ services:
   dominus:
     build:
       context: .
-      dockerfile: ./Dockerfile.dominus 
-    container_name: dominus 
-    deploy:
-      mode: replicated
-      replicas: 1
-      restart_policy: 
-        condition: on-failure
-        delay: 2s
-        max_attempts: 3
+      dockerfile: ./Dockerfile
+    container_name: dominus
+
+    develop:
+      watch:
+        - path: .
+          action: rebuild
 
     env_file:
       - .env.prod
-      
+
     ports:
       - "8000:8000"
       - "5000:5000"
     networks:
       - dominus
     volumes:
-      - dominus_certs:/etc/dominus/certs:ro 
+      - dominus_certs:/etc/dominus/certs:ro
       - dominus_logs:/var/dominus/logs:rw
     healthcheck:
       test: ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://127.0.0.1:8000/health"]
@@ -39,7 +37,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      restart_policy: 
+      restart_policy:
         condition: on-failure
         delay: 1s
         max_attempts: 3
@@ -57,12 +55,12 @@ services:
     image: prom/prometheus:latest
     container_name: prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro 
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     deploy:
       mode: replicated
       replicas: 1
-      restart_policy: 
+      restart_policy:
         condition: on-failure
         delay: 1s
         max_attempts: 3
@@ -79,10 +77,10 @@ services:
       interval: 1m
       timeout: 2s
       retries: 3
-  
+
 
   grafana:
-    image: grafana/grafana:latest 
+    image: grafana/grafana:latest
     container_name: grafana
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -92,7 +90,7 @@ services:
     deploy:
       mode: replicated
       replicas: 1
-      restart_policy: 
+      restart_policy:
         condition: on-failure
         delay: 1s
         max_attempts: 3
@@ -109,7 +107,7 @@ services:
       interval: 1m
       timeout: 2s
       retries: 3
-  
+
 
 volumes:
   prometheus_data:
@@ -120,7 +118,7 @@ volumes:
     driver: local
   dominus_logs:
     driver: local
-  
+
 
 
 networks:
