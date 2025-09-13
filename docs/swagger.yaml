@@ -45,7 +45,29 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Monitor
-  /logs:
+  /metrics:
+    get:
+      description: <h3>gets metrics</h3>
+      responses:
+        "200":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: 'Response body {message: error}'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Monitor
+  /v1/logs:
     get:
       description: <h3>gets all logs fron the database using page and size (required)</h3>
       parameters:
@@ -78,7 +100,7 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Logs
-  /logs-backup:
+  /v1/logs-backup:
     get:
       description: <h3>Gets all selected items from the database for making a backup</h3>
       responses:
@@ -100,30 +122,8 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Logs
-  /metrics:
-    get:
-      description: <h3>gets metrics</h3>
-      responses:
-        "200":
-          description: Success response
-          schema:
-            additionalProperties:
-              items:
-                type: string
-              type: array
-            type: object
-        "406":
-          description: 'Response body {message: error}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Monitor
-  /subscribers/{name}:
-    put:
+  /v1/subscribers/{name}:
+    patch:
       consumes:
       - application/json
       description: <h3>update  subscribers</h3>
@@ -156,7 +156,7 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Manager
-  /topics:
+  /v1/topics:
     get:
       description: <h3>get topics info</h3>
       produces:
@@ -203,7 +203,7 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Manager
-  /topics/{name}:
+  /v1/topics/{name}:
     delete:
       consumes:
       - application/json

@@ -33,7 +33,7 @@ func NewManagerAPI(r *router.Router, uc mg.ManagerService) {
 // @Param topic body dto.SwaggerTopic true "Topic Info"
 // @Success 204 "No Content"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /topics [post]
+// @Router /v1/topics [post]
 func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 	ctx := dto.NewRestContext(c)
 	if err := m.uc.AddTopic(ctx); err != nil {
@@ -54,7 +54,7 @@ func (m *manager) addTopic(c *fasthttp.RequestCtx) {
 // @Param subscribers body []string true "Subscribers"
 // @Success 204 "No Content"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /subscribers/{name} [patch]
+// @Router /v1/subscribers/{name} [patch]
 func (m *manager) updateSubscribers(c *fasthttp.RequestCtx) {
 	ctx := dto.NewRestContext(c)
 	if err := m.uc.UpdateSubscribers(ctx); err != nil {
@@ -74,7 +74,7 @@ func (m *manager) updateSubscribers(c *fasthttp.RequestCtx) {
 // @Param name path string true "topic name"
 // @Success 204 "No Content"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /topics/{name} [delete]
+// @Router /v1/topics/{name} [delete]
 func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 	ctx := dto.NewRestContext(c)
 	if err := m.uc.DeleteTopic(ctx); err != nil {
@@ -92,7 +92,7 @@ func (m *manager) deleteTopic(c *fasthttp.RequestCtx) {
 // @Produce json
 // @Success 200  {object} map[string]any "Topic response"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /topics [get]
+// @Router /v1/topics [get]
 func (m *manager) getTopicsInfo(c *fasthttp.RequestCtx) {
 	resp := m.uc.GetQueueInfo()
 	c.Response.Header.Set("Content-Type", "application/json")
@@ -108,8 +108,8 @@ func (m *manager) getTopicsInfo(c *fasthttp.RequestCtx) {
 }
 
 func (m *manager) path() {
-	m.router.POST("/topics", m.addTopic)
-	m.router.PATCH("/subscribers/{name}", m.updateSubscribers)
-	m.router.DELETE("/topics/{name}", m.deleteTopic)
-	m.router.GET("/topics", m.getTopicsInfo)
+	m.router.POST("/v1/topics", m.addTopic)
+	m.router.PATCH("/v1/subscribers/{name}", m.updateSubscribers)
+	m.router.DELETE("/v1/topics/{name}", m.deleteTopic)
+	m.router.GET("/v1/topics", m.getTopicsInfo)
 }

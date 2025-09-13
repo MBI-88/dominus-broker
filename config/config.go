@@ -11,18 +11,18 @@ var (
 )
 
 type config struct {
-	RestPort                         int64
-	GrpcPort                         int64
-	TopicLimit                       int
-	QueueLimit                       int 
-	KeyFile                          string
-	SslCaCert                        string
-	SslCert                          string
-	ApiToken                         string
-	AllowOrigins                     string
-	ConnectionKey                    string
-	Logs                             string
-	Host                             string
+	RestPort      int64
+	GrpcPort      int64
+	TopicLimit    int
+	QueueLimit    int
+	KeyFile       string
+	SslCaCert     string
+	SslCert       string
+	ApiToken      string
+	AllowOrigins  string
+	ConnectionKey string
+	Logs          string
+	Host          string
 }
 
 func (s *config) setEnv() {
@@ -72,18 +72,18 @@ func (s *config) checkVars() {
 	if s.GrpcPort == 0 {
 		log.Println("[+] GrpcPort was setted to default option 5000")
 		s.GrpcPort = 5000
-	}else if s.RestPort == 0 {
+	} else if s.RestPort == 0 {
 		log.Println("[+] RestPort was setted to default option 8000")
 		s.RestPort = 8000
-	}else if s.ApiToken == "" {
+	} else if s.ApiToken == "" {
 		panic("[-] ApiToken must be different from empty")
-	}else if s.AllowOrigins == "" {
+	} else if s.AllowOrigins == "" {
 		log.Println("[+] AllowOrigins was setted to default option 0.0.0.0/24")
 		s.AllowOrigins = "0.0.0.0/24"
-	}else if s.Logs == "" {
+	} else if s.Logs == "" {
 		log.Println("[+] Logs dir was setted to default option ./logs")
 		s.Logs = "./logs"
-	}else if s.TopicLimit == 0 {
+	} else if s.TopicLimit == 0 {
 		log.Println("[+] TopicLimit was setted to default option 100")
 		s.TopicLimit = 100
 	}

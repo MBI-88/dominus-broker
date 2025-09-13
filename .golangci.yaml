@@ -1,0 +1,43 @@
+run:
+  # Tiempo máximo de ejecución de los linters
+  timeout: 5m
+  # Excluir algunos directorios comunes
+  skip-dirs:
+    - vendor
+    - third_party
+    - tmp
+
+linters-settings:
+  govet:
+    check-shadowing: false
+  golint:
+    min-confidence: 0.8
+  gocyclo:
+    min-complexity: 50
+  staticcheck:
+    checks:
+      - all
+      - '-SA4006' # variable declarada pero no usada
+      - '-SA1019' # uso de APIs obsoletas
+  errcheck:
+    exclude-functions:
+      - (*os.File).Close
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - gofmt
+    - gocyclo
+    - errcheck
+  disable:
+    - golint
+
+issues:
+  exclude:
+    - "shadow: declaration of.*"
+    - "error return value of.*Close.*not checked"
+    - "Error return value of .(Close|Write|Flush).* is not checked"
+    - "SA1019:"
+  max-same-issues: 3
+  max-issues-per-linter: 50

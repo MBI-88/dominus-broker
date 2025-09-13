@@ -84,14 +84,9 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, ctx context.
 		arrayDoQuery = append(arrayDoQuery, cls)
 	}
 
-	for {
-		select {
-		case payload, ok := <-msg:
-			if ok {
-				for _, cls := range arrayDoQuery {
-					go cls(payload)
-				}
-			}
+	for m := range msg {
+		for _, cls := range arrayDoQuery {
+			go cls(m)
 		}
 	}
 }
@@ -113,7 +108,9 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 					if err == io.EOF {
 						g.lgs.WriteLog("ServerStream", err.Error())
 						tx <- struct{}{}
-						stream.CloseSend()
+						if err := stream.CloseSend(); err != nil {
+							g.lgs.WriteLog("ColseSend", err.Error())
+						}
 						return
 					} else if err != io.EOF && err != nil {
 						goto connect
@@ -191,7 +188,9 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 					if err == io.EOF {
 						g.lgs.WriteLog("ServerStream", err.Error())
 						tx <- struct{}{}
-						stream.CloseSend()
+						if err := stream.CloseSend(); err != nil {
+							g.lgs.WriteLog("CloseSend", err.Error())
+						}
 						return
 					} else if err != io.EOF && err != nil {
 						goto connect
@@ -212,17 +211,10 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 		}(url, stream, err)
 	}
 
-	for {
-		select {
-		case payload, ok := <-provMsg:
-			if ok {
-				for _, cls := range arrayDoQuery {
-					go cls(payload)
-				}
-			} else {
-				tx <- struct{}{}
-				return
-			}
+	for msg := range provMsg {
+		for _, cls := range arrayDoQuery {
+			go cls(msg)
 		}
 	}
+	tx <- struct{}{}
 }

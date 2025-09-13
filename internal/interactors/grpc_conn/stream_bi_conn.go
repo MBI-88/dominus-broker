@@ -11,9 +11,12 @@ func (c *grpcService) StreamBiConn(stream adapters.StreamBi) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	req, err := stream.Recv()
+	if err != nil {
+		return err
+	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("Subscribers not found")
+		return fmt.Errorf("subscribers not found")
 	}
 	total := len(subscribers)
 	done := make(chan struct{}, total)
@@ -21,9 +24,6 @@ func (c *grpcService) StreamBiConn(stream adapters.StreamBi) error {
 	streamSub := make(chan []byte, total+int(total*2/3))
 	errMsg := make(chan error, total)
 
-	if err != nil {
-		return err
-	}
 	go func(sig <-chan error) {
 		for er := range sig {
 			go c.lg.WriteLog("InsertObject", er.Error())

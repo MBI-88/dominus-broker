@@ -170,9 +170,9 @@ func TestUpdateSubscribers(t *testing.T) {
 		{
 			name: "UpdateSubscribers parser error",
 			setupMock: func(mrd *mocks.MockRestDto, mt1 *mocks.MockTopics, mt2 *mocks.MockTopic) {
-				mrd.EXPECT(). 
-				Param("name"). 
-				Return("test").Times(1)
+				mrd.EXPECT().
+					Param("name").
+					Return("test").Times(1)
 
 				mrd.EXPECT().
 					BodyParser(gomock.All()).
@@ -195,7 +195,7 @@ func TestUpdateSubscribers(t *testing.T) {
 						n1 := reflect.ValueOf("server1.api.com")
 						n2 := reflect.ValueOf("server2.api.com")
 						n3 := reflect.ValueOf("http://:80/api-3")
-						news := reflect.Append(subs, n1, n2,n3)
+						news := reflect.Append(subs, n1, n2, n3)
 						subs.Set(news)
 						return nil
 					}).Times(1)
@@ -254,9 +254,8 @@ func TestUpdateSubscribers(t *testing.T) {
 	}
 }
 
-
 func TestDeleteTopic(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name      string
 		setupMock func(*mocks.MockRestDto, *mocks.MockTopics)
 		output    error
@@ -264,35 +263,35 @@ func TestDeleteTopic(t *testing.T) {
 		{
 			name: "DeleteTopic Ok",
 			setupMock: func(mrd *mocks.MockRestDto, mt1 *mocks.MockTopics) {
-				mrd.EXPECT(). 
-				Param("name").
-				Return("test").Times(1) 
+				mrd.EXPECT().
+					Param("name").
+					Return("test").Times(1)
 
-				mt1.EXPECT(). 
-				Delete(gomock.All()). 
-				Return(nil).Times(1)
+				mt1.EXPECT().
+					Delete(gomock.All()).
+					Return(nil).Times(1)
 			},
 			output: nil,
 		},
 		{
 			name: "DeleteTopic empty param",
 			setupMock: func(mrd *mocks.MockRestDto, mt1 *mocks.MockTopics) {
-				mrd.EXPECT(). 
-				Param("name").
-				Return("").Times(1) 
+				mrd.EXPECT().
+					Param("name").
+					Return("").Times(1)
 			},
 			output: fmt.Errorf("empty param"),
 		},
 		{
 			name: "DeleteTopic delete error",
 			setupMock: func(mrd *mocks.MockRestDto, mt1 *mocks.MockTopics) {
-				mrd.EXPECT(). 
-				Param("name").
-				Return("test").Times(1) 
+				mrd.EXPECT().
+					Param("name").
+					Return("test").Times(1)
 
-				mt1.EXPECT(). 
-				Delete(gomock.All()). 
-				Return(fmt.Errorf("delete error")).Times(1)
+				mt1.EXPECT().
+					Delete(gomock.All()).
+					Return(fmt.Errorf("delete error")).Times(1)
 			},
 			output: fmt.Errorf("delete error"),
 		},
@@ -322,44 +321,44 @@ func TestDeleteTopic(t *testing.T) {
 }
 
 func TestGetQueueInfo(t *testing.T) {
-	tests := []struct{
+	tests := []struct {
 		name      string
 		setupMock func(*mocks.MockRestDto, *mocks.MockTopics)
-		output   int
+		output    int
 	}{
 		{
 			name: "GetQueueInfo resp length 3",
 			setupMock: func(mrd *mocks.MockRestDto, mt *mocks.MockTopics) {
-				mt.EXPECT(). 
-				GetTopicsInfo(). 
-				Return(map[string]any{
-					"test-1": []string{"test1","test2"},
-					"test-2": []string{"test1","test2"},
-					"test-3": []string{"test1","test2"},
-				}).Times(1)
+				mt.EXPECT().
+					GetTopicsInfo().
+					Return(map[string]any{
+						"test-1": []string{"test1", "test2"},
+						"test-2": []string{"test1", "test2"},
+						"test-3": []string{"test1", "test2"},
+					}).Times(1)
 			},
 			output: 3,
 		},
 		{
 			name: "GetQueueInfo length 2",
 			setupMock: func(mrd *mocks.MockRestDto, mt *mocks.MockTopics) {
-				mt.EXPECT(). 
-				GetTopicsInfo(). 
-				Return(map[string]any{
-					"test-1": []string{"test1","test2"},
-					"test-2": []string{"test1","test2"},
-				}).Times(1)
+				mt.EXPECT().
+					GetTopicsInfo().
+					Return(map[string]any{
+						"test-1": []string{"test1", "test2"},
+						"test-2": []string{"test1", "test2"},
+					}).Times(1)
 			},
 			output: 2,
 		},
 		{
 			name: "GetQueueInfo length 1",
 			setupMock: func(mrd *mocks.MockRestDto, mt *mocks.MockTopics) {
-				mt.EXPECT(). 
-				GetTopicsInfo(). 
-				Return(map[string]any{
-					"test-1": []string{"test1","test2"},
-				}).Times(1)
+				mt.EXPECT().
+					GetTopicsInfo().
+					Return(map[string]any{
+						"test-1": []string{"test1", "test2"},
+					}).Times(1)
 			},
 			output: 1,
 		},

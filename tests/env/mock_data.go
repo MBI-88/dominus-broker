@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	SubsOk  = []string{"78.168.1.6:5001/api/test", "grpc.dominus.com/api","192.16.1.6:5001","grpc.dominus.com"}
-	Tps = "test.example"
-	Data  = struct {
+	SubsOk = []string{"78.168.1.6:5001/api/test", "grpc.dominus.com/api", "192.16.1.6:5001", "grpc.dominus.com"}
+	Tps    = "test.example"
+	Data   = struct {
 		Id        string    `json:"id"`
 		Name      string    `json:"name"`
 		Dni       string    `json:"dni"`
@@ -21,7 +21,7 @@ var (
 		Age:       35,
 		CreatedAt: time.Now(),
 	}
-	Ad = new(sync.Mutex)
+	Ad         = new(sync.Mutex)
 	QueueLimit = 100
 	TopicLimit = 100
 )

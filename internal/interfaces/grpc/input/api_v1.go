@@ -6,6 +6,7 @@ import (
 	"dominus-project/internal/interfaces/grpc/dto"
 	"fmt"
 	"io"
+	"log"
 
 	pb "github.com/PR0C0D3-MBI/dominus-proto-definition/src/dominus"
 
@@ -34,7 +35,7 @@ func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.R
 	if err := s.uc.SimpleConn(ms); err != nil {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("%s", err))
 	}
-	return &pb.Response{Status: 200, Message: "[+] Accepted"}, nil
+	return &pb.Response{Status: 200, Message: "Accepted"}, nil
 }
 
 // Receives array messages from client
@@ -46,22 +47,26 @@ func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 	}
 	return stream.SendAndClose(&pb.Response{
 		Status:  200,
-		Message: "[*]Connection closed",
+		Message: "Connection closed",
 	})
 }
 
 // Sends array messages to client
 func (s *grpcController) ServerStream(ms *pb.RequestMessage, stream pb.Grpc_ServerStreamServer) error {
 	ctx := dto.NewServerStreamContext(stream)
-	return status.Error(codes.Aborted, fmt.Sprintf("%s", s.uc.StreamServerConn(ms, ctx))) 
+	return status.Error(codes.Aborted, fmt.Sprintf("%s", s.uc.StreamServerConn(ms, ctx)))
 }
 
 // Receives and sends messages from server to client
 func (s *grpcController) BidirectionalStream(stream pb.Grpc_BidirectionalStreamServer) error {
 	ctx := dto.NewBiStreamConn(stream)
-	return status.Error(codes.Aborted, fmt.Sprintf("%s", s.uc.StreamBiConn(ctx))) 
+	return status.Error(codes.Aborted, fmt.Sprintf("%s", s.uc.StreamBiConn(ctx)))
 }
 
 func (s *grpcController) runQueue(close <-chan struct{}) {
-	go s.uc.RunQueue(close)
+	go func() {
+		if err := s.uc.RunQueue(close); err != nil {
+			log.Printf("%s", err)
+		}
+	}()
 }

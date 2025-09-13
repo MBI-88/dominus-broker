@@ -24,7 +24,7 @@ type system struct {
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
 // @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /logs [get]
+// @Router /v1/logs [get]
 func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 	result, err := r.uc.GetLogs()
 	if err != nil {
@@ -45,7 +45,7 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
 // @Failure 406 {object} map[string]string "Error response"
-// @Router /logs-backup [get]
+// @Router /v1/logs-backup [get]
 func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 	result, err := r.uc.GetLogs()
 	if err != nil {
@@ -65,8 +65,8 @@ func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 }
 
 func (r *system) path() {
-	r.router.GET("/logs", r.getLogs)
-	r.router.GET("/logs-backup", r.getBackup)
+	r.router.GET("/v1/logs", r.getLogs)
+	r.router.GET("/v1/logs-backup", r.getBackup)
 }
 
 func NewSystemAPI(r *router.Router, uc st.SystemService) {

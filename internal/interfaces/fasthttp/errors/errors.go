@@ -5,7 +5,6 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-
 var (
 	js = jsoniter.ConfigCompatibleWithStandardLibrary
 )

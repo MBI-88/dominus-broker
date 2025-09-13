@@ -55,7 +55,43 @@ const docTemplate = `{
                 }
             }
         },
-        "/logs": {
+        "/metrics": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003egets metrics\u003c/h3\u003e",
+                "tags": [
+                    "Monitor"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Response body {message: error}",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/logs": {
             "get": {
                 "security": [
                     {
@@ -107,7 +143,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/logs-backup": {
+        "/v1/logs-backup": {
             "get": {
                 "security": [
                     {
@@ -143,44 +179,8 @@ const docTemplate = `{
                 }
             }
         },
-        "/metrics": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "\u003ch3\u003egets metrics\u003c/h3\u003e",
-                "tags": [
-                    "Monitor"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "406": {
-                        "description": "Response body {message: error}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/subscribers/{name}": {
-            "put": {
+        "/v1/subscribers/{name}": {
+            "patch": {
                 "security": [
                     {
                         "ApiKeyAuth": []
@@ -233,7 +233,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/topics": {
+        "/v1/topics": {
             "get": {
                 "security": [
                     {
@@ -309,7 +309,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/topics/{name}": {
+        "/v1/topics/{name}": {
             "delete": {
                 "security": [
                     {

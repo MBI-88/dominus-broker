@@ -1,6 +1,5 @@
 package entities
 
-
 type errorResponse struct {
 	Error       bool
 	FailedField string

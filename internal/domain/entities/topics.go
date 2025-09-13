@@ -87,10 +87,7 @@ func (ts *topics) findTopic(name string) (int, error) {
 }
 
 func (ts *topics) checkLenght() bool {
-	if len(ts.ar) >= ts.limit {
-		return false
-	}
-	return true
+	return len(ts.ar) >= ts.limit
 }
 
 func (ts *topics) Next() (Topic, error) {

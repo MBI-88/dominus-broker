@@ -1,34 +1,99 @@
 package grpcconn_test
 
 import (
-	"dominus-project/internal/domain/entities"
+	"context"
 	grpcconn "dominus-project/internal/interactors/grpc_conn"
-	"dominus-project/tests/env"
-	"encoding/json"
+	"dominus-project/mocks"
+	"fmt"
 	"testing"
+	"time"
+
+	"go.uber.org/mock/gomock"
 )
 
-func TestServerStream(t *testing.T) {
-	log := env.NewEventMock(true)
-	topics := entities.NewTopics(100)
-	stream := grpcconn.NewGrpcService(log, env.NewGrpcClientMock(true,true), topics)
-	t.Run("ServerStream-OK", func(t *testing.T) {
-		payload, _ := json.Marshal(env.Data)
-		msg, ctx := env.NewServerContextMock(payload, env.SubsOk)
-		result := stream.StreamServerConn(msg, ctx)
-		if result.Error() != "Connection closed" {
-			t.Fatal(result)
-		}
+func TestStreamServerConn(t *testing.T) {
+	tests := []struct {
+		name      string
+		setupMock func(*mocks.MockStreamServer, *mocks.MockGrpcClient, *mocks.MockLogs, *mocks.MockGrpcDto)
+		output    error
+	}{
+		{
+			name: "StreamServerConn ok",
+			setupMock: func(mss *mocks.MockStreamServer, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
+				mgd.EXPECT().
+					GetSubscribers().
+					Return([]string{"server1.api.com", "server2.api.com", "server3.api.com", "127.0.0.1:8080"}).AnyTimes()
 
-	})
+				mgd.EXPECT().
+					GetPayload().
+					Return([]byte("test")).Times(1)
 
-	t.Run("ServerStream-Error", func(t *testing.T) {
-		payload, _ := json.Marshal(env.Data)
-		msg, ctx := env.NewServerContextMock(payload, make([]string, 0))
-		result := stream.StreamServerConn(msg, ctx)
-		if result.Error() == "End" {
-			t.Fatalf("Expected error but received nil")
-		}
-	})
+				mgc.EXPECT().
+					ServerStream(gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All()).
+					Do(func(subscribers, initialRequest, stream, ctx, done any) {
+						for {
+							select {
+							case <-time.Tick(1 * time.Second):
+								stream.(chan<- []byte) <- []byte("test")
+							case <-ctx.(context.Context).Done():
+								for range subscribers.([]string) {
+									done.(chan<- struct{}) <- struct{}{}
+								}
+								return
+							case <-time.Tick(5 * time.Second):
+							}
+						}
+					}).Times(1)
 
+				gomock.InOrder(
+					mss.EXPECT().Send(gomock.All()).Return(nil),
+					mss.EXPECT().Send(gomock.All()).Return(nil),
+					mss.EXPECT().Send(gomock.All()).Return(nil),
+					mss.EXPECT().Send(gomock.All()).Return(fmt.Errorf("connection closed")),
+				)
+
+				ml.EXPECT().
+					WriteLog(gomock.All(), gomock.All()).AnyTimes()
+			},
+			output: fmt.Errorf("connection closed"),
+		},
+		{
+			name: "StreamServerConn subscribers empty",
+			setupMock: func(mss *mocks.MockStreamServer, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
+				mgd.EXPECT().
+					GetSubscribers().
+					Return([]string{}).Times(1)
+
+			},
+			output: fmt.Errorf("subscribers not found"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			mockLogs := mocks.NewMockLogs(ctrl)
+			mockStreaServer := mocks.NewMockStreamServer(ctrl)
+			mockGrpcDto := mocks.NewMockGrpcDto(ctrl)
+			mockGrpcClient := mocks.NewMockGrpcClient(ctrl)
+			mockTopics := mocks.NewMockTopics(ctrl)
+
+			tt.setupMock(mockStreaServer, mockGrpcClient, mockLogs, mockGrpcDto)
+
+			stream := grpcconn.NewGrpcService(mockLogs, mockGrpcClient, mockTopics)
+
+			err := stream.StreamServerConn(mockGrpcDto, mockStreaServer)
+
+			if tt.output != nil && err == nil {
+				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
+			}
+			if tt.output == nil && err != nil {
+				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
+			}
+
+		})
+
+	}
 }

@@ -20,7 +20,6 @@ repos:
       - id: commitizen-branch
         stages: [pre-push]
 
-
   # Golang pre-commit hooks
   # https://golangci-lint.run/welcome/install/#local-installation
   - repo: local
@@ -54,21 +53,6 @@ repos:
         types: [go]
 
   # Bash helper hooks (local)
-  #
-#  - repo: local
-#    hooks:
-#      # shellcheck (aliased to shck)
-#      #
-#      - id: shellcheck
-#        name: Run static analysis (shellcheck)
-#        entry: shellcheck
-#        language: system
-#        files: \.(sh|bash)$
-#        types: [file]
-#        alias: shck
-#        args: ["-x", "-e", "SC2034"]
-#      # shfmt
-#      #
 #      - id: shfmt
 #        name: Run lint check (shfmt -d)
 #        entry: shfmt

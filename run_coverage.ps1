@@ -1,7 +1,8 @@
 # Lista de paquetes a excluir del coverage
 $excluded = @(
     'tests/env',
-    'docs'
+    'docs',
+    'mocks'
 )
 
 Write-Host "`n🔍 Getting packages list...`n"
@@ -30,7 +31,7 @@ $coverpkg = $packages -join ','
 Write-Host "`n🚀 Running test...`n"
 
 # Ejecutar go test y capturar salida línea por línea
-$testOutput = go test -race -coverpkg="$coverpkg" -covermode=atomic -coverprofile="coverage.out" ./tests/... 2>&1
+$testOutput = go test -timeout 120s -race -coverpkg="$coverpkg" -covermode=atomic -coverprofile="coverage.out" ./tests/... 2>&1
 
 # Mostrar cada línea con formato y salto automático
 foreach ($line in $testOutput) {

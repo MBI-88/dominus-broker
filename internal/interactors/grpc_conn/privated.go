@@ -14,26 +14,31 @@ func (c *grpcService) checkQueue() {
 	for {
 		t, err := c.topics.Next()
 		if err != nil {
+			c.lg.WriteLog("Next", err.Error())
 			break
 		}
 
 		body := t.GetMessage()
-		for _, sub := range t.GetSubscribers() {
-			go func(url string, topic entities.Topic) {
-				if len(body) > 0 {
+		if len(body) > 0 {
+			for _, sub := range t.GetSubscribers() {
+				go func(url string, topic entities.Topic) {
 					resp, err := c.client.Simple(url, body)
 					if err != nil {
 						c.lg.WriteLog("SimpleConn", err.Error())
-						topic.SetMessage(body)
+						if err = topic.SetMessage(body); err != nil {
+							c.lg.WriteLog("SetMessage", err.Error())
+						}
 						return
 					}
 					if resp.GetStatus() != 200 {
-						topic.SetMessage(body)
+						if err = topic.SetMessage(body); err != nil {
+							c.lg.WriteLog("SetMessage", err.Error())
+						}
 					}
-				}
-
-			}(sub, t)
+				}(sub, t)
+			}
 		}
+
 	}
 }
 

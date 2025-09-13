@@ -42,14 +42,14 @@ var (
 	st         chan os.Signal
 	showBanner *bool
 	banner     = `
-==========================================================	
+==========================================================
 ██████    ██████  ███     ██ ██ ███    ██ ██    ██ ███████
 ██   ██  ██    ██ ████  ████ ██ ████   ██ ██    ██ ██
 ██   ██  ██    ██ ██ ████ ██ ██ ██ ██  ██ ██    ██ ███████
 ██   ██  ██    ██ ██  ██  ██ ██ ██  ██ ██ ██    ██      ██
 ██████    ██████  ██      ██ ██ ██   ████  ██████  ███████
-==========================================================    
-   
+==========================================================
+
 👉 Github: https://github.com/MBI-88
 🔧 Press CTRL+C to terminate the server
 
@@ -174,7 +174,7 @@ func main() {
 	var (
 		optsS []grpc.ServerOption
 		optsD []grpc.DialOption
-		queue  = make(chan struct{})
+		queue = make(chan struct{})
 	)
 
 	midGs := gm.NewMiddleware(env.ConnectionKey, logs)
@@ -270,7 +270,7 @@ func main() {
 	case <-ctx.Done():
 		log.Fatalln("[-] Context closed")
 	}
-	
+
 	queue <- struct{}{}
 	if err := r.Shutdown(); err != nil {
 		log.Fatal(err)

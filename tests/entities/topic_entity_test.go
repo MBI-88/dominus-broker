@@ -60,7 +60,7 @@ func TestTopicParallelRW(t *testing.T) {
 
 	t.Run("SetMessage_GetMessage_RW", func(t *testing.T) {
 		var (
-			wg   = new(sync.WaitGroup) 
+			wg     = new(sync.WaitGroup)
 			errGet error
 			errSet error
 		)
