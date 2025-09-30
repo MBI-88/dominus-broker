@@ -9,6 +9,9 @@ import (
 func (m *managerService) AddTopic(ctx adapters.RestDto) error {
 	topic := entities.NewTopic(ctx, m.queueLimit)
 
+	if topic == nil {
+		return fmt.Errorf("invalid topic")
+	}
 	if err := topic.ParseTopic(); err != nil {
 		return err
 	}

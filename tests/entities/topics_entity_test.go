@@ -2,12 +2,17 @@ package entities_test
 
 import (
 	"dominus-project/internal/domain/entities"
+	"dominus-project/mocks"
 	"dominus-project/tests/env"
 	"testing"
+
+	"go.uber.org/mock/gomock"
 )
 
 func TestTopics(t *testing.T) {
-	topic := entities.NewTopic(nil, env.QueueLimit)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	topic := entities.NewTopic(mocks.NewMockRestDto(ctrl), env.QueueLimit)
 
 	t.Run("Append_Ok", func(t *testing.T) {
 		topics := entities.NewTopics(1)

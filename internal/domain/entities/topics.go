@@ -36,7 +36,7 @@ func (ts *topics) Append(t Topic) error {
 		ts.ar = append(ts.ar, t)
 		return nil
 	}
-	return fmt.Errorf("Limit reached")
+	return fmt.Errorf("limit reached")
 }
 
 func (ts *topics) Update(t Topic) error {
@@ -87,13 +87,13 @@ func (ts *topics) findTopic(name string) (int, error) {
 }
 
 func (ts *topics) checkLenght() bool {
-	return len(ts.ar) >= ts.limit
+	return len(ts.ar) < ts.limit
 }
 
 func (ts *topics) Next() (Topic, error) {
 	if ts.next > len(ts.ar)-1 {
 		ts.next = 0
-		return nil, fmt.Errorf("End")
+		return nil, fmt.Errorf("end")
 	}
 	ts.mutex.RLock()
 	topic := ts.ar[ts.next]

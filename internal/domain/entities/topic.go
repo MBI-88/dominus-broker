@@ -2,7 +2,6 @@ package entities
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"sync"
 
@@ -36,7 +35,7 @@ type topic struct {
 
 func NewTopic(dto parserBody, limit int) Topic {
 	customValidate := validator.New()
-	err := customValidate.RegisterValidation("hostname_port", func(fl validator.FieldLevel) bool {
+	if err := customValidate.RegisterValidation("hostname_port", func(fl validator.FieldLevel) bool {
 		value := fl.Field().String()
 
 		host, port, _ := net.SplitHostPort(value)
@@ -58,8 +57,10 @@ func NewTopic(dto parserBody, limit int) Topic {
 
 		return false
 
-	})
-	log.Panicln(err)
+	}); err != nil {
+		return nil
+	}
+
 	return &topic{
 		validate:   customValidate,
 		Lck:        new(sync.RWMutex),
