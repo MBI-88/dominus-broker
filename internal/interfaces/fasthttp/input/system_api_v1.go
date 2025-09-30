@@ -45,7 +45,7 @@ func (r *system) getLogs(ctx *fasthttp.RequestCtx) {
 // @Security ApiKeyAuth
 // @Success 200 {object} map[string][]string "Success response"
 // @Failure 406 {object} map[string]string "Error response"
-// @Router /v1/logs-backup [get]
+// @Router /v1/backup [get]
 func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 	result, err := r.uc.GetLogs()
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *system) getBackup(ctx *fasthttp.RequestCtx) {
 
 func (r *system) path() {
 	r.router.GET("/v1/logs", r.getLogs)
-	r.router.GET("/v1/logs-backup", r.getBackup)
+	r.router.GET("/v1/backup", r.getBackup)
 }
 
 func NewSystemAPI(r *router.Router, uc st.SystemService) {

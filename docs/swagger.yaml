@@ -67,6 +67,28 @@ paths:
       - ApiKeyAuth: []
       tags:
       - Monitor
+  /v1/backup:
+    get:
+      description: <h3>Gets all selected items from the database for making a backup</h3>
+      responses:
+        "200":
+          description: Success response
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "406":
+          description: Error response
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Logs
   /v1/logs:
     get:
       description: <h3>gets all logs fron the database using page and size (required)</h3>
@@ -92,28 +114,6 @@ paths:
             type: object
         "406":
           description: 'Response body {message: error}'
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      tags:
-      - Logs
-  /v1/logs-backup:
-    get:
-      description: <h3>Gets all selected items from the database for making a backup</h3>
-      responses:
-        "200":
-          description: Success response
-          schema:
-            additionalProperties:
-              items:
-                type: string
-              type: array
-            type: object
-        "406":
-          description: Error response
           schema:
             additionalProperties:
               type: string

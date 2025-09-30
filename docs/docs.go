@@ -91,6 +91,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/v1/backup": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "\u003ch3\u003eGets all selected items from the database for making a backup\u003c/h3\u003e",
+                "tags": [
+                    "Logs"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "406": {
+                        "description": "Error response",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/logs": {
             "get": {
                 "security": [
@@ -133,42 +169,6 @@ const docTemplate = `{
                     },
                     "406": {
                         "description": "Response body {message: error}",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/v1/logs-backup": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "\u003ch3\u003eGets all selected items from the database for making a backup\u003c/h3\u003e",
-                "tags": [
-                    "Logs"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "array",
-                                "items": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "406": {
-                        "description": "Error response",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
