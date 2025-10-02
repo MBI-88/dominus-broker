@@ -154,7 +154,7 @@ func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, s
 					Payload:     payload})
 				lock.Unlock()
 				if err != nil {
-					g.lgs.WriteLog("ClientStream", err.Error())
+					g.lgs.WriteLog("BidirectionalStream", err.Error())
 					lock.Lock()
 					errConn = err
 					lock.Unlock()

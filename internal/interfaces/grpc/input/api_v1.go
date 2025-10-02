@@ -35,7 +35,7 @@ func (s *grpcController) Simple(_ context.Context, ms *pb.RequestMessage) (*pb.R
 	if err := s.uc.SimpleConn(ms); err != nil {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("%s", err))
 	}
-	return &pb.Response{Status: 200, Message: "Accepted"}, nil
+	return &pb.Response{Status: 0, Message: "Accepted"}, nil
 }
 
 // Receives array messages from client
@@ -46,7 +46,7 @@ func (s *grpcController) ClientStream(stream pb.Grpc_ClientStreamServer) error {
 		return status.Error(codes.Canceled, fmt.Sprintf("%s", err))
 	}
 	return stream.SendAndClose(&pb.Response{
-		Status:  200,
+		Status:  0,
 		Message: "Connection closed",
 	})
 }

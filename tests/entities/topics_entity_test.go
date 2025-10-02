@@ -131,4 +131,17 @@ func TestTopics(t *testing.T) {
 			t.Fatal("Error must be different from nil")
 		}
 	})
+
+	t.Run("GetTopicsInfo ok", func(t *testing.T) {
+		topics := entities.NewTopics(2)
+		if err := topics.Append(topic); err != nil {
+			t.Fatal(err)
+		}
+		resp := topics.GetTopicsInfo()
+
+		if len(resp) == 0 {
+			t.Fatalf("Expected keys output must be different from 0")
+		}
+
+	})
 }
