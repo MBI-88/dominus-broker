@@ -1,30 +1,24 @@
 package entities
 
-type Queue interface {
-	Enqueue(ms []byte)
-	Length() int
-	Dequeue() ([]byte, bool)
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type Queue struct {
+	Message   []byte    `json:"message"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	DeletedAt time.Time `json:"deleted_at"`
+	Hidden    bool      `json:"hidden"`
 }
 
-type queue [][]byte
-
-func NewQueue() Queue {
-	return new(queue)
-}
-
-func (q *queue) Enqueue(ms []byte) {
-	*q = append(*q, ms)
-}
-
-func (q *queue) Dequeue() ([]byte, bool) {
-	if len(*q) == 0 {
-		return nil, false
+func NewQueue(message []byte) *Queue {
+	return &Queue{
+		Message:   message,
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		Hidden:    false,
 	}
-	ms := (*q)[0]
-	*q = (*q)[1:]
-	return ms, true
-}
-
-func (q *queue) Length() int {
-	return len(*q)
 }

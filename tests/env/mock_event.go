@@ -10,6 +10,12 @@ type eventMock struct {
 	statusFlag bool
 }
 
+func NewEventMock(status bool) adapters.Logs {
+	return &eventMock{
+		statusFlag: status,
+	}
+}
+
 func (*eventMock) WriteLog(op, dsc string) {
 	log.Println(op, " ", dsc)
 }
@@ -25,8 +31,4 @@ func (ev *eventMock) GetLogs() ([]string, error) {
 	return nil, fmt.Errorf("[-] Error response")
 }
 
-func NewEventMock(status bool) adapters.Logs {
-	return &eventMock{
-		statusFlag: status,
-	}
-}
+

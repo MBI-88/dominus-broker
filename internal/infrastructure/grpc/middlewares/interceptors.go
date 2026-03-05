@@ -1,0 +1,48 @@
+package middlewares
+
+import (
+	"context"
+	"dominus-project/internal/domain/adapters"
+	"dominus-project/internal/domain/enum"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+)
+
+type Interceptor interface {
+	StreamAuthInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string,
+		streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error)
+	UnaryAuthInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
+		invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error
+}
+
+type interceptor struct {
+	apiToken string
+	log  adapters.Logs
+}
+
+func NewInterceptor(token string, log adapters.Logs) Interceptor {
+	return &interceptor{
+		apiToken: token,
+		log: log,
+	}
+}
+
+func (i *interceptor) UnaryAuthInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
+	invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	ctx = metadata.AppendToOutgoingContext(ctx, enum.XapiKey, i.apiToken)
+	go i.log.WriteLog(ctx, enum.DEBUG, "UnaryAuthInterceptor", "debuging")
+	return invoker(ctx, method, req, reply, cc, opts...)
+}
+
+func (i *interceptor) StreamAuthInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string,
+	streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
+	ctx = metadata.AppendToOutgoingContext(ctx, enum.XapiKey, i.apiToken)
+	s, err := streamer(ctx, desc, cc, method, opts...)
+	go i.log.WriteLog(ctx, enum.DEBUG, "StreamAuthInterceptor", err.Error())
+	if err != nil {
+		go i.log.WriteLog(ctx, enum.ERROR, "StreamAuthInterceptor", err.Error())
+		return nil, err
+	}
+	return s, nil
+}

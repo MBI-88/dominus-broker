@@ -1,99 +1,102 @@
 package config
 
 import (
-	"log"
+	"encoding/json"
 
 	"github.com/spf13/viper"
 )
 
-var (
-	grpcConnKey = "DominusKeyConnectionMBI@88"
-)
-
-type config struct {
-	RestPort      int64
-	GrpcPort      int64
-	TopicLimit    int
-	QueueLimit    int
-	KeyFile       string
-	SslCaCert     string
-	SslCert       string
-	ApiToken      string
-	AllowOrigins  string
-	ConnectionKey string
-	Logs          string
-	Host          string
+type grpcConfig struct {
+	GRPCPort      int64  `json:"grpc_port"`
+	ConnectionKey string `json:"connection_key"`
 }
 
-func (s *config) setEnv() {
-	s.ApiToken = viper.GetString("API_TOKEN")
-	s.RestPort = viper.GetInt64("REST_PORT")
-	s.GrpcPort = viper.GetInt64("GRPC_PORT")
-	s.SslCert = viper.GetString("SSL_CERT")
-	s.SslCaCert = viper.GetString("SSL_CA")
-	s.KeyFile = viper.GetString("KEY_FILE")
-	s.AllowOrigins = viper.GetString("ALLOW_ORIGINS")
-	s.ConnectionKey = grpcConnKey
-	s.Logs = viper.GetString("LOGS")
-	s.Host = viper.GetString("HOST")
-	s.TopicLimit = viper.GetInt("TOPIC_LIMIT")
-	s.QueueLimit = viper.GetInt("QUEUE_LIMIT")
+type restConfig struct {
+	RestPort     int64  `json:"rest_port"`
+	ApiToken     string `json:"api_token"`
+	AllowOrigins string `json:"allow_origins"`
 }
 
-func (s config) GetEnvVar(prod bool) config {
+type domainConfig struct {
+	TopicLimit int `json:"topic_limit"`
+	QueueLimit int `json:"queue_limit"`
+}
+
+type certConfig struct {
+	KeyFile   string `json:"key_file"`
+	SslCaCert string `json:"ssl_ca_cert"`
+	SslCert   string `json:"ssl_cert"`
+}
+
+type redisConfig struct {
+	PoolSize     int64  `json:"pool_size"`
+	IdleConn     int64  `json:"idle_conn"`
+	MaxRetries   int64  `json:"max_retries"`
+	DialTimeOut  int64  `json:"dial_time_out"`
+	ReadTimeOut  int64  `json:"read_time_out"`
+	WriteTimeOut int64  `json:"write_time_out"`
+	Port         int64  `json:"port"`
+	Db           int64  `json:"db"`
+	Host         string `json:"host"`
+	Password     string `json:"password"`
+	Tls          bool   `json:"tls"`
+	Ssl          bool   `json:"ssl"`
+}
+
+type sqsConfig struct {
+	MaxAttempts     int64  `json:"max_attempts"`
+	Region          string `json:"region"`
+	AccessKeyID     string `json:"access_key_id"`
+	SecretAccessKey string `json:"secret_access_key"`
+	SqsQueueURL     string `json:"sqs_queue_url"`
+	Endpoint        string `json:"endpoint"`
+	RetrieMode      string `json:"retrie_mode"`
+	RoleARN         string `json:"role_arn"`
+	ExternaID       string `json:"external_id"`
+}
+
+type providerConfig struct {
+	RedisConfig redisConfig `json:"redis_config"`
+	SqsConfig   sqsConfig   `json:"sqs_config"`
+}
+
+type infraConfig struct {
+	LogMode string `json:"log_mode"`
+	Host    string `json:"host"`
+	LogURL  string `json:"log_url"`
+}
+
+type Config struct {
+	GrpcConfig     grpcConfig     `json:"grpc_config"`
+	RestConfig     restConfig     `json:"rest_config"`
+	CertConfig     certConfig     `json:"cert_config"`
+	ProviderConfig providerConfig `json:"provider_config"`
+	InfraConfig    infraConfig    `json:"infra_config"`
+}
+
+func NewConfig(prod bool) Config {
+	var (
+		cf Config
+	)
+
 	if prod {
 		viper.AutomaticEnv()
+		if err := json.Unmarshal([]byte(viper.GetString("APP_CONFIG")), &cf); err != nil {
+			panic(err)
+		}
 	} else {
-		viper.SetConfigFile("./.env")
+		viper.SetConfigType("json")
+		viper.SetConfigFile("./../env/env.dev.json")
+
 		if err := viper.ReadInConfig(); err != nil {
 			if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 				panic("[-] File not found!")
 			}
 		}
-	}
-	s.setEnv()
-	s.checkVars()
-	return s
-}
-
-func (s *config) GetEnvVarTest() config {
-	viper.SetConfigFile("./../.env")
-	if err := viper.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			panic("[-] File not found!")
+		if err := viper.Unmarshal(&cf); err != nil {
+			panic(err)
 		}
 	}
-	s.setEnv()
-	s.checkVars()
-	return *s
-}
 
-func (s *config) checkVars() {
-	if s.GrpcPort == 0 {
-		log.Println("[+] GrpcPort was setted to default option 5000")
-		s.GrpcPort = 5000
-	} else if s.RestPort == 0 {
-		log.Println("[+] RestPort was setted to default option 8000")
-		s.RestPort = 8000
-	} else if s.ApiToken == "" {
-		panic("[-] ApiToken must be different from empty")
-	} else if s.AllowOrigins == "" {
-		log.Println("[+] AllowOrigins was setted to default option 0.0.0.0/24")
-		s.AllowOrigins = "0.0.0.0/24"
-	} else if s.Logs == "" {
-		log.Println("[+] Logs dir was setted to default option ./logs")
-		s.Logs = "./logs"
-	} else if s.TopicLimit == 0 {
-		log.Println("[+] TopicLimit was setted to default option 100")
-		s.TopicLimit = 100
-	}
-}
-
-type restConfigInt interface {
-	GetEnvVarTest() config
-	GetEnvVar(prod bool) config
-}
-
-func NewConfig() restConfigInt {
-	return new(config)
+	return cf
 }

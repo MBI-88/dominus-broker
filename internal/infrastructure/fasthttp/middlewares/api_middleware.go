@@ -1,0 +1,42 @@
+package middlewares
+
+import (
+	"crypto/sha256"
+	"crypto/subtle"
+	"dominus-project/internal/domain/adapters"
+	"dominus-project/internal/domain/enum"
+	"fmt"
+	"strings"
+
+	"github.com/valyala/fasthttp"
+)
+
+type apMiddleware struct {
+	token []byte
+	log adapters.Logs
+}
+
+func NewMiddlewareApiToken(t string, log adapters.Logs) Middlewares {
+	return &apMiddleware{
+		token: []byte(t),
+		log: log,
+	}
+}
+
+func (a *apMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
+	if t, ok := a.log.CheckID(ctx).(*fasthttp.RequestCtx); ok {
+		ctx = t
+	}
+	path := string(ctx.RequestURI())
+	if strings.HasPrefix(path, "/swagger") {
+		return nil
+	}
+	token := ctx.Request.Header.Peek(enum.XapiKey)
+	hashedToken := sha256.Sum256(token)
+	hashedKey := sha256.Sum256(a.token)
+	if subtle.ConstantTimeCompare(hashedKey[:], hashedToken[:]) == 0 {
+		go a.log.WriteLog(ctx, enum.ERROR, "CheckMiddleware", "Invalid token")
+		return fmt.Errorf("invalid token")
+	}
+	return nil
+}

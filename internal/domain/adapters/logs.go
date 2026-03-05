@@ -1,7 +1,10 @@
 package adapters
 
+import (
+	"context"
+)
+
 type Logs interface {
-	WriteLog(op, dsc string)
-	Printf(format string, args ...any)
-	GetLogs() ([]string, error)
+	WriteLog(ctx context.Context, level, op, dsc string)
+	CheckID(ctx context.Context) context.Context
 }
