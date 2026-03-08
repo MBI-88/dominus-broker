@@ -4,9 +4,6 @@ import (
 	"context"
 	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/entities"
-	"sync"
-
-	"github.com/google/uuid"
 )
 
 type Queue interface {
@@ -16,17 +13,16 @@ type Queue interface {
 }
 
 type queue struct {
-	memory   adapters.MemoryClient
+	client   adapters.MemoryClient
 	lg       adapters.Logs
-	idList  []uuid.UUID
-	lock    *sync.Mutex
+	memory  entities.Memory
+
 }
 
-func NewQueue(lg adapters.Logs, memory adapters.MemoryClient) Queue {
+func NewQueue(lg adapters.Logs, client adapters.MemoryClient, m entities.Memory) Queue {
 	return &queue{
 		lg:     lg,
-		memory: memory,
-		idList: make([]uuid.UUID, 100),
-		lock: new(sync.Mutex),
+		client: client,
+		memory: m,
 	}
 }

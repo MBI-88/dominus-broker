@@ -50,6 +50,9 @@ func NewRedisClient(
 
 	client := redis.NewClient(op)
 
+	if _, err := client.Ping(context.Background()).Result(); err != nil {
+		panic(err)
+	}
 	return &redisClient{
 		rdb: client,
 	}
@@ -63,10 +66,9 @@ func (r *redisClient) SendMessage(ctx context.Context, q *entities.Queue) error 
 	return nil
 }
 
-func (r *redisClient) DeleteMessage(ctx context.Context, ID string) error {
-	status := r.rdb.Del(ctx, ID)
-	if status.Err() != nil {
-
+func (r *redisClient) DeleteMessage(ctx context.Context, key string) error {
+	if _, err := r.rdb.Del(ctx, key).Result(); err != nil {
+		return  err
 	}
 	return nil
 }
@@ -81,6 +83,5 @@ func (r *redisClient) GetMessage(ctx context.Context, key string) (*entities.Que
 	if err := jsoniter.Unmarshal([]byte(result), q); err != nil {
 		return  nil, err
 	}	
-
 	return q, nil
 }
