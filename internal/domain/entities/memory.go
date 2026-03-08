@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"dominus-project/internal/domain/enum"
 	"slices"
 	"sync"
 )
@@ -41,7 +42,7 @@ func (m *memory) Delete(id string) string {
 		m.idList = slices.Delete(m.idList, pos, pos+1)
 		return id
 	}
-	return ""
+	return enum.EMPTY_STRING
 }
 
 func (m *memory) Find(id string) string {
@@ -51,11 +52,11 @@ func (m *memory) Find(id string) string {
 	if ok {
 		return m.idList[pos]
 	}
-	return ""
+	return enum.EMPTY_STRING
 }
 
 func (m *memory) CheckMemory() bool {
 	m.lock.Lock() 
 	defer m.lock.Unlock()
-	return len(m.idList) > 0
+	return len(m.idList) > 0 // true idList is not empty
 }

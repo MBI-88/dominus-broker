@@ -17,4 +17,5 @@ const (
 	MATCH_TOKEN = "failed to match token"
 	NO_HOST_ALLOW = "host not allowed"
 	ALL_KEYS = "*"
+	EMPTY_STRING = ""
 )
