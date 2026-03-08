@@ -29,18 +29,19 @@ type certConfig struct {
 }
 
 type redisConfig struct {
-	PoolSize     int64  `json:"pool_size"`
-	IdleConn     int64  `json:"idle_conn"`
-	MaxRetries   int64  `json:"max_retries"`
-	DialTimeOut  int64  `json:"dial_time_out"`
-	ReadTimeOut  int64  `json:"read_time_out"`
-	WriteTimeOut int64  `json:"write_time_out"`
-	Port         int64  `json:"port"`
-	Db           int64  `json:"db"`
-	Host         string `json:"host"`
-	Password     string `json:"password"`
-	Tls          bool   `json:"tls"`
-	Ssl          bool   `json:"ssl"`
+	PoolSize       int64  `json:"pool_size"`
+	IdleConn       int64  `json:"idle_conn"`
+	MaxRetries     int64  `json:"max_retries"`
+	DialTimeOut    int64  `json:"dial_time_out"`
+	ReadTimeOut    int64  `json:"read_time_out"`
+	WriteTimeOut   int64  `json:"write_time_out"`
+	Port           int64  `json:"port"`
+	Db             int64  `json:"db"`
+	ExpirationTime int64  `json:"expiration_time"`
+	Host           string `json:"host"`
+	Password       string `json:"password"`
+	Username       string `json:"username"`
+	Tls            bool   `json:"tls"`
 }
 
 type sqsConfig struct {

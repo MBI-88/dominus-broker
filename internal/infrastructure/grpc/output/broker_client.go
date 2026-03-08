@@ -13,19 +13,19 @@ import (
 	"google.golang.org/grpc"
 )
 
-type grpcClient struct {
+type brokerClient struct {
 	opts []grpc.DialOption
 	lgs  adapters.Logs
 }
 
 func NewGrpClient(opts []grpc.DialOption, lgs adapters.Logs) adapters.BrokerClient {
-	return &grpcClient{
+	return &brokerClient{
 		opts: opts,
 		lgs:  lgs,
 	}
 }
 
-func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
+func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
 	lock := new(sync.Mutex)
 	connect := func(url string) (pb.API_ClientStreamClient, error) {
@@ -75,7 +75,7 @@ func (g *grpcClient) ClientStream(urls []string, msg <-chan []byte, ctx context.
 	}
 }
 
-func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, ctx context.Context, tx chan<- struct{}) {
+func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, ctx context.Context, tx chan<- struct{}) {
 	for _, url := range urls {
 		go func(url string) {
 			conn, _ := grpc.NewClient(url, g.opts...)
@@ -117,7 +117,7 @@ func (g *grpcClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []
 	}
 }
 
-func (g *grpcClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
+func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
 	lock := new(sync.Mutex)
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
 

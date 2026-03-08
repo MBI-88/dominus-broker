@@ -99,7 +99,7 @@ func gRPServer(
 
 	// Interactors
 	brk := broker.NewBroker(logs, bclient)
-	quk := queue.NewQueue(logs, nil, nil) 
+	quk := queue.NewQueue(logs, nil) 
 
 	// API
 	srGRP := gi.NewGrpcAPI(optsS, brk, quk, logs)

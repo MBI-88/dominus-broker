@@ -8,4 +8,6 @@ const (
 	ERROR     = "error"
 	LOGCLIENT = "logclient"
 	XapiKey  = "x-api-key"
+	DescriptionMessag = "Message deleted successful"
+	OK = 0
 )

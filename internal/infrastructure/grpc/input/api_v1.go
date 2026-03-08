@@ -4,9 +4,9 @@ import (
 	"context"
 	"dominus-project/internal/domain/adapters"
 	"dominus-project/internal/domain/enum"
+	"dominus-project/internal/infrastructure/grpc/dto"
 	"dominus-project/internal/orchestrators/broker"
 	"dominus-project/internal/orchestrators/queue"
-	"dominus-project/internal/infrastructure/grpc/dto"
 	"fmt"
 	"io"
 
@@ -16,6 +16,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type grpcController struct {
@@ -38,19 +39,36 @@ func (s *grpcController) Provider(ctx context.Context, ms *pb.ProviderRequest) (
 	go s.log.WriteLog(ctx, enum.DEBUG, "Provider", "request accepted")
 	if err := s.q.Provider(ctx, ms); err != nil {
 		go s.log.WriteLog(ctx, enum.ERROR, "Provider", err.Error())
-		return nil, status.Error(codes.InvalidArgument, fmt.Sprintf("%s", err))
+		return nil, status.Error(codes.Aborted, err.Error())
 	}
-	return &pb.ProviderResponse{Status: 0}, nil
+	return &pb.ProviderResponse{Status: enum.OK}, nil
 }
 
 func (s *grpcController) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "Consumer", "request accepted")
-	return &pb.ConsumerResponse{}, nil
+	response, err := s.q.Consumer(ctx)
+	if err != nil {
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", err.Error())
+		return nil, status.Error(codes.Aborted, err.Error())
+	}
+	return &pb.ConsumerResponse{
+		Id:      response.ID.String(),
+		Message: response.Message,
+		Hidden:  response.Hidden,
+		Date:    timestamppb.New(response.CreatedAt),
+	}, nil
 }
 
 func (s *grpcController) ConsumerDLT(ctx context.Context, ms *pb.ConsumerDeleteRequest) (*pb.ConsumerDeleteResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "ConsumerDLT", "request accepted")
-	return &pb.ConsumerDeleteResponse{}, nil
+	if err := s.q.ConsumerDLT(ctx, ms); err != nil {
+		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", err.Error())
+		return nil, status.Error(codes.Aborted, err.Error())
+	}
+	return &pb.ConsumerDeleteResponse{
+		Status: enum.OK,
+		Description: enum.DescriptionMessag,
+	}, nil
 }
 
 // Receives array messages from client
@@ -60,10 +78,10 @@ func (s *grpcController) ClientStream(stream pb.API_ClientStreamServer) error {
 	err := s.br.StreamClientConn(ctx)
 	if err != io.EOF {
 		go s.log.WriteLog(stream.Context(), enum.ERROR, "ClientStream", err.Error())
-		return status.Error(codes.Canceled, fmt.Sprintf("%s", err))
+		return status.Error(codes.Aborted, fmt.Sprintf("%s", err))
 	}
 	return stream.SendAndClose(&pb.StreamResponseMessage{
-		Status: 0,
+		Status: enum.OK,
 	})
 }
 

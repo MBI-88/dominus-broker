@@ -2,9 +2,9 @@ package queue
 
 import (
 	"context"
-	"dominus-project/internal/domain/adapters"
+	"dominus-project/internal/domain/entities"
 )
 
-func (c *queue) Consumer(ctx context.Context ,ms adapters.ConsumerDto) error {
-	return  nil
+func (c *queue) Consumer(ctx context.Context) (*entities.Queue, error) {
+	return  nil, nil
 }
