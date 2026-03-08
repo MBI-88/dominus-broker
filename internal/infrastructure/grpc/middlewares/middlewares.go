@@ -37,26 +37,26 @@ func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
 	ctx = m.logs.CheckID(ctx)
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		go m.logs.WriteLog(ctx, enum.ERROR, "ApiToken", "Not found arguments")
-		return nil, status.Errorf(codes.DataLoss, "not found arguments")
+		go m.logs.WriteLog(ctx, enum.ERROR, "ApiToken", enum.NOT_FOUND)
+		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
 	}
-	token := md.Get(enum.XapiKey)[0]
+	token := md.Get(enum.X_API_KEY)[0]
 	hashedTokenRecived := sha256.Sum256([]byte(token))
 	hashedKey := sha256.Sum256(m.token)
 	if subtle.ConstantTimeCompare(hashedTokenRecived[:], hashedKey[:]) == 0 {
-		go m.logs.WriteLog(ctx, enum.ERROR, "ApiToken", "Failed to match token")
-		return nil, status.Errorf(codes.Unauthenticated, "failed to match token")
+		go m.logs.WriteLog(ctx, enum.ERROR, "ApiToken", enum.MATCH_TOKEN)
+		return nil, status.Errorf(codes.Unauthenticated, enum.MATCH_TOKEN)
 	}
 	return ctx, nil
 }
 
 func (m *middlewares) UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	m.logs.WriteLog(ctx, enum.DEBUG, info.FullMethod, "Called")
+	go m.logs.WriteLog(ctx, enum.DEBUG, info.FullMethod, enum.DEBUG_DESCRIPTION)
 	return handler(ctx, req)
 }
 
 func (m *middlewares) StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	m.logs.WriteLog(ss.Context(), enum.DEBUG ,info.FullMethod, "Called")
+	go m.logs.WriteLog(ss.Context(), enum.DEBUG ,info.FullMethod, enum.DEBUG_DESCRIPTION)
 	return handler(srv, ss)
 }
 

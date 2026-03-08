@@ -18,7 +18,7 @@ func (b *broker) StreamBiConn(stream adapters.BrokerBidirectionalDto) error {
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamBiConn", "Subscirbers not found")
+		go b.lg.WriteLog(ctx, enum.ERROR, "StreamBiConn", enum.SUBCRIBER_NOT_FOUND)
 		return fmt.Errorf("subscribers not found")
 	}
 	total := len(subscribers)

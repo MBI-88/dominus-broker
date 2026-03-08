@@ -18,7 +18,7 @@ func (b *broker) StreamClientConn(st adapters.BrokerClientDto) error {
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamClientConn", "Subscribers not found")
+		go b.lg.WriteLog(ctx, enum.ERROR, "StreamClientConn", enum.SUBCRIBER_NOT_FOUND)
 		return fmt.Errorf("subscribers not found")
 	}
 

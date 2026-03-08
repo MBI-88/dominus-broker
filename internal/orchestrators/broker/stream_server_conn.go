@@ -12,7 +12,7 @@ func (b *broker) StreamServerConn(req adapters.BrokerRequestDto, st adapters.Bro
 	defer cancel()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamServerConn", "Subscribers not found")
+		go b.lg.WriteLog(ctx, enum.ERROR, "StreamServerConn", enum.SUBCRIBER_NOT_FOUND)
 		return fmt.Errorf("subscribers not found")
 	}
 	total := len(subscribers)

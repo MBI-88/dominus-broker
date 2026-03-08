@@ -31,12 +31,12 @@ func (a *apMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	if strings.HasPrefix(path, "/swagger") {
 		return nil
 	}
-	token := ctx.Request.Header.Peek(enum.XapiKey)
+	token := ctx.Request.Header.Peek(enum.X_API_KEY)
 	hashedToken := sha256.Sum256(token)
 	hashedKey := sha256.Sum256(a.token)
 	if subtle.ConstantTimeCompare(hashedKey[:], hashedToken[:]) == 0 {
-		go a.log.WriteLog(ctx, enum.ERROR, "CheckMiddleware", "Invalid token")
-		return fmt.Errorf("invalid token")
+		go a.log.WriteLog(ctx, enum.ERROR, "CheckMiddleware", enum.MATCH_TOKEN)
+		return fmt.Errorf(enum.MATCH_TOKEN)
 	}
 	return nil
 }

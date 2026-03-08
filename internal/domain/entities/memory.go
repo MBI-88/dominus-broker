@@ -3,15 +3,14 @@ package entities
 import (
 	"slices"
 	"sync"
-
-	"github.com/google/uuid"
 )
 
 // Referency to ids
 type Memory interface {
-	Set(id uuid.UUID) string
-	Delete(id uuid.UUID) string
-	Find(id uuid.UUID) string
+	Set(id string) string
+	Delete(id string) string
+	Find(id string) string
+	CheckMemory() bool
 }
 
 type memory struct {
@@ -26,31 +25,37 @@ func NewMemory() Memory {
 	}
 }
 
-func (m *memory) Set(id uuid.UUID) string {
+func (m *memory) Set(id string) string {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	m.idList = append(m.idList, id.String())
-	return id.String()
+	m.idList = append(m.idList, id)
+	return id
 }
 
-func (m *memory) Delete(id uuid.UUID) string {
+func (m *memory) Delete(id string) string {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	pos, ok := slices.BinarySearch(m.idList, id.String())
+	pos, ok := slices.BinarySearch(m.idList, id)
 	if ok {
 		m.idList = slices.Delete(m.idList, pos, pos+1)
-		return id.String()
+		return id
 	}
 	return ""
 }
 
-func (m *memory) Find(id uuid.UUID) string {
+func (m *memory) Find(id string) string {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	pos, ok := slices.BinarySearch(m.idList, id.String())
+	pos, ok := slices.BinarySearch(m.idList, id)
 	if ok {
 		return m.idList[pos]
 	}
 	return ""
+}
+
+func (m *memory) CheckMemory() bool {
+	m.lock.Lock() 
+	defer m.lock.Unlock()
+	return len(m.idList) > 0
 }

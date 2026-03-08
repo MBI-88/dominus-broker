@@ -30,16 +30,16 @@ func NewInterceptor(token string, log adapters.Logs) Interceptor {
 
 func (i *interceptor) UnaryAuthInterceptor(ctx context.Context, method string, req, reply any, cc *grpc.ClientConn,
 	invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	ctx = metadata.AppendToOutgoingContext(ctx, enum.XapiKey, i.apiToken)
-	go i.log.WriteLog(ctx, enum.DEBUG, "UnaryAuthInterceptor", "debuging")
+	ctx = metadata.AppendToOutgoingContext(ctx, enum.X_API_KEY, i.apiToken)
+	go i.log.WriteLog(ctx, enum.DEBUG, "UnaryAuthInterceptor", enum.DEBUG_DESCRIPTION)
 	return invoker(ctx, method, req, reply, cc, opts...)
 }
 
 func (i *interceptor) StreamAuthInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string,
 	streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
-	ctx = metadata.AppendToOutgoingContext(ctx, enum.XapiKey, i.apiToken)
+	ctx = metadata.AppendToOutgoingContext(ctx, enum.X_API_KEY, i.apiToken)
 	s, err := streamer(ctx, desc, cc, method, opts...)
-	go i.log.WriteLog(ctx, enum.DEBUG, "StreamAuthInterceptor", err.Error())
+	go i.log.WriteLog(ctx, enum.DEBUG, "StreamAuthInterceptor", enum.DEBUG_DESCRIPTION)
 	if err != nil {
 		go i.log.WriteLog(ctx, enum.ERROR, "StreamAuthInterceptor", err.Error())
 		return nil, err

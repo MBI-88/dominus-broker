@@ -35,6 +35,7 @@ type redisConfig struct {
 	DialTimeOut    int64  `json:"dial_time_out"`
 	ReadTimeOut    int64  `json:"read_time_out"`
 	WriteTimeOut   int64  `json:"write_time_out"`
+	BatchSize      int64  `json:"batch_size"`
 	Port           int64  `json:"port"`
 	Db             int64  `json:"db"`
 	ExpirationTime int64  `json:"expiration_time"`
