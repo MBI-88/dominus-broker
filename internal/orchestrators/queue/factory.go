@@ -7,9 +7,10 @@ import (
 )
 
 type Queue interface {
-	Provider(ctx context.Context, ms adapters.ProviderDto) error 
+	Producer(ctx context.Context, ms adapters.ProducerDto) error 
 	Consumer(ctx context.Context) (*entities.Queue, error)
 	ConsumerDLT(ctx context.Context, ms adapters.ConsumerDto) error
+	CheckMemory()
 }
 
 type queue struct {

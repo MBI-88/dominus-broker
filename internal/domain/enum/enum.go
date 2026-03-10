@@ -18,4 +18,7 @@ const (
 	NO_HOST_ALLOW = "host not allowed"
 	ALL_KEYS = "*"
 	EMPTY_STRING = ""
+	DOMAIN = "dominus.com"
+	ROUTER_CLIENT = `{"loadBalancingConfig":[{"round_robin":{}}]}`
+	PROJECT_NAME = "Dominus"
 )

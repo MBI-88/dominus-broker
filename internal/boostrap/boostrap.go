@@ -5,6 +5,8 @@ import (
 	"dominus-project/config"
 	"dominus-project/docs"
 	"dominus-project/internal/domain/adapters"
+	"dominus-project/internal/domain/entities"
+	"dominus-project/internal/domain/enum"
 	"dominus-project/internal/orchestrators/broker"
 	"dominus-project/internal/orchestrators/queue"
 
@@ -14,6 +16,7 @@ import (
 	gi "dominus-project/internal/infrastructure/grpc/input"
 	gm "dominus-project/internal/infrastructure/grpc/middlewares"
 	gt "dominus-project/internal/infrastructure/grpc/output"
+	redisclient "dominus-project/internal/infrastructure/providers/redis_client"
 	"fmt"
 	"log"
 	"net"
@@ -34,8 +37,41 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 )
 
+func providers(cf *config.Config, lgs adapters.Logs) adapters.MemoryClient {
+	prv := cf.ProviderConfig
+	var cli adapters.MemoryClient
+
+	if prv.RedisConfig != nil {
+		cli = redisclient.NewRedisClient(
+			prv.RedisConfig.PoolSize, 
+			prv.RedisConfig.IdleConn, 
+			prv.RedisConfig.MaxRetries, 
+			prv.RedisConfig.DialTimeOut, 
+			prv.RedisConfig.ReadTimeOut, 
+			prv.RedisConfig.WriteTimeOut, 
+			prv.RedisConfig.Port, 
+			prv.RedisConfig.Db, 
+			prv.RedisConfig.Host, 
+			prv.RedisConfig.Password, 
+			prv.RedisConfig.Tls, 
+			prv.RedisConfig.Username, 
+			prv.RedisConfig.ExpirationTime, 
+			prv.RedisConfig.BatchSize, 
+			lgs,
+		)
+	}else if prv.SqsConfig != nil {
+
+	}
+
+	if cli == nil {
+		panic("not provider selected")
+	}
+
+	return cli
+}
+
 func gRPServer(
-	cf config.Config,
+	cf *config.Config,
 	logs adapters.Logs,
 	errC,
 	errK,
@@ -60,7 +96,7 @@ func gRPServer(
 		}
 		optsS = append(optsS, grpc.Creds(credsS))
 
-		credsD, err := credentials.NewClientTLSFromFile(cf.CertConfig.SslCaCert, "dominus.com")
+		credsD, err := credentials.NewClientTLSFromFile(cf.CertConfig.SslCaCert, enum.DOMAIN)
 		if err != nil {
 			cancel()
 			panic(err)
@@ -91,15 +127,23 @@ func gRPServer(
 		grpc.WithUnaryInterceptor(midGc.UnaryAuthInterceptor),
 		grpc.WithStreamInterceptor(midGc.StreamAuthInterceptor),
 		grpc.WithDefaultCallOptions(grpc.UseCompressor(gzip.Name)),
-		grpc.WithDefaultServiceConfig(`{"loadBalancingConfig":[{"round_robin":{}}]}`),
+		grpc.WithDefaultServiceConfig(enum.ROUTER_CLIENT),
 	)
 
+	// Entities
+	memory := entities.NewMemory()
+
+	// Clients
 	bclient := gt.NewGrpClient(optsD, logs)
-	//qclient :=  add client implementation
+	qclient :=  providers(cf, logs)
 
 	// Interactors
 	brk := broker.NewBroker(logs, bclient)
-	quk := queue.NewQueue(logs, nil, nil) 
+	quk := queue.NewQueue(logs, qclient, memory) 
+
+
+	// Checking current data in memory (redis case)
+	quk.CheckMemory()
 
 	// API
 	srGRP := gi.NewGrpcAPI(optsS, brk, quk, logs)
@@ -120,7 +164,7 @@ func gRPServer(
 
 func restServer(
 	reg *prometheus.Registry,
-	cf config.Config,
+	cf *config.Config,
 	logs adapters.Logs,
 	cancel context.CancelFunc,
 	errC error,
@@ -139,8 +183,8 @@ func restServer(
 
 	r := fasthttp.Server{
 		Handler:                      midF.Middlewares(router.Handler),
-		Name:                         "dominus-project",
-		MaxRequestBodySize:           1000,
+		Name:                         enum.PROJECT_NAME,
+		MaxRequestBodySize:           100,
 		ReduceMemoryUsage:            true,
 		DisablePreParseMultipartForm: true,
 		KeepHijackedConns:            true,

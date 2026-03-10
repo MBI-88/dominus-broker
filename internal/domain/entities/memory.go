@@ -8,7 +8,7 @@ import (
 
 // Referency to ids
 type Memory interface {
-	Set(id string) string
+	Set(id string) 
 	Delete(id string) string
 	Find(id string) string
 	CheckMemory() bool
@@ -26,11 +26,10 @@ func NewMemory() Memory {
 	}
 }
 
-func (m *memory) Set(id string) string {
+func (m *memory) Set(id string)  {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	m.idList = append(m.idList, id)
-	return id
 }
 
 func (m *memory) Delete(id string) string {

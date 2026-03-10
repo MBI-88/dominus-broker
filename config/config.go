@@ -38,7 +38,7 @@ type redisConfig struct {
 	BatchSize      int64  `json:"batch_size"`
 	Port           int64  `json:"port"`
 	Db             int64  `json:"db"`
-	ExpirationTime int64  `json:"expiration_time"`
+	ExpirationTime int    `json:"expiration_time"`
 	Host           string `json:"host"`
 	Password       string `json:"password"`
 	Username       string `json:"username"`
@@ -58,8 +58,8 @@ type sqsConfig struct {
 }
 
 type providerConfig struct {
-	RedisConfig redisConfig `json:"redis_config"`
-	SqsConfig   sqsConfig   `json:"sqs_config"`
+	RedisConfig *redisConfig `json:"redis_config"`
+	SqsConfig   *sqsConfig   `json:"sqs_config"`
 }
 
 type infraConfig struct {
@@ -69,16 +69,16 @@ type infraConfig struct {
 }
 
 type Config struct {
-	GrpcConfig     grpcConfig     `json:"grpc_config"`
-	RestConfig     restConfig     `json:"rest_config"`
-	CertConfig     certConfig     `json:"cert_config"`
-	ProviderConfig providerConfig `json:"provider_config"`
-	InfraConfig    infraConfig    `json:"infra_config"`
+	GrpcConfig     *grpcConfig     `json:"grpc_config"`
+	RestConfig     *restConfig     `json:"rest_config"`
+	CertConfig     *certConfig     `json:"cert_config"`
+	ProviderConfig *providerConfig `json:"provider_config"`
+	InfraConfig    *infraConfig    `json:"infra_config"`
 }
 
-func NewConfig(prod bool) Config {
+func NewConfig(prod bool) *Config {
 	var (
-		cf Config
+		cf *Config
 	)
 
 	if prod {
@@ -95,7 +95,7 @@ func NewConfig(prod bool) Config {
 				panic("[-] File not found!")
 			}
 		}
-		if err := viper.Unmarshal(&cf); err != nil {
+		if err := viper.Unmarshal(cf); err != nil {
 			panic(err)
 		}
 	}

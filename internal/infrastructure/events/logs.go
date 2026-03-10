@@ -57,10 +57,10 @@ func (l *logs) CheckID(ctx context.Context) context.Context {
 
 func (l *logs) typeLog(level string, message []byte) {
 	switch l.mode {
-		case enum.LOGCLIENT:
-			l.clientLog(level, message)
-		default:
-			l.cmdLog(level, message)
+	case enum.LOGCLIENT:
+		l.clientLog(level, message)
+	default:
+		l.cmdLog(level, message)
 	}
 }
 
@@ -68,7 +68,7 @@ func (l *logs) clientLog(level string, message []byte) {
 
 }
 
-func (l *logs) cmdLog(level string, message []byte ) {
+func (l *logs) cmdLog(level string, message []byte) {
 	switch level {
 	case enum.INFO:
 		if l.devMod {

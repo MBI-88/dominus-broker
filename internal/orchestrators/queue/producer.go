@@ -5,6 +5,6 @@ import (
 	"dominus-project/internal/domain/adapters"
 )
 
-func (c *queue) Provider(ctx context.Context, ms adapters.ProviderDto) error {
+func (c *queue) Producer(ctx context.Context, ms adapters.ProducerDto) error {
 	return  nil
 }

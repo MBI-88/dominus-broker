@@ -35,13 +35,13 @@ func NewGrpcAPI(opts []grpc.ServerOption, br broker.Broker, q queue.Queue, log a
 }
 
 // Receives simple messages from client
-func (s *grpcController) Provider(ctx context.Context, ms *pb.ProviderRequest) (*pb.ProviderResponse, error) {
-	go s.log.WriteLog(ctx, enum.DEBUG, "Provider", enum.REQUEST_OK)
-	if err := s.q.Provider(ctx, ms); err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "Provider", err.Error())
+func (s *grpcController) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.ProducerResponse, error) {
+	go s.log.WriteLog(ctx, enum.DEBUG, "Producer", enum.REQUEST_OK)
+	if err := s.q.Producer(ctx, ms); err != nil {
+		go s.log.WriteLog(ctx, enum.ERROR, "Producer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
-	return &pb.ProviderResponse{Status: enum.OK}, nil
+	return &pb.ProducerResponse{Status: enum.OK}, nil
 }
 
 func (s *grpcController) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {

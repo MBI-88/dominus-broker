@@ -5,7 +5,7 @@ import (
 	"dominus-project/internal/domain/entities"
 )
 
-type ProviderDto interface {
+type ProducerDto interface {
 	GetPayload() []byte
 }
 
