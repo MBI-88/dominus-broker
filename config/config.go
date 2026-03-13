@@ -6,12 +6,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-type grpcConfig struct {
+type GrpcConfig struct {
 	GRPCPort      int64  `json:"grpc_port"`
 	ConnectionKey string `json:"connection_key"`
 }
 
-type restConfig struct {
+type RestConfig struct {
 	RestPort     int64  `json:"rest_port"`
 	ApiToken     string `json:"api_token"`
 	AllowOrigins string `json:"allow_origins"`
@@ -22,13 +22,13 @@ type domainConfig struct {
 	QueueLimit int `json:"queue_limit"`
 }
 
-type certConfig struct {
+type CertConfig struct {
 	KeyFile   string `json:"key_file"`
 	SslCaCert string `json:"ssl_ca_cert"`
 	SslCert   string `json:"ssl_cert"`
 }
 
-type redisConfig struct {
+type RedisConfig struct {
 	PoolSize       int64  `json:"pool_size"`
 	IdleConn       int64  `json:"idle_conn"`
 	MaxRetries     int64  `json:"max_retries"`
@@ -37,43 +37,28 @@ type redisConfig struct {
 	WriteTimeOut   int64  `json:"write_time_out"`
 	BatchSize      int64  `json:"batch_size"`
 	Port           int64  `json:"port"`
-	Db             int64  `json:"db"`
+	MemoryDB       int    `json:"memory_db"`
+	CheckerDB      int    `json:"checker_db"`
 	ExpirationTime int    `json:"expiration_time"`
+	IdPotency      int    `json:"id_potency"`
 	Host           string `json:"host"`
 	Password       string `json:"password"`
 	Username       string `json:"username"`
 	Tls            bool   `json:"tls"`
 }
 
-type sqsConfig struct {
-	MaxAttempts     int64  `json:"max_attempts"`
-	Region          string `json:"region"`
-	AccessKeyID     string `json:"access_key_id"`
-	SecretAccessKey string `json:"secret_access_key"`
-	SqsQueueURL     string `json:"sqs_queue_url"`
-	Endpoint        string `json:"endpoint"`
-	RetrieMode      string `json:"retrie_mode"`
-	RoleARN         string `json:"role_arn"`
-	ExternaID       string `json:"external_id"`
-}
-
-type providerConfig struct {
-	RedisConfig *redisConfig `json:"redis_config"`
-	SqsConfig   *sqsConfig   `json:"sqs_config"`
-}
-
-type infraConfig struct {
+type InfraConfig struct {
 	LogMode string `json:"log_mode"`
 	Host    string `json:"host"`
 	LogURL  string `json:"log_url"`
 }
 
 type Config struct {
-	GrpcConfig     *grpcConfig     `json:"grpc_config"`
-	RestConfig     *restConfig     `json:"rest_config"`
-	CertConfig     *certConfig     `json:"cert_config"`
-	ProviderConfig *providerConfig `json:"provider_config"`
-	InfraConfig    *infraConfig    `json:"infra_config"`
+	GrpcConfig  *GrpcConfig  `json:"grpc_config"`
+	RestConfig  *RestConfig  `json:"rest_config"`
+	CertConfig  *CertConfig  `json:"cert_config"`
+	RedisConfig *RedisConfig `json:"redis_config"`
+	InfraConfig *InfraConfig `json:"infra_config"`
 }
 
 func NewConfig(prod bool) *Config {

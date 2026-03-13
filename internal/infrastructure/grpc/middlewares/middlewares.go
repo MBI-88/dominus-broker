@@ -19,17 +19,20 @@ type Middleware interface {
 	LogErrors() logging.Logger
 	UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error)
 	StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
+	IdPotency(ctx context.Context) (context.Context, error)
 }
 
 type middlewares struct {
 	token []byte
 	logs  adapters.Logs
+	ch   adapters.ChckerClient
 }
 
-func NewMiddleware(t string, lg adapters.Logs) Middleware {
+func NewMiddleware(t string, lg adapters.Logs, checker adapters.ChckerClient) Middleware {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,
+		ch: checker,
 	}
 }
 
@@ -76,4 +79,33 @@ func (m *middlewares) LogErrors() logging.Logger {
 		}
 		go m.logs.WriteLog(ctx, l, "LogErrors", msg)
 	})
+}
+
+func (m *middlewares) IdPotency(ctx context.Context) (context.Context, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	go m.logs.WriteLog(ctx, enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION)
+
+	if !ok {
+		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency", enum.NOT_FOUND)
+		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
+	}
+
+	key := md.Get(enum.ID_POTENCY_HEADER)[0]
+	if key == "" {
+		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency", enum.NOT_FOUND)
+		return nil, status.Error(codes.DataLoss, enum.NOT_FOUND)
+	}
+
+	if ok := m.ch.CheckConsumer(ctx, key); ok {
+		go m.logs.WriteLog(ctx, enum.INFO, "CheckConsumer", "id potency found")
+		return nil, status.Error(codes.Aborted, "id potency found")
+	}
+
+	go func(key string) {
+		if err := m.ch.SaveConsumer(ctx, key); err != nil {
+			m.logs.WriteLog(ctx, enum.ERROR, "SaveConsumer", err.Error())
+		}
+	}(key)
+
+	return ctx, nil
 }

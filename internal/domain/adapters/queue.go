@@ -20,3 +20,8 @@ type MemoryClient interface {
 	GetMessage(ctx context.Context, key string) (*entities.Queue, error)
 	GetKeys(ctx context.Context, mem entities.Memory) error
 }
+
+type ChckerClient interface {
+	SaveConsumer(ctx context.Context, key string ) error
+	CheckConsumer(ctx context.Context, key string) bool
+}

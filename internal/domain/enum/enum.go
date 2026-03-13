@@ -21,4 +21,6 @@ const (
 	DOMAIN = "dominus.com"
 	ROUTER_CLIENT = `{"loadBalancingConfig":[{"round_robin":{}}]}`
 	PROJECT_NAME = "Dominus"
+	ID_POTENCY_HEADER = "id-pontency"
+	ID_POTENCY_TAG = "idepotency"
 )

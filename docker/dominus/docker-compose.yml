@@ -1,0 +1,30 @@
+services:
+  dominus:
+    build:
+      context: ./../../
+      dockerfile: Dockerfile
+    container_name: dominus
+
+    develop:
+      watch:
+        - path: .
+          action: rebuild
+
+    ports:
+      - "8000:8000"
+      - "5000:5000"
+    networks:
+      - dominus
+    volumes:
+      - dominus_certs:/etc/dominus/certs:ro
+      - dominus_logs:/var/dominus/logs:rw
+      - ./env:/env:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://127.0.0.1:8000/health"]
+      interval: 1m
+      timeout: 2s
+      retries: 3
+
+volumes:
+  dominus_certs:
+    driver: local

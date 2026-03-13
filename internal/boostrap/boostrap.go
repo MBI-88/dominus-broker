@@ -16,7 +16,8 @@ import (
 	gi "dominus-project/internal/infrastructure/grpc/input"
 	gm "dominus-project/internal/infrastructure/grpc/middlewares"
 	gt "dominus-project/internal/infrastructure/grpc/output"
-	redisclient "dominus-project/internal/infrastructure/providers/redis_client"
+	"dominus-project/internal/infrastructure/providers/cchecker"
+	"dominus-project/internal/infrastructure/providers/cmemory"
 	"fmt"
 	"log"
 	"net"
@@ -37,38 +38,6 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 )
 
-func providers(cf *config.Config, lgs adapters.Logs) adapters.MemoryClient {
-	prv := cf.ProviderConfig
-	var cli adapters.MemoryClient
-
-	if prv.RedisConfig != nil {
-		cli = redisclient.NewRedisClient(
-			prv.RedisConfig.PoolSize, 
-			prv.RedisConfig.IdleConn, 
-			prv.RedisConfig.MaxRetries, 
-			prv.RedisConfig.DialTimeOut, 
-			prv.RedisConfig.ReadTimeOut, 
-			prv.RedisConfig.WriteTimeOut, 
-			prv.RedisConfig.Port, 
-			prv.RedisConfig.Db, 
-			prv.RedisConfig.Host, 
-			prv.RedisConfig.Password, 
-			prv.RedisConfig.Tls, 
-			prv.RedisConfig.Username, 
-			prv.RedisConfig.ExpirationTime, 
-			prv.RedisConfig.BatchSize, 
-			lgs,
-		)
-	}else if prv.SqsConfig != nil {
-
-	}
-
-	if cli == nil {
-		panic("not provider selected")
-	}
-
-	return cli
-}
 
 func gRPServer(
 	cf *config.Config,
@@ -85,7 +54,24 @@ func gRPServer(
 		optsD []grpc.DialOption
 	)
 
-	midGs := gm.NewMiddleware(cf.GrpcConfig.ConnectionKey, logs)
+	checker := cchecker.NewCheckerClient(
+		cf.RedisConfig.PoolSize,
+		cf.RedisConfig.IdleConn,
+		cf.RedisConfig.MaxRetries,
+		cf.RedisConfig.DialTimeOut,
+		cf.RedisConfig.ReadTimeOut,
+		cf.RedisConfig.WriteTimeOut,
+		cf.RedisConfig.Port,
+		cf.RedisConfig.CheckerDB,
+		cf.RedisConfig.Host,
+		cf.RedisConfig.Password,
+		cf.RedisConfig.Tls,
+		cf.RedisConfig.Username,
+		cf.RedisConfig.IdPotency,
+		cf.RedisConfig.BatchSize,
+	)
+
+	midGs := gm.NewMiddleware(cf.GrpcConfig.ConnectionKey, logs, checker)
 	midGc := gm.NewInterceptor(cf.GrpcConfig.ConnectionKey, logs)
 
 	if errC == nil && errK == nil && errCa == nil {
@@ -110,6 +96,7 @@ func gRPServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
 			auth.UnaryServerInterceptor(midGs.ApiToken),
+			auth.UnaryServerInterceptor(midGs.IdPotency),
 			metricserver.UnaryServerInterceptor(),
 			logging.UnaryServerInterceptor(midGs.LogErrors()),
 		),
@@ -135,12 +122,27 @@ func gRPServer(
 
 	// Clients
 	bclient := gt.NewGrpClient(optsD, logs)
-	qclient :=  providers(cf, logs)
+	qclient := cmemory.NewMemoryClient(
+		cf.RedisConfig.PoolSize,
+		cf.RedisConfig.IdleConn,
+		cf.RedisConfig.MaxRetries,
+		cf.RedisConfig.DialTimeOut,
+		cf.RedisConfig.ReadTimeOut,
+		cf.RedisConfig.WriteTimeOut,
+		cf.RedisConfig.Port,
+		cf.RedisConfig.MemoryDB,
+		cf.RedisConfig.Host,
+		cf.RedisConfig.Password,
+		cf.RedisConfig.Tls,
+		cf.RedisConfig.Username,
+		cf.RedisConfig.ExpirationTime,
+		cf.RedisConfig.BatchSize,
+		logs,
+	)
 
 	// Interactors
 	brk := broker.NewBroker(logs, bclient)
-	quk := queue.NewQueue(logs, qclient, memory) 
-
+	quk := queue.NewQueue(logs, qclient, memory)
 
 	// Checking current data in memory (redis case)
 	quk.CheckMemory()

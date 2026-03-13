@@ -1,4 +1,4 @@
-package redisclient
+package cmemory
 
 import (
 	"context"
@@ -13,14 +13,14 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-type redisClient struct {
+type memory struct {
 	rdb       *redis.Client
 	exp       int
 	lg        adapters.Logs
 	batchSize int64
 }
 
-func NewRedisClient(
+func NewMemoryClient(
 	PoolSize int64,
 	IdleConn int64,
 	MaxRetries int64,
@@ -28,7 +28,7 @@ func NewRedisClient(
 	ReadTimeOut int64,
 	WriteTimeOut int64,
 	Port int64,
-	Db int64,
+	Db int,
 	Host string,
 	Password string,
 	Tls bool,
@@ -53,7 +53,7 @@ func NewRedisClient(
 		DialTimeout:  time.Duration(DialTimeOut),
 		ReadTimeout:  time.Duration(ReadTimeOut),
 		WriteTimeout: time.Duration(WriteTimeOut),
-		DB:           int(Db),
+		DB:           Db,
 		Addr:         fmt.Sprintf("%s:%d", Host, Port),
 		Password:     Password,
 		TLSConfig:    cfTls,
@@ -63,7 +63,7 @@ func NewRedisClient(
 	if _, err := client.Ping(context.Background()).Result(); err != nil {
 		panic(err)
 	}
-	return &redisClient{
+	return &memory{
 		rdb:       client,
 		exp:       ExpirationTime,
 		lg:        lg,
@@ -71,60 +71,60 @@ func NewRedisClient(
 	}
 }
 
-func (r *redisClient) SendMessage(ctx context.Context, q *entities.Queue) error {
-	go r.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
-	if _, err := r.rdb.Set(ctx, q.ID.String(), q, time.Duration(r.exp)*time.Hour).Result(); err != nil {
-		go r.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
+func (m *memory) SendMessage(ctx context.Context, q *entities.Queue) error {
+	go m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
+	if _, err := m.rdb.Set(ctx, q.ID.String(), q, time.Duration(m.exp)*time.Hour).Result(); err != nil {
+		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (r *redisClient) DeleteMessage(ctx context.Context, key string) error {
-	go r.lg.WriteLog(ctx, enum.DEBUG, "DeleteMessage", enum.DEBUG_DESCRIPTION)
-	if _, err := r.rdb.Del(ctx, key).Result(); err != nil {
-		go r.lg.WriteLog(ctx, enum.ERROR, "DeleteMessage", err.Error())
+func (m *memory) DeleteMessage(ctx context.Context, key string) error {
+	go m.lg.WriteLog(ctx, enum.DEBUG, "DeleteMessage", enum.DEBUG_DESCRIPTION)
+	if _, err := m.rdb.Del(ctx, key).Result(); err != nil {
+		go m.lg.WriteLog(ctx, enum.ERROR, "DeleteMessage", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (r *redisClient) GetMessage(ctx context.Context, key string) (*entities.Queue, error) {
-	go r.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
-	result, err := r.rdb.Get(ctx, key).Result()
+func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Queue, error) {
+	go m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
+	result, err := m.rdb.Get(ctx, key).Result()
 	if err != nil {
-		go r.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
+		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
 		return nil, redis.ErrClosed
 	}
 
 	var q *entities.Queue
 	if err := jsoniter.Unmarshal([]byte(result), q); err != nil {
-		go r.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
+		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
 		return nil, err
 	}
 	return q, nil
 }
 
-func (r *redisClient) GetKeys(ctx context.Context, mem entities.Memory) error {
-	go r.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
+func (m *memory) GetKeys(ctx context.Context, mem entities.Memory) error {
+	go m.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
 
 	var cursor uint64
 	for {
-		keys, nextCursor, error := r.rdb.Scan(ctx, cursor, enum.ALL_KEYS, r.batchSize).Result()
+		keys, nextCursor, error := m.rdb.Scan(ctx, cursor, enum.ALL_KEYS, m.batchSize).Result()
 		if error != nil {
-			go r.lg.WriteLog(ctx, enum.ERROR, "GetKeys", error.Error())
+			go m.lg.WriteLog(ctx, enum.ERROR, "GetKeys", error.Error())
 			return error
 		}
 
 		for _, key := range keys {
-			go r.lg.WriteLog(ctx, enum.INFO, "GetKeys", key)
+			go m.lg.WriteLog(ctx, enum.INFO, "GetKeys", key)
 			mem.Set(key)
 		}
 
 		cursor = nextCursor
 
 		if cursor == 0 {
-			go r.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
+			go m.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
 			break
 		}
 	}
