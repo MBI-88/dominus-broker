@@ -1,8 +1,8 @@
 package env
 
 import (
-	"dominus-project/internal/domain/adapters"
-	"fmt"
+	"context"
+	"dominus-project/internal/domain/repositories"
 	"log"
 )
 
@@ -10,25 +10,17 @@ type eventMock struct {
 	statusFlag bool
 }
 
-func NewEventMock(status bool) adapters.Logs {
+func NewEventMock(status bool) repositories.Logs {
 	return &eventMock{
 		statusFlag: status,
 	}
 }
 
-func (*eventMock) WriteLog(op, dsc string) {
+func (*eventMock) CheckID(ctx context.Context) context.Context {
+	return  ctx
+}
+
+func (*eventMock) WriteLog(ctx context.Context, level, op, dsc string) {
 	log.Println(op, " ", dsc)
 }
-
-func (*eventMock) Printf(format string, args ...any) {
-	log.Println(format, " ", args)
-}
-
-func (ev *eventMock) GetLogs() ([]string, error) {
-	if ev.statusFlag {
-		return make([]string, 10), nil
-	}
-	return nil, fmt.Errorf("[-] Error response")
-}
-
 

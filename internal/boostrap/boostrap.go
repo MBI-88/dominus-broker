@@ -4,20 +4,21 @@ import (
 	"context"
 	"dominus-project/config"
 	"dominus-project/docs"
-	"dominus-project/internal/domain/adapters"
+
+	"dominus-project/internal/application/use_cases/broker"
+	"dominus-project/internal/application/use_cases/queue"
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/enum"
-	"dominus-project/internal/orchestrators/broker"
-	"dominus-project/internal/orchestrators/queue"
+	"dominus-project/internal/domain/repositories"
 
-	"dominus-project/internal/infrastructure/events"
-	fi "dominus-project/internal/infrastructure/fasthttp/input"
-	fm "dominus-project/internal/infrastructure/fasthttp/middlewares"
-	gi "dominus-project/internal/infrastructure/grpc/input"
-	gm "dominus-project/internal/infrastructure/grpc/middlewares"
-	gt "dominus-project/internal/infrastructure/grpc/output"
-	"dominus-project/internal/infrastructure/providers/cchecker"
-	"dominus-project/internal/infrastructure/providers/cmemory"
+	fi "dominus-project/internal/adapters/fasthttp/inbound"
+	fm "dominus-project/internal/adapters/fasthttp/middlewares"
+	gi "dominus-project/internal/adapters/grpc/inbound"
+	gm "dominus-project/internal/adapters/grpc/middlewares"
+	gt "dominus-project/internal/adapters/grpc/outbound"
+	"dominus-project/internal/adapters/trace"
+	"dominus-project/internal/adapters/redis/cchecker"
+	"dominus-project/internal/adapters/redis/cmemory"
 	"fmt"
 	"log"
 	"net"
@@ -38,10 +39,9 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 )
 
-
 func gRPServer(
 	cf *config.Config,
-	logs adapters.Logs,
+	logs repositories.Logs,
 	errC,
 	errK,
 	errCa error,
@@ -167,7 +167,7 @@ func gRPServer(
 func restServer(
 	reg *prometheus.Registry,
 	cf *config.Config,
-	logs adapters.Logs,
+	logs repositories.Logs,
 	cancel context.CancelFunc,
 	errC error,
 	errK error,
@@ -230,7 +230,7 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//Instances
 	cf := config.NewConfig(*mode)
 
-	logs := events.NewLogs(cf.InfraConfig.LogMode, cf.InfraConfig.LogURL, *mode)
+	lgs := trace.NewLog(cf.InfraConfig.LogMode, cf.InfraConfig.LogURL, *mode)
 	docs.SwaggerInfo.Host = cf.InfraConfig.Host
 
 	// Signals
@@ -256,13 +256,13 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//***********Rest Server****************
 	//**************************************
 
-	r := restServer(reg, cf, logs, cancel, errC, errK)
+	r := restServer(reg, cf, lgs, cancel, errC, errK)
 
 	//********************************
 	//*********Grpc server************
 	//********************************
 
-	srG := gRPServer(cf, logs, errC, errK, errCa, cancel, metricserver, metricclient)
+	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
 	if srG == nil {
 		panic("GRPC server error")
 	}

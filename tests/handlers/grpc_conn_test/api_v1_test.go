@@ -2,9 +2,9 @@ package grpcconn_test
 
 import (
 	"context"
-	"dominus-project/internal/domain/adapters"
-	"dominus-project/internal/infrastructure/grpc/input"
-	"dominus-project/internal/infrastructure/grpc/output"
+	
+	"dominus-project/internal/adapters/grpc/inbound"
+	"dominus-project/internal/adapters/grpc/outbound"
 	"dominus-project/mocks"
 	"fmt"
 	"log"
@@ -49,8 +49,8 @@ func TestSimple(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
+		client := outbound.NewGrpClient(opts, logMock)
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
