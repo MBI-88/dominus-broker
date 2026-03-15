@@ -1,4 +1,4 @@
-package input
+package inbound
 
 import (
 	"dominus-project/internal/domain/repositories"

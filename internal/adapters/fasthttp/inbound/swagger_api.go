@@ -1,4 +1,4 @@
-package input
+package inbound
 
 import (
 	"github.com/fasthttp/router"

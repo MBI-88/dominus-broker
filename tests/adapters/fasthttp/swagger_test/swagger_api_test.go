@@ -1,7 +1,7 @@
 package swagger_test
 
 import (
-	"dominus-project/internal/infrastructure/fasthttp/input"
+	"dominus-project/internal/adapters/fasthttp/inbound"
 	"testing"
 
 	"github.com/fasthttp/router"
@@ -11,7 +11,7 @@ import (
 func TestSwaggerController(t *testing.T) {
 	t.Run("Swagger_Ok", func(t *testing.T) {
 		router := router.New()
-		input.NewSwaggerAPI(router)
+		inbound.NewSwaggerAPI(router)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/swagger/index.html")
 		router.Handler(ctx)
@@ -24,7 +24,7 @@ func TestSwaggerController(t *testing.T) {
 
 	t.Run("Swagger_Error", func(t *testing.T) {
 		router := router.New()
-		input.NewSwaggerAPI(router)
+		inbound.NewSwaggerAPI(router)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/swagger/")
 		router.Handler(ctx)

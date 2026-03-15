@@ -1,7 +1,7 @@
 package monitor_test
 
 import (
-	"dominus-project/internal/infrastructure/fasthttp/input"
+	"dominus-project/internal/adapters/fasthttp/inbound"
 	"dominus-project/mocks"
 	"testing"
 
@@ -17,7 +17,7 @@ func TestMonitorController(t *testing.T) {
 		reg := prometheus.NewRegistry()
 		crtl := gomock.NewController(t)
 		lockMock := mocks.NewMockLogs(crtl)
-		input.NewMonitorAPI(router, reg, lockMock)
+		inbound.NewMonitorAPI(router, reg, lockMock)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/metrics")
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
@@ -33,7 +33,7 @@ func TestMonitorController(t *testing.T) {
 		reg := prometheus.NewRegistry()
 		crtl := gomock.NewController(t)
 		lockMock := mocks.NewMockLogs(crtl)
-		input.NewMonitorAPI(router, reg,lockMock)
+		inbound.NewMonitorAPI(router, reg,lockMock)
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/health")
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)

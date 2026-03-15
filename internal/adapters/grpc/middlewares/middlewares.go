@@ -25,10 +25,10 @@ type Middleware interface {
 type middlewares struct {
 	token []byte
 	logs  repositories.Logs
-	ch   repositories.ChckerClient
+	ch   repositories.CheckerClient
 }
 
-func NewMiddleware(t string, lg repositories.Logs, checker repositories.ChckerClient) Middleware {
+func NewMiddleware(t string, lg repositories.Logs, checker repositories.CheckerClient) Middleware {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,

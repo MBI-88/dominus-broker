@@ -31,7 +31,7 @@ func NewCheckerClient(
 	Username string,
 	ExpirationTime int,
 	BatchSize int64,
-) repositories.ChckerClient {
+) repositories.CheckerClient {
 
 	var cfTls *tls.Config
 

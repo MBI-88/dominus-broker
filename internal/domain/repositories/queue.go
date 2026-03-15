@@ -13,7 +13,7 @@ type MemoryClient interface {
 	GetKeys(ctx context.Context, mem entities.Memory) error
 }
 
-type ChckerClient interface {
+type CheckerClient interface {
 	SaveConsumer(ctx context.Context, key string ) error
 	CheckConsumer(ctx context.Context, key string) bool
 }
