@@ -13,12 +13,10 @@ type Broker interface {
 
 type broker struct {
 	client repositories.BrokerClient
-	lg     repositories.Logs
 }
 
-func NewBroker(lclient repositories.Logs, gclient repositories.BrokerClient) Broker {
+func NewBroker(gclient repositories.BrokerClient) Broker {
 	return &broker{
-		lg:     lclient,
 		client: gclient,
 	}
 }

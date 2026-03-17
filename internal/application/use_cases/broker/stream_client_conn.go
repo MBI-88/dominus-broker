@@ -14,13 +14,11 @@ func (b *broker) StreamClientConn(st dtos.BrokerClientDto) error {
 	stream := make(chan []byte)
 	req, err := st.Recv()
 	if err != nil {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamClientConn", err.Error())
 		return err
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamClientConn", enum.SUBCRIBER_NOT_FOUND)
-		return fmt.Errorf("subscribers not found")
+		return fmt.Errorf("%s", enum.SUBCRIBER_NOT_FOUND)
 	}
 
 	go b.client.ClientStream(subscribers, stream, ctx)
@@ -29,7 +27,6 @@ func (b *broker) StreamClientConn(st dtos.BrokerClientDto) error {
 	for {
 		req, err := st.Recv()
 		if err != nil {
-			go b.lg.WriteLog(ctx, enum.ERROR ,"StreamClientConn", err.Error())
 			close(stream)
 			cancel()
 			return err

@@ -14,13 +14,11 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 	defer cancel()
 	req, err := stream.Recv()
 	if err != nil {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamBiConn", err.Error())
 		return err
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamBiConn", enum.SUBCRIBER_NOT_FOUND)
-		return fmt.Errorf("subscribers not found")
+		return fmt.Errorf("%s", enum.SUBCRIBER_NOT_FOUND)
 	}
 	total := len(subscribers)
 	done := make(chan struct{}, total)
@@ -30,7 +28,7 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 
 	go func(sig <-chan error) {
 		for er := range sig {
-			go b.lg.WriteLog(ctx, enum.ERROR, "InsertObject", er.Error())
+			fmt.Println(er)
 		}
 	}(errMsg)
 
@@ -42,7 +40,6 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 		for {
 			req, err := stream.Recv()
 			if err != nil {
-				go b.lg.WriteLog(ctx, enum.ERROR, "StreamBiConn", err.Error())
 				close(streamProv)
 				<-closed
 				return
@@ -57,7 +54,6 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 		case payload, ok := <-streamSub:
 			if ok {
 				if err := stream.Send(payload); err != nil {
-					go b.lg.WriteLog(ctx, enum.ERROR, "StreamBiConn", err.Error())
 					cancel()
 				}
 			}

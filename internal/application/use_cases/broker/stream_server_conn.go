@@ -13,8 +13,7 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 	defer cancel()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		go b.lg.WriteLog(ctx, enum.ERROR, "StreamServerConn", enum.SUBCRIBER_NOT_FOUND)
-		return fmt.Errorf("subscribers not found")
+		return fmt.Errorf("%s", enum.SUBCRIBER_NOT_FOUND)
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))
@@ -28,7 +27,6 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 		case body, ok := <-stream:
 			if ok {
 				if err := st.Send(body); err != nil {
-					go b.lg.WriteLog(ctx, enum.ERROR ,"StreamServerConn", err.Error())
 					cancel()
 				}
 			}

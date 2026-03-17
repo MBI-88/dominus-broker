@@ -16,14 +16,12 @@ type Queue interface {
 
 type queue struct {
 	client   repositories.MemoryClient
-	lg       repositories.Logs
 	memory  entities.Memory
 
 }
 
-func NewQueue(lg repositories.Logs, client repositories.MemoryClient, m entities.Memory) Queue {
+func NewQueue(client repositories.MemoryClient, m entities.Memory) Queue {
 	return &queue{
-		lg:     lg,
 		client: client,
 		memory: m,
 	}

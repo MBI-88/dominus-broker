@@ -2,19 +2,16 @@ package queue
 
 import (
 	"context"
-	"dominus-project/internal/domain/enum"
+	"fmt"
 )
 
 func (q *queue) CheckMemory() {
-	ctx := q.lg.CheckID(context.Background())
 	if !q.memory.CheckMemory() {
-		q.lg.WriteLog(ctx, enum.ERROR, "CheckMemory", "memory empty")
-		if err := q.client.GetKeys(ctx, q.memory); err != nil {
-			q.lg.WriteLog(ctx, enum.ERROR, "CheckMemory", err.Error())
+		if err := q.client.GetKeys(context.Background(), q.memory); err != nil {
+			fmt.Println(err)
 		}
-		q.lg.WriteLog(ctx, enum.INFO, "CheckID", "memory ready")
 		return
 	}
 
-	q.lg.WriteLog(ctx, enum.INFO, "CheckMemory" ,"memory loaded")
+	fmt.Println("Memory load completed")
 }

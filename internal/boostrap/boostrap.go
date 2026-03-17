@@ -141,8 +141,8 @@ func gRPServer(
 	)
 
 	// Interactors
-	brk := broker.NewBroker(logs, bclient)
-	quk := queue.NewQueue(logs, qclient, memory)
+	brk := broker.NewBroker(bclient)
+	quk := queue.NewQueue(qclient, memory)
 
 	// Checking current data in memory (redis case)
 	quk.CheckMemory()
