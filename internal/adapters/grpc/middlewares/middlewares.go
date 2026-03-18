@@ -4,8 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
+	"dominus-project/internal/adapters/event"
+	"dominus-project/internal/adapters/enum"
 	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/domain/enum"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"
@@ -24,11 +25,11 @@ type Middleware interface {
 
 type middlewares struct {
 	token []byte
-	logs  repositories.Logs
+	logs  event.Event
 	ch   repositories.CheckerClient
 }
 
-func NewMiddleware(t string, lg repositories.Logs, checker repositories.CheckerClient) Middleware {
+func NewMiddleware(t string, lg event.Event, checker repositories.CheckerClient) Middleware {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,

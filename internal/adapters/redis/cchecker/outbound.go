@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/domain/enum"
+	"dominus-project/internal/adapters/enum"
 	"fmt"
 	"time"
 

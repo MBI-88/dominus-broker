@@ -3,9 +3,11 @@ package cmemory
 import (
 	"context"
 	"crypto/tls"
-	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/adapters/enum"
+	"dominus-project/internal/adapters/event"
 	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/enum"
+	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/domain/services"
 	"fmt"
 	"time"
 
@@ -16,7 +18,7 @@ import (
 type memory struct {
 	rdb       *redis.Client
 	exp       int
-	lg        repositories.Logs
+	lg        event.Event
 	batchSize int64
 }
 
@@ -35,7 +37,7 @@ func NewMemoryClient(
 	Username string,
 	ExpirationTime int,
 	BatchSize int64,
-	lg repositories.Logs,
+	lg event.Event,
 ) repositories.MemoryClient {
 
 	var cfTls *tls.Config
@@ -105,7 +107,7 @@ func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Queue, e
 	return q, nil
 }
 
-func (m *memory) GetKeys(ctx context.Context, mem entities.Memory) error {
+func (m *memory) GetKeys(ctx context.Context, mem services.Memory) error {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
 
 	var cursor uint64

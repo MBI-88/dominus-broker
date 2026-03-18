@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/domain/enum"
 	"fmt"
 )
 
@@ -18,7 +17,7 @@ func (b *broker) StreamClientConn(st dtos.BrokerClientDto) error {
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("%s", enum.SUBCRIBER_NOT_FOUND)
+		return fmt.Errorf("subscribers not found")
 	}
 
 	go b.client.ClientStream(subscribers, stream, ctx)

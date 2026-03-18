@@ -5,20 +5,20 @@ import (
 	"dominus-project/config"
 	"dominus-project/docs"
 
+	"dominus-project/internal/adapters/enum"
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/application/use_cases/queue"
-	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/enum"
-	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/domain/services"
 
+	"dominus-project/internal/adapters/event"
 	fi "dominus-project/internal/adapters/fasthttp/inbound"
 	fm "dominus-project/internal/adapters/fasthttp/middlewares"
 	gi "dominus-project/internal/adapters/grpc/inbound"
 	gm "dominus-project/internal/adapters/grpc/middlewares"
 	gt "dominus-project/internal/adapters/grpc/outbound"
-	"dominus-project/internal/adapters/trace"
 	"dominus-project/internal/adapters/redis/cchecker"
 	"dominus-project/internal/adapters/redis/cmemory"
+
 	"fmt"
 	"log"
 	"net"
@@ -41,7 +41,7 @@ import (
 
 func gRPServer(
 	cf *config.Config,
-	logs repositories.Logs,
+	logs event.Event,
 	errC,
 	errK,
 	errCa error,
@@ -118,7 +118,7 @@ func gRPServer(
 	)
 
 	// Entities
-	memory := entities.NewMemory()
+	memory := services.NewMemory()
 
 	// Clients
 	bclient := gt.NewGrpClient(optsD, logs)
@@ -167,7 +167,7 @@ func gRPServer(
 func restServer(
 	reg *prometheus.Registry,
 	cf *config.Config,
-	logs repositories.Logs,
+	logs event.Event,
 	cancel context.CancelFunc,
 	errC error,
 	errK error,
@@ -230,7 +230,7 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//Instances
 	cf := config.NewConfig(*mode)
 
-	lgs := trace.NewLog(cf.InfraConfig.LogMode, cf.InfraConfig.LogURL, *mode)
+	lgs := event.NewEvent(cf.InfraConfig.LogMode, cf.InfraConfig.LogURL, *mode)
 	docs.SwaggerInfo.Host = cf.InfraConfig.Host
 
 	// Signals

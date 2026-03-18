@@ -2,8 +2,9 @@ package outbound
 
 import (
 	"context"
+	"dominus-project/internal/adapters/event"
+	"dominus-project/internal/adapters/enum"
 	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/domain/enum"
 	"io"
 	"sync"
 	"time"
@@ -15,10 +16,10 @@ import (
 
 type brokerClient struct {
 	opts []grpc.DialOption
-	lgs  repositories.Logs
+	lgs  event.Event
 }
 
-func NewGrpClient(opts []grpc.DialOption, lgs repositories.Logs) repositories.BrokerClient {
+func NewGrpClient(opts []grpc.DialOption, lgs event.Event) repositories.BrokerClient {
 	return &brokerClient{
 		opts: opts,
 		lgs:  lgs,

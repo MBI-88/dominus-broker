@@ -3,9 +3,10 @@ package middlewares
 import (
 	"crypto/sha256"
 	"crypto/subtle"
-	"dominus-project/internal/domain/enum"
-	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/adapters/event"
+	"dominus-project/internal/adapters/enum"
 	"fmt"
+
 	"strings"
 
 	"github.com/valyala/fasthttp"
@@ -13,10 +14,10 @@ import (
 
 type apMiddleware struct {
 	token []byte
-	log repositories.Logs
+	log event.Event
 }
 
-func NewMiddlewareApiToken(t string, log repositories.Logs) Middlewares {
+func NewMiddlewareApiToken(t string, log event.Event) Middlewares {
 	return &apMiddleware{
 		token: []byte(t),
 		log: log,

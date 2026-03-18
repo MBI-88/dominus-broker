@@ -1,10 +1,8 @@
-package trace
+package event
 
 import (
 	"context"
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/enum"
+	"dominus-project/internal/adapters/enum"
 	"fmt"
 	"log/slog"
 	"os"
@@ -13,6 +11,11 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+type Event interface {
+	WriteLog(ctx context.Context, level, op, dsc string)
+	CheckID(ctx context.Context) context.Context
+}
+
 type log struct {
 	lg     *slog.Logger
 	mode   string // feature flag, selecting log type, cmd, client (send to other place)
@@ -20,7 +23,7 @@ type log struct {
 	devMod bool
 }
 
-func NewLog(mode, url string, devMode bool) repositories.Logs {
+func NewEvent(mode, url string, devMode bool) Event {
 	handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slog.LevelError | slog.LevelDebug | slog.LevelInfo,
 	})
@@ -34,7 +37,7 @@ func NewLog(mode, url string, devMode bool) repositories.Logs {
 }
 
 func (l *log) WriteLog(ctx context.Context, level, op, dsc string) {
-	message, err := jsoniter.Marshal(&entities.Logs{
+	message, err := jsoniter.Marshal(&Logs{
 		ID:          ctx.Value(enum.ID).(string),
 		Description: dsc,
 		Op:          op,

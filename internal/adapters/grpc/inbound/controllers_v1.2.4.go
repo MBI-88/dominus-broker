@@ -2,11 +2,11 @@ package inbound
 
 import (
 	"context"
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/domain/enum"
+	"dominus-project/internal/adapters/event"
 	"dominus-project/internal/adapters/grpc/mappers"
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/application/use_cases/queue"
+	"dominus-project/internal/adapters/enum"
 	"fmt"
 	"io"
 
@@ -23,10 +23,10 @@ type grpcController struct {
 	pb.UnimplementedAPIServer
 	br  broker.Broker
 	q   queue.Queue
-	log repositories.Logs
+	log event.Event
 }
 
-func NewGrpcAPI(opts []grpc.ServerOption, br broker.Broker, q queue.Queue, log repositories.Logs) *grpc.Server {
+func NewGrpcAPI(opts []grpc.ServerOption, br broker.Broker, q queue.Queue, log event.Event) *grpc.Server {
 	s := grpc.NewServer(opts...)
 	gsrv := &grpcController{br: br, log: log, q: q}
 	pb.RegisterAPIServer(s, gsrv)

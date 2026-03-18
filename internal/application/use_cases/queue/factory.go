@@ -5,6 +5,7 @@ import (
 	"dominus-project/internal/application/dtos"
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/domain/services"
 )
 
 type Queue interface {
@@ -16,11 +17,11 @@ type Queue interface {
 
 type queue struct {
 	client   repositories.MemoryClient
-	memory  entities.Memory
+	memory  services.Memory
 
 }
 
-func NewQueue(client repositories.MemoryClient, m entities.Memory) Queue {
+func NewQueue(client repositories.MemoryClient, m services.Memory) Queue {
 	return &queue{
 		client: client,
 		memory: m,

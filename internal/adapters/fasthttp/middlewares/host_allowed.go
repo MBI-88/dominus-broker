@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"dominus-project/internal/domain/enum"
-	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/adapters/event"
+	"dominus-project/internal/adapters/enum"
 	"fmt"
 	"net"
 
@@ -11,10 +11,10 @@ import (
 
 type hostAllowed struct {
 	cidr string
-	log repositories.Logs
+	log event.Event
 }
 
-func NewMiddlewareHost(c string, log repositories.Logs) Middlewares {
+func NewMiddlewareHost(c string, log event.Event) Middlewares {
 	return &hostAllowed{
 		cidr: c,
 		log: log,

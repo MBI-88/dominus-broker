@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/domain/enum"
 	"fmt"
 )
 
@@ -13,7 +12,7 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 	defer cancel()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("%s", enum.SUBCRIBER_NOT_FOUND)
+		return fmt.Errorf("subscribers not found")
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))

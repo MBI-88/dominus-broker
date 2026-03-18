@@ -1,4 +1,4 @@
-package entities
+package event
 
 
 type Logs struct {

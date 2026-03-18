@@ -1,7 +1,7 @@
 package inbound
 
 import (
-	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/adapters/event"
 	"net/http"
 
 	"github.com/fasthttp/router"
@@ -43,10 +43,10 @@ type monitor struct {
 	router *router.Router
 	opts   promhttp.HandlerOpts
 	reg    *prometheus.Registry
-	log    repositories.Logs
+	log    event.Event
 }
 
-func NewMonitorAPI(r *router.Router, reg *prometheus.Registry, log repositories.Logs) {
+func NewMonitorAPI(r *router.Router, reg *prometheus.Registry, log event.Event) {
 	reg.MustRegister(cpumetrics, memorymetrics)
 	m := &monitor{
 		router: r,
