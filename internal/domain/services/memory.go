@@ -12,6 +12,7 @@ type Memory interface {
 	Find(id string) string
 	CheckMemory() bool
 	Len() int
+	Iter(pos int) string
 }
 
 type memory struct {
@@ -64,4 +65,13 @@ func (m *memory) Len() int {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	return len(m.idList)
+}
+
+func (m *memory) Iter(pos int) string {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	if pos > len(m.idList) - 1 {
+		return ""
+	}
+	return m.idList[pos]
 }
