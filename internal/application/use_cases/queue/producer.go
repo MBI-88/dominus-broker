@@ -13,6 +13,6 @@ func (c *queue) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 		return  fmt.Errorf("empty payload")
 	}
 	q := entities.NewQueue(payload)
-	c.memory.Set(q.ID.String())
+	c.memory.Set(q.GetID())
 	return c.client.SendMessage(ctx, q)
 }

@@ -23,9 +23,9 @@ func (q *queue) ReactivateMessage(ch <-chan os.Signal) {
 						continue
 					}
 
-					if payload.Hidden && time.Since(payload.CreatedAt).Minutes() > 1 {
-						payload.Hidden = false
-						payload.CreatedAt = time.Now()
+					if payload.GetHidden() && time.Since(payload.GetCreatedAt()).Minutes() > 1 {
+						payload.SetHidden(false)
+						payload.SetCreateAt(time.Now())
 
 						if err := q.client.SendMessage(ctx, payload); err != nil {
 							fmt.Printf("%s\n", err)

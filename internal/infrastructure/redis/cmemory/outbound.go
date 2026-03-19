@@ -75,7 +75,7 @@ func NewMemoryClient(
 
 func (m *memory) SendMessage(ctx context.Context, q *entities.Queue) error {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
-	if _, err := m.rdb.Set(ctx, q.ID.String(), q, time.Duration(m.exp)*time.Hour).Result(); err != nil {
+	if _, err := m.rdb.Set(ctx, q.GetID(), q, time.Duration(m.exp)*time.Hour).Result(); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
 		return err
 	}

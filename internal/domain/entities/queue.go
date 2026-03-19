@@ -26,12 +26,26 @@ func (q *Queue) SetMessage(data []byte) {
 	q.Message = data
 }
 func (q *Queue) GetMessage() []byte {
-	return  q.Message
+	return q.Message
 }
 
 func (q *Queue) SetHidden(ok bool) {
 	q.Hidden = ok
 }
 func (q *Queue) GetHidden() bool {
-	return  q.Hidden
+	return q.Hidden
+}
+
+func (q *Queue) SetID(id uuid.UUID) {
+	q.ID = id
+}
+func (q *Queue) GetID() string {
+	return q.ID.String()
+}
+
+func (q *Queue) GetCreatedAt() time.Time {
+	return q.CreatedAt
+}
+func (q *Queue) SetCreateAt(date time.Time) {
+	q.CreatedAt = date
 }

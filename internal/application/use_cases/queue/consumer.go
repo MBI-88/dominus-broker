@@ -14,7 +14,7 @@ func (c *queue) Consumer(ctx context.Context) (*entities.Queue, error) {
 			return nil, err
 		}
 
-		if !payload.Hidden {
+		if !payload.GetHidden() {
 			return payload, nil
 		}
 	}

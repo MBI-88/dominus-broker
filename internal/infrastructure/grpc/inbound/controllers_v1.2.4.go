@@ -58,10 +58,10 @@ func (s *grpcController) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	return &pb.ConsumerResponse{
-		Id:      response.ID.String(),
-		Message: response.Message,
-		Hidden:  response.Hidden,
-		Date:    timestamppb.New(response.CreatedAt),
+		Id:      response.GetID(),
+		Message: response.GetMessage(),
+		Hidden:  response.GetHidden(),
+		Date:    timestamppb.New(response.GetCreatedAt()),
 	}, nil
 }
 
