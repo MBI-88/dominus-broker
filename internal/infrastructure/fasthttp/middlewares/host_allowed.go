@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"dominus-project/internal/adapters/event"
-	"dominus-project/internal/adapters/enum"
+	"dominus-project/internal/infrastructure/event"
+	"dominus-project/internal/infrastructure/enum"
 	"fmt"
 	"net"
 

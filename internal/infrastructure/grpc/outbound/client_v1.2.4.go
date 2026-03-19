@@ -2,8 +2,8 @@ package outbound
 
 import (
 	"context"
-	"dominus-project/internal/adapters/event"
-	"dominus-project/internal/adapters/enum"
+	"dominus-project/internal/infrastructure/event"
+	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/domain/repositories"
 	"io"
 	"sync"

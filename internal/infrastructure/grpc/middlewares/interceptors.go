@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"context"
-	"dominus-project/internal/adapters/event"
-	"dominus-project/internal/adapters/enum"
+	"dominus-project/internal/infrastructure/event"
+	"dominus-project/internal/infrastructure/enum"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

@@ -1,7 +1,7 @@
 package inbound
 
 import (
-	"dominus-project/internal/adapters/event"
+	"dominus-project/internal/infrastructure/event"
 	"net/http"
 
 	"github.com/fasthttp/router"

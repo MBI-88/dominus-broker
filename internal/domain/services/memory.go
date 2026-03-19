@@ -11,6 +11,7 @@ type Memory interface {
 	Delete(id string) string
 	Find(id string) string
 	CheckMemory() bool
+	Len() int
 }
 
 type memory struct {
@@ -57,4 +58,10 @@ func (m *memory) CheckMemory() bool {
 	m.lock.Lock() 
 	defer m.lock.Unlock()
 	return len(m.idList) > 0 // true idList is not empty
+}
+
+func (m *memory) Len() int {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return len(m.idList)
 }

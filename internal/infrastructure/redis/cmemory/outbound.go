@@ -3,8 +3,8 @@ package cmemory
 import (
 	"context"
 	"crypto/tls"
-	"dominus-project/internal/adapters/enum"
-	"dominus-project/internal/adapters/event"
+	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repositories"
 	"dominus-project/internal/domain/services"

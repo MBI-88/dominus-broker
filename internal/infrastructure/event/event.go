@@ -2,7 +2,7 @@ package event
 
 import (
 	"context"
-	"dominus-project/internal/adapters/enum"
+	"dominus-project/internal/infrastructure/enum"
 	"fmt"
 	"log/slog"
 	"os"

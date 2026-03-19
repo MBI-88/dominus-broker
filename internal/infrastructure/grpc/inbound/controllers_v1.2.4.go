@@ -2,11 +2,11 @@ package inbound
 
 import (
 	"context"
-	"dominus-project/internal/adapters/event"
-	"dominus-project/internal/adapters/grpc/mappers"
+	"dominus-project/internal/infrastructure/event"
+	"dominus-project/internal/infrastructure/grpc/mappers"
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/application/use_cases/queue"
-	"dominus-project/internal/adapters/enum"
+	"dominus-project/internal/infrastructure/enum"
 	"fmt"
 	"io"
 
