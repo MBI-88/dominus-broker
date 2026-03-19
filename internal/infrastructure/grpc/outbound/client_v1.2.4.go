@@ -37,7 +37,7 @@ func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx contex
 	doQuery := func(url string) func([]byte) {
 		stream, errConn := connect(url)
 		return func(payload []byte) {
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "ClientStream", "debuging sending request")
+			go g.lgs.WriteLog(ctx, enum.DEBUG, "ClientStream", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -130,7 +130,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 
 	doQuey := func(url string, stream pb.API_BidirectionalStreamClient, errConn error) func([]byte) {
 		return func(payload []byte) {
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream", "debuging sending request")
+			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -164,7 +164,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 
 		go func(url string, c pb.API_BidirectionalStreamClient, errConn error) {
 		connect:
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", "debuging sending request")
+			go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -181,7 +181,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 						}
 						return
 					} else if err != io.EOF && err != nil {
-						go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", "reconecting ...")
+						go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", enum.DEBUG_DESCRIPTION)
 						goto connect
 					} else {
 						subMsg <- resp.GetPayload()

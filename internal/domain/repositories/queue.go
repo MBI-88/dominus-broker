@@ -6,7 +6,6 @@ import (
 	"dominus-project/internal/domain/services"
 )
 
-
 type MemoryClient interface {
 	SendMessage(ctx context.Context, q *entities.Queue) error
 	DeleteMessage(ctx context.Context, ID string) error
@@ -15,6 +14,6 @@ type MemoryClient interface {
 }
 
 type CheckerClient interface {
-	SaveConsumer(ctx context.Context, key string ) error
+	SaveConsumer(ctx context.Context, key string) error
 	CheckConsumer(ctx context.Context, key string) bool
 }

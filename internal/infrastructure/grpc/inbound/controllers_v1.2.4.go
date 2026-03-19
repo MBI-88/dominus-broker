@@ -37,11 +37,17 @@ func NewGrpcAPI(opts []grpc.ServerOption, br broker.Broker, q queue.Queue, log e
 // Receives simple messages from client
 func (s *grpcController) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.ProducerResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "Producer", enum.REQUEST_OK)
+
+	if len(ms.GetPayload()) == 0 {
+		go s.log.WriteLog(ctx, enum.ERROR, "Producer", enum.INVALID_PAYLOAD)
+		return nil, status.Error(codes.OutOfRange, enum.INVALID_PAYLOAD)
+	}
+
 	if err := s.q.Producer(ctx, ms); err != nil {
 		go s.log.WriteLog(ctx, enum.ERROR, "Producer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
-	return &pb.ProducerResponse{Status: enum.OK}, nil
+	return &pb.ProducerResponse{Status: int64(codes.OK)}, nil
 }
 
 func (s *grpcController) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
@@ -61,12 +67,17 @@ func (s *grpcController) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (
 
 func (s *grpcController) ConsumerDLT(ctx context.Context, ms *pb.ConsumerDeleteRequest) (*pb.ConsumerDeleteResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "ConsumerDLT", enum.REQUEST_OK)
+
+	if ms.GetId() == "" {
+		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", enum.INVALID_ID)
+		return nil, status.Error(codes.NotFound, enum.INVALID_ID)
+	}
 	if err := s.q.ConsumerDLT(ctx, ms); err != nil {
 		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	return &pb.ConsumerDeleteResponse{
-		Status: enum.OK,
+		Status: int64(codes.OK),
 		Description: enum.DESCRIPTION_DELETE_MESSAGE,
 	}, nil
 }
@@ -81,7 +92,7 @@ func (s *grpcController) ClientStream(stream pb.API_ClientStreamServer) error {
 		return status.Error(codes.Aborted, err.Error())
 	}
 	return stream.SendAndClose(&pb.StreamResponseMessage{
-		Status: enum.OK,
+		Status: int64(codes.OK),
 	})
 }
 

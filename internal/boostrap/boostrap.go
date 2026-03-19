@@ -48,6 +48,7 @@ func gRPServer(
 	cancel context.CancelFunc,
 	metricserver *grpcmetrics.ServerMetrics,
 	metricclient *grpcmetrics.ClientMetrics,
+	st <-chan os.Signal,
 ) *grpc.Server {
 	var (
 		optsS []grpc.ServerOption
@@ -146,6 +147,8 @@ func gRPServer(
 
 	// Checking current data in memory (redis case)
 	quk.CheckMemory()
+	// Background worker
+	quk.ReactivateMessage(st)
 
 	// API
 	srGRP := gi.NewGrpcAPI(optsS, brk, quk, logs)
@@ -262,7 +265,7 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//*********Grpc server************
 	//********************************
 
-	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
+	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient, st)
 	if srG == nil {
 		panic("GRPC server error")
 	}

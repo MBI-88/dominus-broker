@@ -6,6 +6,7 @@ import (
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repositories"
 	"dominus-project/internal/domain/services"
+	"os"
 )
 
 type Queue interface {
@@ -13,6 +14,7 @@ type Queue interface {
 	Consumer(ctx context.Context) (*entities.Queue, error)
 	ConsumerDLT(ctx context.Context, ms dtos.ConsumerDto) error
 	CheckMemory()
+	ReactivateMessage(ch <-chan os.Signal)
 }
 
 type queue struct {

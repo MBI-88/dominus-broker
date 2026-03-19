@@ -10,7 +10,6 @@ type Queue struct {
 	Message   []byte    `json:"message"`
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
-	DeletedAt time.Time `json:"deleted_at"`
 	Hidden    bool      `json:"hidden"`
 }
 
@@ -21,4 +20,18 @@ func NewQueue(message []byte) *Queue {
 		CreatedAt: time.Now(),
 		Hidden:    false,
 	}
+}
+
+func (q *Queue) SetMessage(data []byte) {
+	q.Message = data
+}
+func (q *Queue) GetMessage() []byte {
+	return  q.Message
+}
+
+func (q *Queue) SetHidden(ok bool) {
+	q.Hidden = ok
+}
+func (q *Queue) GetHidden() bool {
+	return  q.Hidden
 }

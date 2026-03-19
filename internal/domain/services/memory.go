@@ -8,7 +8,7 @@ import (
 // Referency to ids
 type Memory interface {
 	Set(id string) 
-	Delete(id string) string
+	Delete(id string)
 	Find(id string) string
 	CheckMemory() bool
 	Len() int
@@ -33,16 +33,14 @@ func (m *memory) Set(id string)  {
 	m.idList = append(m.idList, id)
 }
 
-func (m *memory) Delete(id string) string {
+func (m *memory) Delete(id string) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
 	pos, ok := slices.BinarySearch(m.idList, id)
 	if ok {
 		m.idList = slices.Delete(m.idList, pos, pos+1)
-		return id
 	}
-	return ""
 }
 
 func (m *memory) Find(id string) string {

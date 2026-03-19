@@ -9,7 +9,8 @@ const (
 	LOGCLIENT = "logclient"
 	X_API_KEY  = "x-api-key"
 	DESCRIPTION_DELETE_MESSAGE = "message deleted successful"
-	OK = 0
+	INVALID_PAYLOAD = "invalid payload"
+	INVALID_ID = "invalid id"
 	DEBUG_DESCRIPTION = "system debuging activated"
 	SUBCRIBER_NOT_FOUND = "subscirbers not found"
 	REQUEST_OK = "request accepted"
