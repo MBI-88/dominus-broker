@@ -6,15 +6,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type Queue struct {
+type Message struct {
 	Message   []byte    `json:"message"`
 	ID        uuid.UUID `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	Hidden    bool      `json:"hidden"`
 }
 
-func NewQueue(message []byte) *Queue {
-	return &Queue{
+func NewMessage(message []byte) *Message {
+	return &Message{
 		Message:   message,
 		ID:        uuid.New(),
 		CreatedAt: time.Now(),
@@ -22,30 +22,30 @@ func NewQueue(message []byte) *Queue {
 	}
 }
 
-func (q *Queue) SetMessage(data []byte) {
+func (q *Message) SetMessage(data []byte) {
 	q.Message = data
 }
-func (q *Queue) GetMessage() []byte {
+func (q *Message) GetMessage() []byte {
 	return q.Message
 }
 
-func (q *Queue) SetHidden(ok bool) {
+func (q *Message) SetHidden(ok bool) {
 	q.Hidden = ok
 }
-func (q *Queue) GetHidden() bool {
+func (q *Message) GetHidden() bool {
 	return q.Hidden
 }
 
-func (q *Queue) SetID(id uuid.UUID) {
+func (q *Message) SetID(id uuid.UUID) {
 	q.ID = id
 }
-func (q *Queue) GetID() string {
+func (q *Message) GetID() string {
 	return q.ID.String()
 }
 
-func (q *Queue) GetCreatedAt() time.Time {
+func (q *Message) GetCreatedAt() time.Time {
 	return q.CreatedAt
 }
-func (q *Queue) SetCreateAt(date time.Time) {
+func (q *Message) SetCreateAt(date time.Time) {
 	q.CreatedAt = date
 }

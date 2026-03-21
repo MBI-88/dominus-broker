@@ -1,11 +1,11 @@
-package queue
+package sqs
 
 import (
 	"context"
 	"fmt"
 )
 
-func (q *queue) CheckMemory() {
+func (q *sqs) CheckMemory() {
 	if !q.memory.CheckMemory() {
 		if err := q.client.GetKeys(context.Background(), q.memory); err != nil {
 			fmt.Println(err)

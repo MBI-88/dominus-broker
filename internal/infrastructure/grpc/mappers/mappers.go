@@ -8,10 +8,10 @@ import (
 )
 
 type grpcBiContextStream struct {
-	sr pb.API_BidirectionalStreamServer
+	sr pb.BrokerAPI_BidirectionalStreamServer
 }
 
-func NewBiStreamConn(sr pb.API_BidirectionalStreamServer) dtos.BrokerBidirectionalDto {
+func NewBiStreamConn(sr pb.BrokerAPI_BidirectionalStreamServer) dtos.BrokerBidirectionalDto {
 	return &grpcBiContextStream{
 		sr: sr,
 	}
@@ -33,10 +33,10 @@ func (g *grpcBiContextStream) Context() context.Context {
 }
 
 type grpcContextClientStream struct {
-	sr pb.API_ClientStreamServer
+	sr pb.BrokerAPI_ClientStreamServer
 }
 
-func NewClientStreamContext(sr pb.API_ClientStreamServer) dtos.BrokerClientDto {
+func NewClientStreamContext(sr pb.BrokerAPI_ClientStreamServer) dtos.BrokerClientDto {
 	return &grpcContextClientStream{
 		sr: sr,
 	}
@@ -51,10 +51,10 @@ func (g *grpcContextClientStream) Context() context.Context {
 }
 
 type grpcContextServerStream struct {
-	sr pb.API_ServerStreamServer
+	sr pb.BrokerAPI_ServerStreamServer
 }
 
-func NewServerStreamContext(sr pb.API_ServerStreamServer) dtos.BrokerServerDto {
+func NewServerStreamContext(sr pb.BrokerAPI_ServerStreamServer) dtos.BrokerServerDto {
 	return &grpcContextServerStream{
 		sr: sr,
 	}

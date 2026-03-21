@@ -1,4 +1,4 @@
-package queue
+package sqs
 
 import (
 	"context"
@@ -7,12 +7,12 @@ import (
 	"fmt"
 )
 
-func (c *queue) Producer(ctx context.Context, ms dtos.ProducerDto) error {
+func (c *sqs) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 	payload := ms.GetPayload()
 	if len(payload) == 0 {
 		return  fmt.Errorf("empty payload")
 	}
-	q := entities.NewQueue(payload)
+	q := entities.NewMessage(payload)
 	c.memory.Set(q.GetID())
 	return c.client.SendMessage(ctx, q)
 }

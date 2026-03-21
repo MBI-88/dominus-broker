@@ -7,9 +7,9 @@ import (
 )
 
 type MemoryClient interface {
-	SendMessage(ctx context.Context, q *entities.Queue) error
+	SendMessage(ctx context.Context, q *entities.Message) error
 	DeleteMessage(ctx context.Context, ID string) error
-	GetMessage(ctx context.Context, key string) (*entities.Queue, error)
+	GetMessage(ctx context.Context, key string) (*entities.Message, error)
 	GetKeys(ctx context.Context, mem services.Memory) error
 }
 

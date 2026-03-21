@@ -29,9 +29,9 @@ func NewGrpClient(opts []grpc.DialOption, lgs event.Event) repositories.BrokerCl
 func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
 	lock := new(sync.Mutex)
-	connect := func(url string) (pb.API_ClientStreamClient, error) {
+	connect := func(url string) (pb.BrokerAPI_ClientStreamClient, error) {
 		conn, _ := grpc.NewClient(url, g.opts...)
-		c := pb.NewAPIClient(conn)
+		c := pb.NewBrokerAPIClient(conn)
 		return c.ClientStream(ctx)
 	}
 	doQuery := func(url string) func([]byte) {
@@ -80,7 +80,7 @@ func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 	for _, url := range urls {
 		go func(url string) {
 			conn, _ := grpc.NewClient(url, g.opts...)
-			client := pb.NewAPIClient(conn)
+			client := pb.NewBrokerAPIClient(conn)
 			reqMsg := &pb.StreamRequestMessage{
 				Subscribers: nil,
 				Payload:     initalMsg,
@@ -122,13 +122,13 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 	lock := new(sync.Mutex)
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
 
-	connect := func(url string) (pb.API_BidirectionalStreamClient, error) {
+	connect := func(url string) (pb.BrokerAPI_BidirectionalStreamClient, error) {
 		conn, _ := grpc.NewClient(url, g.opts...)
-		c := pb.NewAPIClient(conn)
+		c := pb.NewBrokerAPIClient(conn)
 		return c.BidirectionalStream(ctx)
 	}
 
-	doQuey := func(url string, stream pb.API_BidirectionalStreamClient, errConn error) func([]byte) {
+	doQuey := func(url string, stream pb.BrokerAPI_BidirectionalStreamClient, errConn error) func([]byte) {
 		return func(payload []byte) {
 			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
@@ -162,7 +162,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 		cls := doQuey(url, stream, err)
 		arrayDoQuery = append(arrayDoQuery, cls)
 
-		go func(url string, c pb.API_BidirectionalStreamClient, errConn error) {
+		go func(url string, c pb.BrokerAPI_BidirectionalStreamClient, errConn error) {
 		connect:
 			go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", enum.DEBUG_DESCRIPTION)
 			lock.Lock()

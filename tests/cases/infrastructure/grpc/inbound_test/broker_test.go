@@ -34,7 +34,6 @@ func TestClientStream(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		queueMock := mocks.NewMockQueue(ctrl)
 		evnetMock := mocks.NewMockEvent(ctrl)
 
 		brokerMock.EXPECT().
@@ -46,7 +45,8 @@ func TestClientStream(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, evnetMock)
+		server := grpc.NewServer([]grpc.ServerOption{}...)
+		inbound.NewBrokerAPI(server, brokerMock, evnetMock)
 		client := outbound.NewGrpClient(opts, evnetMock)
 
 		go func() {
@@ -76,7 +76,6 @@ func TestClientStream(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		queueMock := mocks.NewMockQueue(ctrl)
 
 		brokerMock.EXPECT().
 			StreamClientConn(gomock.All()).
@@ -87,7 +86,8 @@ func TestClientStream(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		server := grpc.NewServer([]grpc.ServerOption{}...)
+		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
 
 		go func() {
@@ -120,7 +120,6 @@ func TestServerStream(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		queueMock := mocks.NewMockQueue(ctrl)
 
 		brokerMock.EXPECT().
 			StreamServerConn(gomock.All(), gomock.All()).
@@ -139,7 +138,8 @@ func TestServerStream(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		server := grpc.NewServer([]grpc.ServerOption{}...)
+		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
@@ -174,7 +174,6 @@ func TestServerStream(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		queueMock := mocks.NewMockQueue(ctrl)
 
 		brokerMock.EXPECT().
 			StreamServerConn(gomock.All(), gomock.All()).
@@ -193,7 +192,8 @@ func TestServerStream(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		server := grpc.NewServer([]grpc.ServerOption{}...)
+		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
@@ -233,7 +233,6 @@ func TestBidirectionalStream(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		queueMock := mocks.NewMockQueue(ctrl)
 
 		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
@@ -263,7 +262,8 @@ func TestBidirectionalStream(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		server := grpc.NewServer([]grpc.ServerOption{}...)
+		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
@@ -322,7 +322,6 @@ func TestBidirectionalStream(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		queueMock := mocks.NewMockQueue(ctrl)
 
 		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
@@ -352,7 +351,8 @@ func TestBidirectionalStream(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		server := grpc.NewServer([]grpc.ServerOption{}...)
+		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 

@@ -1,6 +1,5 @@
 # Lista de paquetes a excluir del coverage
 $excluded = @(
-    'tests/env',
     'docs',
     'mocks'
 )

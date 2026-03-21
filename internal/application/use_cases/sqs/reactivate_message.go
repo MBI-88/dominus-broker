@@ -1,4 +1,4 @@
-package queue
+package sqs
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (q *queue) ReactivateMessage(ch <-chan os.Signal) {
+func (q *sqs) ReactivateMessage(ch <-chan os.Signal) {
 	go func() {
 		for {
 			select {

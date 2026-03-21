@@ -1,4 +1,4 @@
-package queue
+package sqs
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-func (c *queue) Consumer(ctx context.Context) (*entities.Queue, error) {
+func (c *sqs) Consumer(ctx context.Context) (*entities.Message, error) {
 	for i := 0; i < c.memory.Len(); i++ {
 		id := c.memory.Iter(i)
 		payload, err := c.client.GetMessage(ctx, id)

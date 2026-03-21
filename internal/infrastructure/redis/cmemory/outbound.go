@@ -73,7 +73,7 @@ func NewMemoryClient(
 	}
 }
 
-func (m *memory) SendMessage(ctx context.Context, q *entities.Queue) error {
+func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
 	if _, err := m.rdb.Set(ctx, q.GetID(), q, time.Duration(m.exp)*time.Hour).Result(); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
@@ -91,7 +91,7 @@ func (m *memory) DeleteMessage(ctx context.Context, key string) error {
 	return nil
 }
 
-func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Queue, error) {
+func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Message, error) {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
 	result, err := m.rdb.Get(ctx, key).Result()
 	if err != nil {
@@ -99,7 +99,7 @@ func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Queue, e
 		return nil, redis.ErrClosed
 	}
 
-	var q *entities.Queue
+	var q *entities.Message
 	if err := jsoniter.Unmarshal([]byte(result), q); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
 		return nil, err

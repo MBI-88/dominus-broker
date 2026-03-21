@@ -1,4 +1,4 @@
-package queue
+package sqs
 
 import (
 	"context"
@@ -9,22 +9,22 @@ import (
 	"os"
 )
 
-type Queue interface {
+type SQS interface {
 	Producer(ctx context.Context, ms dtos.ProducerDto) error 
-	Consumer(ctx context.Context) (*entities.Queue, error)
+	Consumer(ctx context.Context) (*entities.Message, error)
 	ConsumerDLT(ctx context.Context, ms dtos.ConsumerDto) error
 	CheckMemory()
 	ReactivateMessage(ch <-chan os.Signal)
 }
 
-type queue struct {
+type sqs struct {
 	client   repositories.MemoryClient
 	memory  services.Memory
 
 }
 
-func NewQueue(client repositories.MemoryClient, m services.Memory) Queue {
-	return &queue{
+func NewSQS(client repositories.MemoryClient, m services.Memory) SQS {
+	return &sqs{
 		client: client,
 		memory: m,
 	}

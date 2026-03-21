@@ -5,10 +5,10 @@ import (
 	"dominus-project/config"
 	"dominus-project/docs"
 
-	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/application/use_cases/broker"
-	"dominus-project/internal/application/use_cases/queue"
+	"dominus-project/internal/application/use_cases/sqs"
 	"dominus-project/internal/domain/services"
+	"dominus-project/internal/infrastructure/enum"
 
 	"dominus-project/internal/infrastructure/event"
 	fi "dominus-project/internal/infrastructure/fasthttp/inbound"
@@ -37,6 +37,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/reflection"
 )
 
 func gRPServer(
@@ -142,18 +143,26 @@ func gRPServer(
 	)
 
 	// Interactors
-	brk := broker.NewBroker(bclient)
-	quk := queue.NewQueue(qclient, memory)
+	broker := broker.NewBroker(bclient)
+	sqs := sqs.NewSQS(qclient, memory)
 
 	// Checking current data in memory (redis case)
-	quk.CheckMemory()
+	sqs.CheckMemory()
 	// Background worker
-	quk.ReactivateMessage(st)
-
-	// API
-	srGRP := gi.NewGrpcAPI(optsS, brk, quk, logs)
+	sqs.ReactivateMessage(st)
 
 	// Server
+	server := grpc.NewServer(optsS...)
+
+	// Register APIs
+	gi.NewBrokerAPI(server, broker, logs)
+	gi.NewSqsAPI(server, sqs, logs)
+
+	
+	// Reflecting server
+	reflection.Register(server)
+
+	// Listener
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", cf.GrpcConfig.GRPCPort))
 	if err != nil {
 		log.Println(err)
@@ -162,9 +171,9 @@ func gRPServer(
 	go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
 		log.Fatal(sr.Serve(list))
 		cancel()
-	}(srGRP, listener, cancel)
+	}(server, listener, cancel)
 
-	return srGRP
+	return server
 }
 
 func restServer(
