@@ -1,10 +1,10 @@
-package grpcconn_test
+package inbound_test
 
 import (
 	"context"
-	
-	"dominus-project/internal/adapters/grpc/inbound"
-	"dominus-project/internal/adapters/grpc/outbound"
+	"dominus-project/internal/application/dtos"
+	"dominus-project/internal/infrastructure/grpc/inbound"
+	"dominus-project/internal/infrastructure/grpc/outbound"
 	"dominus-project/mocks"
 	"fmt"
 	"log"
@@ -14,9 +14,7 @@ import (
 
 	"go.uber.org/mock/gomock"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -28,91 +26,6 @@ func bufDialer(lis *bufconn.Listener) func(context.Context, string) (net.Conn, e
 	}
 }
 
-func TestSimple(t *testing.T) {
-	t.Run("Simple Ok", func(t *testing.T) {
-		c := make(chan struct{})
-		lis := bufconn.Listen(buffSize)
-		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
-
-		serviceMock.EXPECT().
-			SimpleConn(gomock.All()).
-			Return(nil).Times(1)
-
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
-
-		opts := append([]grpc.DialOption{},
-			grpc.WithContextDialer(bufDialer(lis)),
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-
-		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := outbound.NewGrpClient(opts, logMock)
-
-		go func() {
-			if err := server.Serve(lis); err != nil {
-				t.Log(err)
-			}
-		}()
-
-		resp, err := client.Simple("127.0.0.1:5050", []byte("test-simple"))
-
-		if err == nil && resp.GetStatus() != 0 {
-			t.Fatalf("Expected %d received %d", 0, resp.GetStatus())
-		}
-
-		close(c)
-		server.GracefulStop()
-		ctrl.Finish()
-	})
-
-	t.Run("Simple error", func(t *testing.T) {
-		c := make(chan struct{})
-		lis := bufconn.Listen(buffSize)
-		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
-
-		serviceMock.EXPECT().
-			SimpleConn(gomock.All()).
-			Return(fmt.Errorf("error")).Times(1)
-
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
-
-		opts := append([]grpc.DialOption{},
-			grpc.WithContextDialer(bufDialer(lis)),
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
-
-		go func() {
-			if err := server.Serve(lis); err != nil {
-				t.Log(err)
-			}
-		}()
-
-		resp, err := client.Simple("127.0.0.1:5050", []byte("test-simple"))
-
-		if err == nil && resp.GetStatus() != 0 {
-			t.Fatalf("Expected %d received %d", 0, resp.GetStatus())
-		} else if err.Error() != status.Error(codes.InvalidArgument, "error").Error() {
-			t.Fatalf("Received %s", err)
-		}
-
-		close(c)
-		server.GracefulStop()
-		ctrl.Finish()
-	})
-
-}
-
 func TestClientStream(t *testing.T) {
 
 	t.Run("ClientStream Ok", func(t *testing.T) {
@@ -120,24 +33,21 @@ func TestClientStream(t *testing.T) {
 		msg := make(chan []byte)
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		queueMock := mocks.NewMockQueue(ctrl)
+		evnetMock := mocks.NewMockEvent(ctrl)
 
-		serviceMock.EXPECT().
+		brokerMock.EXPECT().
 			StreamClientConn(gomock.All()).
 			Return(nil).AnyTimes()
-
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, evnetMock)
+		client := outbound.NewGrpClient(opts, evnetMock)
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
@@ -164,24 +74,21 @@ func TestClientStream(t *testing.T) {
 		msg := make(chan []byte)
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		queueMock := mocks.NewMockQueue(ctrl)
 
-		serviceMock.EXPECT().
+		brokerMock.EXPECT().
 			StreamClientConn(gomock.All()).
 			Return(fmt.Errorf("error")).AnyTimes()
-
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		client := outbound.NewGrpClient(opts, eventMock)
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
@@ -211,13 +118,14 @@ func TestServerStream(t *testing.T) {
 		done := make(chan struct{})
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		queueMock := mocks.NewMockQueue(ctrl)
 
-		serviceMock.EXPECT().
+		brokerMock.EXPECT().
 			StreamServerConn(gomock.All(), gomock.All()).
 			DoAndReturn(func(req, st any) error {
-				tem := st.(adapters.StreamServer)
+				tem := st.(dtos.BrokerServerDto)
 				for range 10 {
 					if err := tem.Send([]byte("test-body")); err != nil {
 						log.Panicln(err)
@@ -226,17 +134,13 @@ func TestServerStream(t *testing.T) {
 				return nil
 			}).AnyTimes()
 
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
-
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
 		go func() {
@@ -268,13 +172,14 @@ func TestServerStream(t *testing.T) {
 		done := make(chan struct{})
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		queueMock := mocks.NewMockQueue(ctrl)
 
-		serviceMock.EXPECT().
+		brokerMock.EXPECT().
 			StreamServerConn(gomock.All(), gomock.All()).
 			DoAndReturn(func(req, st any) error {
-				tem := st.(adapters.StreamServer)
+				tem := st.(dtos.BrokerServerDto)
 				for range 10 {
 					if err := tem.Send([]byte("test-body")); err != nil {
 						log.Panicln(err)
@@ -283,17 +188,13 @@ func TestServerStream(t *testing.T) {
 				return fmt.Errorf("error")
 			}).AnyTimes()
 
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
-
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
 		go func() {
@@ -330,13 +231,14 @@ func TestBidirectionalStream(t *testing.T) {
 		done := make(chan struct{})
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		queueMock := mocks.NewMockQueue(ctrl)
 
-		serviceMock.EXPECT().
+		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
 			DoAndReturn(func(st any) error {
-				tem := st.(adapters.StreamBi)
+				tem := st.(dtos.BrokerBidirectionalDto)
 				go func() {
 					for {
 						resp, err := tem.Recv()
@@ -356,17 +258,13 @@ func TestBidirectionalStream(t *testing.T) {
 				return nil
 			}).AnyTimes()
 
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
-
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
 		go func() {
@@ -422,13 +320,14 @@ func TestBidirectionalStream(t *testing.T) {
 		done := make(chan struct{})
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
-		logMock := mocks.NewMockLogs(ctrl)
-		serviceMock := mocks.NewMockGrpcService(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		queueMock := mocks.NewMockQueue(ctrl)
 
-		serviceMock.EXPECT().
+		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
 			DoAndReturn(func(st any) error {
-				tem := st.(adapters.StreamBi)
+				tem := st.(dtos.BrokerBidirectionalDto)
 				go func() {
 					for {
 						resp, err := tem.Recv()
@@ -448,17 +347,13 @@ func TestBidirectionalStream(t *testing.T) {
 				return fmt.Errorf("error")
 			}).AnyTimes()
 
-		serviceMock.EXPECT().
-			RunQueue(c).
-			Return(nil).Times(1)
-
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 
-		server := input.NewGrpcAPI([]grpc.ServerOption{}, serviceMock, logMock)
-		client := output.NewGrpClient(opts, logMock)
+		server := inbound.NewGrpcAPI([]grpc.ServerOption{}, brokerMock, queueMock, eventMock)
+		client := outbound.NewGrpClient(opts, eventMock)
 		ctx, cancel := context.WithCancel(context.Background())
 
 		go func() {

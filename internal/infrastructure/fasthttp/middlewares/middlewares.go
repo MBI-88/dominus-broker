@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"dominus-project/internal/infrastructure/enum"
+
 	"github.com/valyala/fasthttp"
 )
 
@@ -32,7 +34,7 @@ func (m *middleware) Middlewares(handler fasthttp.RequestHandler) fasthttp.Reque
 		for _, mid := range m.mids {
 			if err := mid.CheckMiddleware(ctx); err != nil {
 				ctx.Response.Header.SetStatusCode(fasthttp.StatusForbidden)
-				ctx.Response.Header.SetContentType("application/text")
+				ctx.Response.Header.SetContentType(enum.CONTENT_TYPE_TEXT)
 				ctx.Response.SetBodyString(err.Error())
 				return
 			}

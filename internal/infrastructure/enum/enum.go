@@ -24,4 +24,5 @@ const (
 	PROJECT_NAME = "Dominus"
 	ID_POTENCY_HEADER = "id-pontency"
 	ID_POTENCY_TAG = "idepotency"
+	CONTENT_TYPE_TEXT = "application/text"
 )

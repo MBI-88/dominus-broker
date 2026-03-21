@@ -12,25 +12,25 @@ import (
 func TestStreamClientConn(t *testing.T) {
 	tests := []struct {
 		name      string
-		setupMock func(*mocks.MockStreamClient, *mocks.MockGrpcClient, *mocks.MockLogs, *mocks.MockGrpcDto)
+		setupMock func(*mocks.MockBrokerClient, *mocks.MockBrokerClientDto, *mocks.MockBrokerRequestDto)
 		output    error
 	}{
 		{
 			name: "StreamClientConn Ok",
-			setupMock: func(msc *mocks.MockStreamClient, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerClientDto, mrq *mocks.MockBrokerRequestDto) {
 
 				gomock.InOrder(
-					msc.EXPECT().Recv().Return(mgd, nil),
-					msc.EXPECT().Recv().Return(mgd, nil),
-					msc.EXPECT().Recv().Return(mgd, nil),
-					msc.EXPECT().Recv().Return(nil, fmt.Errorf("end")),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+					mdto.EXPECT().Recv().Return(nil, fmt.Errorf("end")),
 				)
 
-				mgd.EXPECT().
+				mrq.EXPECT().
 					GetSubscribers().
 					Return([]string{"server1.api.com", "server2.api.com", "server3.api.com", "127.0.0.1:8080"}).AnyTimes()
 
-				mgc.EXPECT().
+				mc.EXPECT().
 					ClientStream(gomock.All(), gomock.All(), gomock.All()).
 					Do(func(urls, m, c any) {
 						var ok = true
@@ -39,28 +39,25 @@ func TestStreamClientConn(t *testing.T) {
 						}
 					}).Times(1)
 
-				mgd.EXPECT().
+				mrq.EXPECT().
 					GetPayload().
 					Return([]byte("test-1")).AnyTimes()
-
-				ml.EXPECT().
-					WriteLog(gomock.All(), gomock.All()).Times(1)
 			},
 			output: fmt.Errorf("end"),
 		},
 		{
 			name: "StreamClientConn Recv error",
-			setupMock: func(msc *mocks.MockStreamClient, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
-				msc.EXPECT().Recv().Return(nil, fmt.Errorf("recv error"))
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerClientDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Recv().Return(nil, fmt.Errorf("recv error"))
 			},
 			output: fmt.Errorf("recv error"),
 		},
 		{
 			name: "StreamClientConn subscribers empty",
-			setupMock: func(msc *mocks.MockStreamClient, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
-				msc.EXPECT().Recv().Return(mgd, nil)
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerClientDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Recv().Return(mrq, nil)
 
-				mgd.EXPECT().
+				mrq.EXPECT().
 					GetSubscribers().
 					Return([]string{}).Times(1)
 			},
@@ -73,16 +70,16 @@ func TestStreamClientConn(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockLogs := mocks.NewMockLogs(ctrl)
-			mockStreaClient := mocks.NewMockStreamClient(ctrl)
-			mockGrpcDto := mocks.NewMockGrpcDto(ctrl)
-			mockGrpcClient := mocks.NewMockGrpcClient(ctrl)
+			
+		    mockClientDto := mocks.NewMockBrokerClientDto(ctrl)
+			mockClient := mocks.NewMockBrokerClient(ctrl)
+			mockRequestDto := mocks.NewMockBrokerRequestDto(ctrl)
 
-			tt.setupMock(mockStreaClient, mockGrpcClient, mockLogs, mockGrpcDto)
+			tt.setupMock(mockClient, mockClientDto, mockRequestDto)
 
-			stream := broker.NewBroker(mockLogs, mockGrpcClient)
+			service := broker.NewBroker(mockClient)
 
-			err := stream.StreamClientConn(mockStreaClient)
+			err := service.StreamClientConn(mockClientDto)
 
 			if tt.output != nil && err == nil {
 				t.Fatalf("Expected output different from output %s != %s", tt.output, err)

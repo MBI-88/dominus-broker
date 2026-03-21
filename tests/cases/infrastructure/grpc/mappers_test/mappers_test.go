@@ -1,8 +1,8 @@
-package grpcmappers_test
+package mappers_test
 
 import (
 	"context"
-	"dominus-project/internal/adapters/grpc/mappers"
+	"dominus-project/internal/infrastructure/grpc/mappers"
 	"testing"
 
 	"github.com/PR0C0D3-MBI/dominus-proto-definition/dominus"

@@ -15,31 +15,29 @@ import (
 func TestStreamBiConn(t *testing.T) {
 	tests := []struct {
 		name      string
-		setupMock func(*mocks.MockStreamBi, *mocks.MockGrpcClient, *mocks.MockLogs, *mocks.MockGrpcDto)
+		setupMock func(*mocks.MockBrokerClient, *mocks.MockBrokerBidirectionalDto, *mocks.MockBrokerRequestDto)
 		output    error
 	}{
 		{
 			name: "StreamBiConn Ok",
-			setupMock: func(mss *mocks.MockStreamBi, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
-				ml.EXPECT().
-					WriteLog(gomock.All(), gomock.All()).AnyTimes()
-
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerBidirectionalDto, mrq *mocks.MockBrokerRequestDto) {
+				
 				gomock.InOrder(
-					mss.EXPECT().Recv().Return(mgd, nil),
-					mss.EXPECT().Recv().Return(mgd, nil),
-					mss.EXPECT().Recv().Return(mgd, nil),
-					mss.EXPECT().Recv().Return(nil, fmt.Errorf("connection closed")),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+					mdto.EXPECT().Recv().Return(nil, fmt.Errorf("connection closed")),
 				)
 
-				mgd.EXPECT().
+				mrq.EXPECT().
 					GetSubscribers().
 					Return([]string{"server1.api.com", "server2.api.com", "server3.api.com", "127.0.0.1:8080"}).AnyTimes()
 
-				mgd.EXPECT().
+				mrq.EXPECT().
 					GetPayload().
 					Return([]byte("test")).AnyTimes()
 
-				mgc.EXPECT().
+				mc.EXPECT().
 					BidirectionalStream(gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All()).
 					Do(func(subscribers, streamProv, streamSub, errMsg, closed, ctx, done any) {
 						// received
@@ -67,10 +65,10 @@ func TestStreamBiConn(t *testing.T) {
 					}).Times(1)
 
 				gomock.InOrder(
-					mss.EXPECT().Send(gomock.All()).Return(nil),
-					mss.EXPECT().Send(gomock.All()).Return(nil),
-					mss.EXPECT().Send(gomock.All()).Return(nil),
-					mss.EXPECT().Send(gomock.All()).Return(fmt.Errorf("connection closed")),
+					mdto.EXPECT().Send(gomock.All()).Return(nil),
+					mdto.EXPECT().Send(gomock.All()).Return(nil),
+					mdto.EXPECT().Send(gomock.All()).Return(nil),
+					mdto.EXPECT().Send(gomock.All()).Return(fmt.Errorf("connection closed")),
 				)
 
 			},
@@ -78,17 +76,17 @@ func TestStreamBiConn(t *testing.T) {
 		},
 		{
 			name: "StreamBiConn Recv error",
-			setupMock: func(msb *mocks.MockStreamBi, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
-				msb.EXPECT().Recv().Return(nil, fmt.Errorf("recv error"))
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerBidirectionalDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Recv().Return(nil, fmt.Errorf("recv error"))
 			},
 			output: fmt.Errorf("recv error"),
 		},
 		{
 			name: "StreamBiConn subscribers empty",
-			setupMock: func(msb *mocks.MockStreamBi, mgc *mocks.MockGrpcClient, ml *mocks.MockLogs, mgd *mocks.MockGrpcDto) {
-				msb.EXPECT().Recv().Return(mgd, nil).Times(1)
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerBidirectionalDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Recv().Return(mrq, nil).Times(1)
 
-				mgd.EXPECT().
+				mrq.EXPECT().
 					GetSubscribers().
 					Return([]string{}).Times(1)
 			},
@@ -101,16 +99,15 @@ func TestStreamBiConn(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			mockLogs := mocks.NewMockLogs(ctrl)
-			mockGrpcDto := mocks.NewMockGrpcDto(ctrl)
-			mockGrpcClient := mocks.NewMockGrpcClient(ctrl)
-			mockStreamBi := mocks.NewMockStreamBi(ctrl)
+			mockDto := mocks.NewMockBrokerBidirectionalDto(ctrl)
+			mockClient := mocks.NewMockBrokerClient(ctrl)
+			mockRequestDto := mocks.NewMockBrokerRequestDto(ctrl)
 
-			tt.setupMock(mockStreamBi, mockGrpcClient, mockLogs, mockGrpcDto)
+			tt.setupMock(mockClient, mockDto, mockRequestDto)
 
-			stream := broker.NewBroker(mockLogs, mockGrpcClient)
+			service := broker.NewBroker(mockClient)
 
-			err := stream.StreamBiConn(mockStreamBi)
+			err := service.StreamBiConn(mockDto)
 
 			if tt.output.Error() != err.Error() {
 				t.Fatalf("Expected output different from output %s != %s", tt.output, err)

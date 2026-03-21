@@ -1,7 +1,7 @@
 package swagger_test
 
 import (
-	"dominus-project/internal/adapters/fasthttp/inbound"
+	"dominus-project/internal/infrastructure/fasthttp/inbound"
 	"testing"
 
 	"github.com/fasthttp/router"

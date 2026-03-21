@@ -1,6 +1,7 @@
 package inbound
 
 import (
+	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/infrastructure/event"
 	"net/http"
 
@@ -104,7 +105,7 @@ func (m *monitor) getMetrics(ctx *fasthttp.RequestCtx) {
 // @Failure 406 {object} map[string]string "Response body {message: error}"
 // @Router /health [get]
 func (*monitor) getHealthCheck(ctx *fasthttp.RequestCtx) {
-	ctx.Response.Header.Set("Content-Type", "application/text")
+	ctx.Response.Header.Set("Content-Type", enum.CONTENT_TYPE_TEXT)
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusOK)
 	ctx.Response.SetBody([]byte("Health ok"))
 }
