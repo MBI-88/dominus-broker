@@ -3,11 +3,10 @@ package cmemory
 import (
 	"context"
 	"crypto/tls"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/event"
 	"dominus-project/internal/domain/entities"
 	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/domain/services"
+	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
 	"fmt"
 	"time"
 
@@ -17,9 +16,9 @@ import (
 
 type memory struct {
 	rdb       *redis.Client
-	exp       int
 	lg        event.Event
-	batchSize int64
+	streamID    string
+	groupID   string
 }
 
 func NewMemoryClient(
@@ -35,8 +34,8 @@ func NewMemoryClient(
 	Password string,
 	Tls bool,
 	Username string,
-	ExpirationTime int,
-	BatchSize int64,
+	StreamID string,
+	GroupID  string,
 	lg event.Event,
 ) repositories.MemoryClient {
 
@@ -67,24 +66,37 @@ func NewMemoryClient(
 	}
 	return &memory{
 		rdb:       client,
-		exp:       ExpirationTime,
 		lg:        lg,
-		batchSize: BatchSize,
+		streamID: StreamID,
+		groupID: GroupID,
 	}
 }
 
 func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
-	if _, err := m.rdb.Set(ctx, q.GetID(), q, time.Duration(m.exp)*time.Hour).Result(); err != nil {
+
+	data, err := jsoniter.Marshal(q)
+	if err != nil {
+		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
+		return err
+	}
+
+	if err := m.rdb.XAdd(ctx, &redis.XAddArgs{
+		Stream: m.streamID,
+		Values: map[string]interface{}{
+			enum.PAYLOAD: data,
+		},
+		ID: q.GetID(),
+	}).Err(); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (m *memory) DeleteMessage(ctx context.Context, key string) error {
+func (m *memory) AckMessage(ctx context.Context, key string) error {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "DeleteMessage", enum.DEBUG_DESCRIPTION)
-	if _, err := m.rdb.Del(ctx, key).Result(); err != nil {
+	if err := m.rdb.XAck(ctx, m.streamID, m.groupID, key).Err(); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "DeleteMessage", err.Error())
 		return err
 	}
@@ -93,42 +105,31 @@ func (m *memory) DeleteMessage(ctx context.Context, key string) error {
 
 func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Message, error) {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
-	result, err := m.rdb.Get(ctx, key).Result()
-	if err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
-		return nil, redis.ErrClosed
-	}
 
-	var q *entities.Message
-	if err := jsoniter.Unmarshal([]byte(result), q); err != nil {
+	response, err := m.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
+		Group:    m.groupID,
+		Consumer: key,
+		Streams:  []string{m.streamID, ">"},
+		Block:    time.Second,
+		Count:    1,
+	}).Result()
+
+	if err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
 		return nil, err
 	}
+
+	message := response[0].Messages[0].Values[enum.PAYLOAD].(string)
+
+	var q *entities.Message
+	if err := jsoniter.Unmarshal([]byte(message), q); err != nil {
+		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
+		return nil, err
+	}
+
 	return q, nil
 }
 
-func (m *memory) GetKeys(ctx context.Context, mem services.Memory) error {
-	go m.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
-
-	var cursor uint64
-	for {
-		keys, nextCursor, error := m.rdb.Scan(ctx, cursor, enum.ALL_KEYS, m.batchSize).Result()
-		if error != nil {
-			go m.lg.WriteLog(ctx, enum.ERROR, "GetKeys", error.Error())
-			return error
-		}
-
-		for _, key := range keys {
-			go m.lg.WriteLog(ctx, enum.INFO, "GetKeys", key)
-			mem.Set(key)
-		}
-
-		cursor = nextCursor
-
-		if cursor == 0 {
-			go m.lg.WriteLog(ctx, enum.DEBUG, "GetKeys", enum.DEBUG_DESCRIPTION)
-			break
-		}
-	}
-	return nil
+func (m *memory) Group(ctx context.Context) error {
+	return m.rdb.XGroupCreateMkStream(ctx, m.streamID, m.groupID, enum.START_FROM_NEW_MESSAGE).Err()
 }

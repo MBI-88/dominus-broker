@@ -7,7 +7,6 @@ import (
 
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/application/use_cases/sqs"
-	"dominus-project/internal/domain/services"
 	"dominus-project/internal/infrastructure/enum"
 
 	"dominus-project/internal/infrastructure/event"
@@ -49,7 +48,6 @@ func gRPServer(
 	cancel context.CancelFunc,
 	metricserver *grpcmetrics.ServerMetrics,
 	metricclient *grpcmetrics.ClientMetrics,
-	st <-chan os.Signal,
 ) *grpc.Server {
 	var (
 		optsS []grpc.ServerOption
@@ -119,9 +117,6 @@ func gRPServer(
 		grpc.WithDefaultServiceConfig(enum.ROUTER_CLIENT),
 	)
 
-	// Entities
-	memory := services.NewMemory()
-
 	// Clients
 	bclient := gt.NewGrpClient(optsD, logs)
 	qclient := cmemory.NewMemoryClient(
@@ -137,19 +132,19 @@ func gRPServer(
 		cf.RedisConfig.Password,
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
-		cf.RedisConfig.ExpirationTime,
-		cf.RedisConfig.BatchSize,
+		cf.RedisConfig.StreamID,
+		cf.RedisConfig.GroupID,
 		logs,
 	)
 
 	// Interactors
 	broker := broker.NewBroker(bclient)
-	sqs := sqs.NewSQS(qclient, memory)
+	sqs := sqs.NewSQS(qclient)
 
-	// Checking current data in memory (redis case)
-	sqs.CheckMemory()
-	// Background worker
-	sqs.ReactivateMessage(st)
+	// Create group if not exist
+	if err := sqs.CreateGroup(); err != nil {
+		panic(err)
+	}
 
 	// Server
 	server := grpc.NewServer(optsS...)
@@ -274,7 +269,7 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//*********Grpc server************
 	//********************************
 
-	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient, st)
+	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
 	if srG == nil {
 		panic("GRPC server error")
 	}

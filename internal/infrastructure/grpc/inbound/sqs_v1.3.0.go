@@ -42,7 +42,7 @@ func (s *sqsAPI) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.Prod
 
 func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "Consumer", enum.REQUEST_OK)
-	response, err := s.q.Consumer(ctx)
+	response, err := s.q.Consumer(ctx, ms)
 	if err != nil {
 		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
@@ -50,19 +50,18 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 	return &pb.ConsumerResponse{
 		Id:      response.GetID(),
 		Message: response.GetMessage(),
-		Hidden:  response.GetHidden(),
 		Date:    timestamppb.New(response.GetCreatedAt()),
 	}, nil
 }
 
-func (s *sqsAPI) ConsumerDLT(ctx context.Context, ms *pb.ConsumerDeleteRequest) (*pb.ConsumerDeleteResponse, error) {
+func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerDeleteRequest) (*pb.ConsumerDeleteResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "ConsumerDLT", enum.REQUEST_OK)
 
 	if ms.GetId() == "" {
 		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", enum.INVALID_ID)
 		return nil, status.Error(codes.NotFound, enum.INVALID_ID)
 	}
-	if err := s.q.ConsumerDLT(ctx, ms); err != nil {
+	if err := s.q.Ack(ctx, ms); err != nil {
 		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}

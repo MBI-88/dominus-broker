@@ -29,22 +29,23 @@ type CertConfig struct {
 }
 
 type RedisConfig struct {
-	PoolSize       int64  `json:"pool_size"`
-	IdleConn       int64  `json:"idle_conn"`
-	MaxRetries     int64  `json:"max_retries"`
-	DialTimeOut    int64  `json:"dial_time_out"`
-	ReadTimeOut    int64  `json:"read_time_out"`
-	WriteTimeOut   int64  `json:"write_time_out"`
-	BatchSize      int64  `json:"batch_size"`
-	Port           int64  `json:"port"`
-	MemoryDB       int    `json:"memory_db"`
-	CheckerDB      int    `json:"checker_db"`
-	ExpirationTime int    `json:"expiration_time"`
-	IdPotency      int    `json:"id_potency"`
-	Host           string `json:"host"`
-	Password       string `json:"password"`
-	Username       string `json:"username"`
-	Tls            bool   `json:"tls"`
+	PoolSize     int64  `json:"pool_size"`
+	IdleConn     int64  `json:"idle_conn"`
+	MaxRetries   int64  `json:"max_retries"`
+	DialTimeOut  int64  `json:"dial_time_out"`
+	ReadTimeOut  int64  `json:"read_time_out"`
+	WriteTimeOut int64  `json:"write_time_out"`
+	Port         int64  `json:"port"`
+	BatchSize    int64     `json:"batch_size"`
+	MemoryDB     int    `json:"memory_db"`
+	CheckerDB    int    `json:"checker_db"`
+	IdPotency    int    `json:"id_potency"`
+	Host         string `json:"host"`
+	Password     string `json:"password"`
+	Username     string `json:"username"`
+	StreamID     string `json:"stream_name"`
+	GroupID      string `json:"group_id"`
+	Tls          bool   `json:"tls"`
 }
 
 type InfraConfig struct {

@@ -13,6 +13,5 @@ func (c *sqs) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 		return  fmt.Errorf("empty payload")
 	}
 	q := entities.NewMessage(payload)
-	c.memory.Set(q.GetID())
 	return c.client.SendMessage(ctx, q)
 }
