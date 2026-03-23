@@ -43,7 +43,7 @@ type RedisConfig struct {
 	Host         string `json:"host"`
 	Password     string `json:"password"`
 	Username     string `json:"username"`
-	StreamID     string `json:"stream_name"`
+	StreamID     string `json:"stream_id"`
 	GroupID      string `json:"group_id"`
 	Tls          bool   `json:"tls"`
 }
