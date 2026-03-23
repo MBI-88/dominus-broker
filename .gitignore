@@ -19,6 +19,5 @@
 
 # Go workspace file
 *.sum
-#Database
-database/database/*
-*.log
+*.log 
+.vscode/
