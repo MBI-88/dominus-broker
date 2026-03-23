@@ -2,8 +2,8 @@ cloud.google.com/go/compute/metadata v0.9.0 h1:pDUj4QMoPejqq20dK0Pg2N4yG9zIkYGdB
 cloud.google.com/go/compute/metadata v0.9.0/go.mod h1:E0bWwX5wTnLPedCKqk3pJmVgCBSM6qQI1yTBdEb3C10=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
-github.com/MBI-88/dominus-proto-definition v1.3.4 h1:hwAmBhIU/9Gr77WGjU409WPjFyk4hA+vRLYhZSWl4+E=
-github.com/MBI-88/dominus-proto-definition v1.3.4/go.mod h1:vB/cgE7WGs6usW4R+f16HWjxCt4rEVIkmZmml2F3SQ8=
+github.com/MBI-88/dominus-proto-definition v1.3.5 h1:mGq4WBbieu/5/UORMv6A/OUxIimZfxgspyngvaQ5/Is=
+github.com/MBI-88/dominus-proto-definition v1.3.5/go.mod h1:vB/cgE7WGs6usW4R+f16HWjxCt4rEVIkmZmml2F3SQ8=
 github.com/andybalholm/brotli v1.2.0 h1:ukwgCxwYrmACq68yiUqwIWnGY0cTPox/M94sVwToPjQ=
 github.com/andybalholm/brotli v1.2.0/go.mod h1:rzTDkvFWvIrjDXZHkuS16NPggd91W3kUSvPlQ1pLaKY=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
