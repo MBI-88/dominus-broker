@@ -56,7 +56,6 @@ func gRPServer(
 
 	checker := cchecker.NewCheckerClient(
 		cf.RedisConfig.PoolSize,
-		cf.RedisConfig.IdleConn,
 		cf.RedisConfig.MaxRetries,
 		cf.RedisConfig.DialTimeOut,
 		cf.RedisConfig.ReadTimeOut,
@@ -68,7 +67,6 @@ func gRPServer(
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
 		cf.RedisConfig.IdPotency,
-		cf.RedisConfig.BatchSize,
 	)
 
 	midGs := gm.NewMiddleware(cf.GrpcConfig.ConnectionKey, logs, checker)
@@ -121,7 +119,6 @@ func gRPServer(
 	bclient := gt.NewGrpClient(optsD, logs)
 	qclient := cmemory.NewMemoryClient(
 		cf.RedisConfig.PoolSize,
-		cf.RedisConfig.IdleConn,
 		cf.RedisConfig.MaxRetries,
 		cf.RedisConfig.DialTimeOut,
 		cf.RedisConfig.ReadTimeOut,

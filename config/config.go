@@ -29,14 +29,12 @@ type CertConfig struct {
 }
 
 type RedisConfig struct {
-	PoolSize     int64  `json:"pool_size"`
-	IdleConn     int64  `json:"idle_conn"`
-	MaxRetries   int64  `json:"max_retries"`
-	DialTimeOut  int64  `json:"dial_time_out"`
-	ReadTimeOut  int64  `json:"read_time_out"`
-	WriteTimeOut int64  `json:"write_time_out"`
 	Port         int64  `json:"port"`
-	BatchSize    int64     `json:"batch_size"`
+	PoolSize     int  `json:"pool_size"`
+	MaxRetries   int  `json:"max_retries"`
+	DialTimeOut  int  `json:"dial_time_out"`
+	ReadTimeOut  int  `json:"read_time_out"`
+	WriteTimeOut int  `json:"write_time_out"`
 	MemoryDB     int    `json:"memory_db"`
 	CheckerDB    int    `json:"checker_db"`
 	IdPotency    int    `json:"id_potency"`

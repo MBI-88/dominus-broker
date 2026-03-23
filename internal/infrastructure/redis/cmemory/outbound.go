@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 	jsoniter "github.com/json-iterator/go"
 )
 
@@ -21,12 +21,11 @@ type memory struct {
 }
 
 func NewMemoryClient(
-	PoolSize int64,
-	IdleConn int64,
-	MaxRetries int64,
-	DialTimeOut int64,
-	ReadTimeOut int64,
-	WriteTimeOut int64,
+	PoolSize int,
+	MaxRetries int,
+	DialTimeOut int,
+	ReadTimeOut int,
+	WriteTimeOut int,
 	Port int64,
 	Db int,
 	Host string,
@@ -46,9 +45,8 @@ func NewMemoryClient(
 	}
 
 	client := redis.NewClient(&redis.Options{
-		PoolSize:     int(PoolSize),
-		IdleTimeout:  time.Duration(IdleConn),
-		MaxRetries:   int(MaxRetries),
+		PoolSize:     PoolSize,
+		MaxRetries:   MaxRetries,
 		DialTimeout:  time.Duration(DialTimeOut),
 		ReadTimeout:  time.Duration(ReadTimeOut),
 		WriteTimeout: time.Duration(WriteTimeOut),

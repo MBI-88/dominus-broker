@@ -5,12 +5,12 @@ go 1.26.1
 require (
 	github.com/MBI-88/dominus-proto-definition v1.3.5
 	github.com/fasthttp/router v1.5.4
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
 	github.com/json-iterator/go v1.1.12
 	github.com/prometheus/client_golang v1.23.2
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/viper v1.21.0
 	github.com/swaggo/fasthttp-swagger v1.0.2
