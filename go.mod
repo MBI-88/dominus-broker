@@ -3,7 +3,7 @@ module dominus-project
 go 1.25.5
 
 require (
-	github.com/PR0C0D3-MBI/dominus-proto-definition v1.3.1
+	github.com/MBI-88/dominus-proto-definition v1.3.4
 	github.com/fasthttp/router v1.5.4
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/google/uuid v1.6.0

@@ -15,10 +15,9 @@ import (
 )
 
 type memory struct {
-	rdb       *redis.Client
-	lg        event.Event
-	streamID    string
-	groupID   string
+	rdb      *redis.Client
+	lg       event.Event
+	streamID string
 }
 
 func NewMemoryClient(
@@ -35,7 +34,6 @@ func NewMemoryClient(
 	Tls bool,
 	Username string,
 	StreamID string,
-	GroupID  string,
 	lg event.Event,
 ) repositories.MemoryClient {
 
@@ -65,10 +63,9 @@ func NewMemoryClient(
 		panic(err)
 	}
 	return &memory{
-		rdb:       client,
-		lg:        lg,
+		rdb:      client,
+		lg:       lg,
 		streamID: StreamID,
-		groupID: GroupID,
 	}
 }
 
@@ -83,7 +80,7 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 
 	if err := m.rdb.XAdd(ctx, &redis.XAddArgs{
 		Stream: m.streamID,
-		Values: map[string]interface{}{
+		Values: map[string]any{
 			enum.PAYLOAD: data,
 		},
 		ID: q.GetID(),
@@ -94,23 +91,23 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 	return nil
 }
 
-func (m *memory) AckMessage(ctx context.Context, key string) error {
+func (m *memory) AckMessage(ctx context.Context, messageId, groupId string) error {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "DeleteMessage", enum.DEBUG_DESCRIPTION)
-	if err := m.rdb.XAck(ctx, m.streamID, m.groupID, key).Err(); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "DeleteMessage", err.Error())
+	if err := m.rdb.XAck(ctx, m.streamID, groupId, messageId).Err(); err != nil {
+		go m.lg.WriteLog(ctx, enum.ERROR, "AckMessage", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Message, error) {
+func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*entities.Message, error) {
 	go m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
 
 	response, err := m.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
-		Group:    m.groupID,
-		Consumer: key,
+		Group:    groupId,
+		Consumer: workerId,
 		Streams:  []string{m.streamID, ">"},
-		Block:    time.Second,
+		Block:    100 * time.Millisecond,
 		Count:    1,
 	}).Result()
 
@@ -130,6 +127,6 @@ func (m *memory) GetMessage(ctx context.Context, key string) (*entities.Message,
 	return q, nil
 }
 
-func (m *memory) Group(ctx context.Context) error {
-	return m.rdb.XGroupCreateMkStream(ctx, m.streamID, m.groupID, enum.START_FROM_NEW_MESSAGE).Err()
+func (m *memory) Group(groupId string) error {
+	return m.rdb.XGroupCreateMkStream(context.Background(), m.streamID, groupId, enum.START_FROM_NEW_MESSAGE).Err()
 }

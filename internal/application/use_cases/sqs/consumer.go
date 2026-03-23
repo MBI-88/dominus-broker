@@ -7,5 +7,5 @@ import (
 )
 
 func (s *sqs) Consumer(ctx context.Context, ms dtos.ConsumerDto) (*entities.Message, error) {
-	return s.client.GetMessage(ctx, "key string")
+	return s.client.GetMessage(ctx, ms.GetWorker(), ms.GetGroupId())
 }

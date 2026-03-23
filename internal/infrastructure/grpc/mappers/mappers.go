@@ -4,7 +4,7 @@ import (
 	"context"
 	"dominus-project/internal/application/dtos"
 
-	pb "github.com/PR0C0D3-MBI/dominus-proto-definition/dominus"
+	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 )
 
 type grpcBiContextStream struct {

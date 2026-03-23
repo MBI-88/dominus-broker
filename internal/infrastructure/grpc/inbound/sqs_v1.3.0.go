@@ -6,7 +6,7 @@ import (
 	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/infrastructure/event"
 
-	pb "github.com/PR0C0D3-MBI/dominus-proto-definition/dominus"
+	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,6 +42,17 @@ func (s *sqsAPI) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.Prod
 
 func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "Consumer", enum.REQUEST_OK)
+
+	if ms.GetGroupId() == "" {
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.GROUP_ID)
+		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
+	}
+
+	if ms.GetWorker() == "" {
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.GROUP_ID)
+		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
+	}
+
 	response, err := s.q.Consumer(ctx, ms)
 	if err != nil {
 		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", err.Error())
@@ -54,19 +65,31 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 	}, nil
 }
 
-func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerDeleteRequest) (*pb.ConsumerDeleteResponse, error) {
-	go s.log.WriteLog(ctx, enum.DEBUG, "ConsumerDLT", enum.REQUEST_OK)
+func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
+	go s.log.WriteLog(ctx, enum.DEBUG, "Ack", enum.REQUEST_OK)
 
 	if ms.GetId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", enum.INVALID_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.INVALID_ID)
 		return nil, status.Error(codes.NotFound, enum.INVALID_ID)
 	}
+
+	if ms.GetGroupId() == "" {
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.GROUP_ID)
+		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
+	}
+
+	if ms.GetWorker() == "" {
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.GROUP_ID)
+		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
+	}
+
 	if err := s.q.Ack(ctx, ms); err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "ConsumerDLT", err.Error())
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
-	return &pb.ConsumerDeleteResponse{
-		Status: int64(codes.OK),
-		Description: enum.DESCRIPTION_DELETE_MESSAGE,
+
+	return &pb.ConsumerResponse{
+		Id:   ms.GetId(),
+		Date: timestamppb.Now(),
 	}, nil
 }

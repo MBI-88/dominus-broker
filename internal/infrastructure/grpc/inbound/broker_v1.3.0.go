@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"io"
 
-	pb "github.com/PR0C0D3-MBI/dominus-proto-definition/dominus"
+	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

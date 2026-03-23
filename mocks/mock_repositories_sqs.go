@@ -12,7 +12,6 @@ package mocks
 import (
 	context "context"
 	entities "dominus-project/internal/domain/entities"
-	services "dominus-project/internal/domain/services"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -42,47 +41,47 @@ func (m *MockMemoryClient) EXPECT() *MockMemoryClientMockRecorder {
 	return m.recorder
 }
 
-// DeleteMessage mocks base method.
-func (m *MockMemoryClient) DeleteMessage(ctx context.Context, ID string) error {
+// AckMessage mocks base method.
+func (m *MockMemoryClient) AckMessage(ctx context.Context, messageId, groupId string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteMessage", ctx, ID)
+	ret := m.ctrl.Call(m, "AckMessage", ctx, messageId, groupId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// DeleteMessage indicates an expected call of DeleteMessage.
-func (mr *MockMemoryClientMockRecorder) DeleteMessage(ctx, ID any) *gomock.Call {
+// AckMessage indicates an expected call of AckMessage.
+func (mr *MockMemoryClientMockRecorder) AckMessage(ctx, messageId, groupId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMessage", reflect.TypeOf((*MockMemoryClient)(nil).DeleteMessage), ctx, ID)
-}
-
-// GetKeys mocks base method.
-func (m *MockMemoryClient) GetKeys(ctx context.Context, mem services.Memory) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetKeys", ctx, mem)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// GetKeys indicates an expected call of GetKeys.
-func (mr *MockMemoryClientMockRecorder) GetKeys(ctx, mem any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetKeys", reflect.TypeOf((*MockMemoryClient)(nil).GetKeys), ctx, mem)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AckMessage", reflect.TypeOf((*MockMemoryClient)(nil).AckMessage), ctx, messageId, groupId)
 }
 
 // GetMessage mocks base method.
-func (m *MockMemoryClient) GetMessage(ctx context.Context, key string) (*entities.Message, error) {
+func (m *MockMemoryClient) GetMessage(ctx context.Context, workerId, groupId string) (*entities.Message, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMessage", ctx, key)
+	ret := m.ctrl.Call(m, "GetMessage", ctx, workerId, groupId)
 	ret0, _ := ret[0].(*entities.Message)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetMessage indicates an expected call of GetMessage.
-func (mr *MockMemoryClientMockRecorder) GetMessage(ctx, key any) *gomock.Call {
+func (mr *MockMemoryClientMockRecorder) GetMessage(ctx, workerId, groupId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessage", reflect.TypeOf((*MockMemoryClient)(nil).GetMessage), ctx, key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessage", reflect.TypeOf((*MockMemoryClient)(nil).GetMessage), ctx, workerId, groupId)
+}
+
+// Group mocks base method.
+func (m *MockMemoryClient) Group(groupId string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Group", groupId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Group indicates an expected call of Group.
+func (mr *MockMemoryClientMockRecorder) Group(groupId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Group", reflect.TypeOf((*MockMemoryClient)(nil).Group), groupId)
 }
 
 // SendMessage mocks base method.

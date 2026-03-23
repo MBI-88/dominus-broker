@@ -5,7 +5,7 @@ import (
 	"dominus-project/internal/infrastructure/grpc/mappers"
 	"testing"
 
-	"github.com/PR0C0D3-MBI/dominus-proto-definition/dominus"
+	"github.com/MBI-88/dominus-proto-definition/dominus"
 	"google.golang.org/grpc/metadata"
 )
 

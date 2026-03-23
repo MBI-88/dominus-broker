@@ -133,7 +133,6 @@ func gRPServer(
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
 		cf.RedisConfig.StreamID,
-		cf.RedisConfig.GroupID,
 		logs,
 	)
 
@@ -142,7 +141,7 @@ func gRPServer(
 	sqs := sqs.NewSQS(qclient)
 
 	// Create group if not exist
-	if err := sqs.CreateGroup(); err != nil {
+	if err := qclient.Group(cf.RedisConfig.GroupID); err != nil {
 		panic(err)
 	}
 

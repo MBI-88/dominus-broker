@@ -27,4 +27,6 @@ const (
 	CONTENT_TYPE_TEXT = "application/text"
 	PAYLOAD = "payload"
 	START_FROM_NEW_MESSAGE = "$"
+	GROUP_ID = "empty group id"
+	WORKER_ID = "empty worker id"
 )

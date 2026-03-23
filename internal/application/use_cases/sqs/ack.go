@@ -6,5 +6,5 @@ import (
 )
 
 func (c *sqs) Ack(ctx context.Context, ms dtos.ConsumerDto) error {
-	return c.client.AckMessage(ctx, ms.GetId())
+	return c.client.AckMessage(ctx, ms.GetId(), ms.GetGroupId())
 }

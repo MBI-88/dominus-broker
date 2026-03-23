@@ -13,7 +13,6 @@ import (
 	context "context"
 	dtos "dominus-project/internal/application/dtos"
 	entities "dominus-project/internal/domain/entities"
-	os "os"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
@@ -43,45 +42,33 @@ func (m *MockSQS) EXPECT() *MockSQSMockRecorder {
 	return m.recorder
 }
 
-// CheckMemory mocks base method.
-func (m *MockSQS) CheckMemory() {
+// Ack mocks base method.
+func (m *MockSQS) Ack(ctx context.Context, ms dtos.ConsumerDto) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "CheckMemory")
+	ret := m.ctrl.Call(m, "Ack", ctx, ms)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// CheckMemory indicates an expected call of CheckMemory.
-func (mr *MockSQSMockRecorder) CheckMemory() *gomock.Call {
+// Ack indicates an expected call of Ack.
+func (mr *MockSQSMockRecorder) Ack(ctx, ms any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckMemory", reflect.TypeOf((*MockSQS)(nil).CheckMemory))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ack", reflect.TypeOf((*MockSQS)(nil).Ack), ctx, ms)
 }
 
 // Consumer mocks base method.
-func (m *MockSQS) Consumer(ctx context.Context) (*entities.Message, error) {
+func (m *MockSQS) Consumer(ctx context.Context, ms dtos.ConsumerDto) (*entities.Message, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Consumer", ctx)
+	ret := m.ctrl.Call(m, "Consumer", ctx, ms)
 	ret0, _ := ret[0].(*entities.Message)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Consumer indicates an expected call of Consumer.
-func (mr *MockSQSMockRecorder) Consumer(ctx any) *gomock.Call {
+func (mr *MockSQSMockRecorder) Consumer(ctx, ms any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consumer", reflect.TypeOf((*MockSQS)(nil).Consumer), ctx)
-}
-
-// ConsumerDLT mocks base method.
-func (m *MockSQS) ConsumerDLT(ctx context.Context, ms dtos.ConsumerDto) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ConsumerDLT", ctx, ms)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ConsumerDLT indicates an expected call of ConsumerDLT.
-func (mr *MockSQSMockRecorder) ConsumerDLT(ctx, ms any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumerDLT", reflect.TypeOf((*MockSQS)(nil).ConsumerDLT), ctx, ms)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consumer", reflect.TypeOf((*MockSQS)(nil).Consumer), ctx, ms)
 }
 
 // Producer mocks base method.
@@ -96,16 +83,4 @@ func (m *MockSQS) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 func (mr *MockSQSMockRecorder) Producer(ctx, ms any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Producer", reflect.TypeOf((*MockSQS)(nil).Producer), ctx, ms)
-}
-
-// ReactivateMessage mocks base method.
-func (m *MockSQS) ReactivateMessage(ch <-chan os.Signal) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ReactivateMessage", ch)
-}
-
-// ReactivateMessage indicates an expected call of ReactivateMessage.
-func (mr *MockSQSMockRecorder) ReactivateMessage(ch any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ReactivateMessage", reflect.TypeOf((*MockSQS)(nil).ReactivateMessage), ch)
 }

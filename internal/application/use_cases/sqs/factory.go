@@ -11,7 +11,6 @@ type SQS interface {
 	Producer(ctx context.Context, ms dtos.ProducerDto) error 
 	Consumer(ctx context.Context, ms dtos.ConsumerDto) (*entities.Message, error)
 	Ack(ctx context.Context, ms dtos.ConsumerDto) error
-	CreateGroup() error 
 }
 
 type sqs struct {
