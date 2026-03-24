@@ -8,14 +8,14 @@ import (
 
 type Message struct {
 	Message   []byte    `json:"message"`
-	ID        string    `json:"id"`
+	MeesageId string    `json:"message_id"`
 	CreatedAt time.Time `json:"created_at"`
 }
 
 func NewMessage(message []byte) *Message {
 	return &Message{
 		Message:   message,
-		ID:        uuid.New().String(),
+		MeesageId: uuid.New().String(),
 		CreatedAt: time.Now(),
 	}
 }
@@ -27,11 +27,11 @@ func (q *Message) GetMessage() []byte {
 	return q.Message
 }
 
-func (q *Message) SetID(id string) {
-	q.ID = id
+func (q *Message) SetMessageId(id string) {
+	q.MeesageId = id
 }
-func (q *Message) GetID() string {
-	return q.ID
+func (q *Message) GetMessageId() string {
+	return q.MeesageId
 }
 
 func (q *Message) GetCreatedAt() time.Time {

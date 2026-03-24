@@ -91,30 +91,30 @@ func (mr *MockConsumerDtoMockRecorder) GetGroupId() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupId", reflect.TypeOf((*MockConsumerDto)(nil).GetGroupId))
 }
 
-// GetId mocks base method.
-func (m *MockConsumerDto) GetId() string {
+// GetMessageId mocks base method.
+func (m *MockConsumerDto) GetMessageId() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetId")
+	ret := m.ctrl.Call(m, "GetMessageId")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// GetId indicates an expected call of GetId.
-func (mr *MockConsumerDtoMockRecorder) GetId() *gomock.Call {
+// GetMessageId indicates an expected call of GetMessageId.
+func (mr *MockConsumerDtoMockRecorder) GetMessageId() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetId", reflect.TypeOf((*MockConsumerDto)(nil).GetId))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessageId", reflect.TypeOf((*MockConsumerDto)(nil).GetMessageId))
 }
 
-// GetWorker mocks base method.
-func (m *MockConsumerDto) GetWorker() string {
+// GetWorkerId mocks base method.
+func (m *MockConsumerDto) GetWorkerId() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWorker")
+	ret := m.ctrl.Call(m, "GetWorkerId")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// GetWorker indicates an expected call of GetWorker.
-func (mr *MockConsumerDtoMockRecorder) GetWorker() *gomock.Call {
+// GetWorkerId indicates an expected call of GetWorkerId.
+func (mr *MockConsumerDtoMockRecorder) GetWorkerId() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorker", reflect.TypeOf((*MockConsumerDto)(nil).GetWorker))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkerId", reflect.TypeOf((*MockConsumerDto)(nil).GetWorkerId))
 }

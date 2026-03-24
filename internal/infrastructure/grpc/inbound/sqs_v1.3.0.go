@@ -48,7 +48,7 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
 
-	if ms.GetWorker() == "" {
+	if ms.GetWorkerId() == "" {
 		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.GROUP_ID)
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
@@ -59,16 +59,16 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	return &pb.ConsumerResponse{
-		Id:      response.GetID(),
-		Message: response.GetMessage(),
-		Date:    timestamppb.New(response.GetCreatedAt()),
+		MessageId: response.GetMessageId(),
+		Message:   response.GetMessage(),
+		Date:      timestamppb.New(response.GetCreatedAt()),
 	}, nil
 }
 
 func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
 	go s.log.WriteLog(ctx, enum.DEBUG, "Ack", enum.REQUEST_OK)
 
-	if ms.GetId() == "" {
+	if ms.GetMessageId() == "" {
 		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.INVALID_ID)
 		return nil, status.Error(codes.NotFound, enum.INVALID_ID)
 	}
@@ -78,7 +78,7 @@ func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerR
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
 
-	if ms.GetWorker() == "" {
+	if ms.GetWorkerId() == "" {
 		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.GROUP_ID)
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
@@ -89,7 +89,7 @@ func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerR
 	}
 
 	return &pb.ConsumerResponse{
-		Id:   ms.GetId(),
-		Date: timestamppb.Now(),
+		MessageId: ms.GetMessageId(),
+		Date:      timestamppb.Now(),
 	}, nil
 }

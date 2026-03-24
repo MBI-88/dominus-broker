@@ -5,7 +5,7 @@ type ProducerDto interface {
 }
 
 type ConsumerDto interface {
-	GetId() string
-	GetWorker() string
+	GetMessageId() string
+	GetWorkerId() string
 	GetGroupId() string
 }

@@ -7,11 +7,11 @@ import (
 	"fmt"
 )
 
-func (c *sqs) Producer(ctx context.Context, ms dtos.ProducerDto) error {
+func (s *sqs) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 	payload := ms.GetPayload()
 	if len(payload) == 0 {
 		return  fmt.Errorf("empty payload")
 	}
 	q := entities.NewMessage(payload)
-	return c.client.SendMessage(ctx, q)
+	return s.client.SendMessage(ctx, q)
 }

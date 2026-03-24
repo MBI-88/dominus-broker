@@ -81,7 +81,7 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 		Values: map[string]any{
 			enum.PAYLOAD: data,
 		},
-		ID: q.GetID(),
+		ID: q.GetMessageId(),
 	}).Err(); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
 		return err
