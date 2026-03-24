@@ -37,8 +37,16 @@ func NewEvent(mode, url string, devMode bool) Event {
 }
 
 func (l *log) WriteLog(ctx context.Context, level, op, dsc string) {
+	var id string
+
+	temp := ctx.Value(enum.ID)
+	if temp == nil {
+		id = ""
+	} else {
+		id = temp.(string)
+	}
 	message, err := jsoniter.Marshal(&Logs{
-		ID:          ctx.Value(enum.ID).(string),
+		ID:          id,
 		Description: dsc,
 		Op:          op,
 	})
@@ -68,7 +76,6 @@ func (l *log) typeLog(level string, message []byte) {
 }
 
 func (l *log) clientLog(level string, message []byte) {
-
 }
 
 func (l *log) cmdLog(level string, message []byte) {
