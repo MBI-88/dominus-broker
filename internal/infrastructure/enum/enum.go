@@ -10,7 +10,7 @@ const (
 	X_API_KEY  = "x-api-key"
 	DESCRIPTION_DELETE_MESSAGE = "message deleted successful"
 	INVALID_PAYLOAD = "invalid payload"
-	INVALID_ID = "invalid id"
+	INVALID_ID = "invalid message id"
 	DEBUG_DESCRIPTION = "system debuging activated"
 	SUBCRIBER_NOT_FOUND = "subscirbers not found"
 	REQUEST_OK = "request accepted"

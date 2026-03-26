@@ -37,7 +37,7 @@ func (s *sqsAPI) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.Prod
 		go s.log.WriteLog(ctx, enum.ERROR, "Producer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
-	return &pb.ProducerResponse{Status: int64(codes.OK)}, nil
+	return &pb.ProducerResponse{Status: 0}, nil
 }
 
 func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
@@ -49,8 +49,8 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 	}
 
 	if ms.GetWorkerId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.GROUP_ID)
-		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.WORKER_ID)
+		return nil, status.Error(codes.NotFound, enum.WORKER_ID)
 	}
 
 	response, err := s.q.Consumer(ctx, ms)
@@ -79,8 +79,8 @@ func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerR
 	}
 
 	if ms.GetWorkerId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.GROUP_ID)
-		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.WORKER_ID)
+		return nil, status.Error(codes.NotFound, enum.WORKER_ID)
 	}
 
 	if err := s.q.Ack(ctx, ms); err != nil {
