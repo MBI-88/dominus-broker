@@ -3,6 +3,7 @@ package inbound_test
 import (
 	"context"
 	"dominus-project/internal/application/dtos"
+	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/infrastructure/grpc/inbound"
 	"dominus-project/internal/infrastructure/grpc/outbound"
 	"dominus-project/mocks"
@@ -34,11 +35,15 @@ func TestClientStream(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		brokerMock := mocks.NewMockBroker(ctrl)
-		evnetMock := mocks.NewMockEvent(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
 
 		brokerMock.EXPECT().
 			StreamClientConn(gomock.All()).
 			Return(nil).AnyTimes()
+
+		eventMock.EXPECT().
+			WriteLog(context.Background(), enum.DEBUG, "ClientStream", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
@@ -46,8 +51,8 @@ func TestClientStream(t *testing.T) {
 		)
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
-		inbound.NewBrokerAPI(server, brokerMock, evnetMock)
-		client := outbound.NewGrpClient(opts, evnetMock)
+		inbound.NewBrokerAPI(server, brokerMock, eventMock)
+		client := outbound.NewGrpClient(opts, eventMock)
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
@@ -80,6 +85,10 @@ func TestClientStream(t *testing.T) {
 		brokerMock.EXPECT().
 			StreamClientConn(gomock.All()).
 			Return(fmt.Errorf("error")).AnyTimes()
+
+		eventMock.EXPECT().
+			WriteLog(context.Background(), enum.DEBUG, "ClientStream", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
@@ -132,6 +141,10 @@ func TestServerStream(t *testing.T) {
 				}
 				return nil
 			}).AnyTimes()
+		
+		eventMock.EXPECT().
+			WriteLog(context.Background(), enum.DEBUG, "ServerStream", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
@@ -186,6 +199,10 @@ func TestServerStream(t *testing.T) {
 				}
 				return fmt.Errorf("error")
 			}).AnyTimes()
+		
+		eventMock.EXPECT().
+			WriteLog(context.Background(), enum.DEBUG, "ServerStream", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),
@@ -261,6 +278,10 @@ func TestBidirectionalStream(t *testing.T) {
 			grpc.WithContextDialer(bufDialer(lis)),
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
+
+		eventMock.EXPECT().
+			WriteLog(context.Background(), enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewBrokerAPI(server, brokerMock, eventMock)
@@ -345,6 +366,10 @@ func TestBidirectionalStream(t *testing.T) {
 
 				return fmt.Errorf("error")
 			}).AnyTimes()
+		
+		eventMock.EXPECT().
+			WriteLog(context.Background(), enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
 			grpc.WithContextDialer(bufDialer(lis)),

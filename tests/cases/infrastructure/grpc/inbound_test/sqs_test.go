@@ -43,11 +43,12 @@ func TestProducer(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		sqsMock.EXPECT().
-			Producer(gomock.All(), gomock.All()).
+			Producer(context.Background(), gomock.All()).
 			Return(nil)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Producer", enum.REQUEST_OK)
+			WriteLog(gomock.All(), enum.DEBUG, "Producer", enum.REQUEST_OK).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -84,9 +85,11 @@ func TestProducer(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Producer", enum.REQUEST_OK)
+			WriteLog(gomock.All(), enum.DEBUG, "Producer", enum.REQUEST_OK).
+			AnyTimes()
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.ERROR, "Producer", enum.INVALID_PAYLOAD)
+			WriteLog(gomock.All(), enum.ERROR, "Producer", enum.INVALID_PAYLOAD).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -120,12 +123,15 @@ func TestProducer(t *testing.T) {
 
 		sqsMock.EXPECT().
 			Producer(gomock.All(), gomock.All()).
-			Return(fmt.Errorf("connection error"))
+			Return(fmt.Errorf("connection error")). 
+			AnyTimes()
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Producer", enum.REQUEST_OK)
+			WriteLog(gomock.All(), enum.DEBUG, "Producer", enum.REQUEST_OK).
+			AnyTimes()
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.ERROR, "Producer", "connection error")
+			WriteLog(gomock.All(), enum.ERROR, "Producer", "connection error").
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -163,13 +169,15 @@ func TestConsumer(t *testing.T) {
 		sqsMock.EXPECT().
 			Consumer(gomock.All(), gomock.All()).
 			Return(&entities.Message{
-				Message: []byte("test-done"),
+				Message:   []byte("test-done"),
 				MeesageId: "123456789",
 				CreatedAt: time.Now(),
-			}, nil)
+			}, nil). 
+			AnyTimes()
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION)
+			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -206,11 +214,12 @@ func TestConsumer(t *testing.T) {
 		evnetMock := mocks.NewMockEvent(ctrl)
 		sqsMock := mocks.NewMockSQS(ctrl)
 
-	
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION)
+			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.ERROR, "Consumer", enum.GROUP_ID)
+			WriteLog(gomock.All(), enum.ERROR, "Consumer", enum.GROUP_ID).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -230,7 +239,6 @@ func TestConsumer(t *testing.T) {
 		if err == nil {
 			t.Fatalf("Expected error got %v\n", err)
 		}
-		
 
 		t.Cleanup(func() {
 			server.GracefulStop()
@@ -245,11 +253,12 @@ func TestConsumer(t *testing.T) {
 		evnetMock := mocks.NewMockEvent(ctrl)
 		sqsMock := mocks.NewMockSQS(ctrl)
 
-	
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION)
+			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.ERROR, "Consumer", enum.WORKER_ID)
+			WriteLog(gomock.All(), enum.ERROR, "Consumer", enum.WORKER_ID).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -282,15 +291,16 @@ func TestConsumer(t *testing.T) {
 		evnetMock := mocks.NewMockEvent(ctrl)
 		sqsMock := mocks.NewMockSQS(ctrl)
 
-	
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION)
+			WriteLog(gomock.All(), enum.DEBUG, "Consumer", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.ERROR, "Consumer", enum.WORKER_ID)
-		
-		sqsMock.EXPECT(). 
-		Consumer(gomock.All(), gomock.All()). 
-		Return(nil, fmt.Errorf("connection error"))
+			WriteLog(gomock.All(), enum.ERROR, "Consumer", enum.WORKER_ID).
+			AnyTimes()
+
+		sqsMock.EXPECT().
+			Consumer(gomock.All(), gomock.All()).
+			Return(nil, fmt.Errorf("connection error"))
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -318,7 +328,6 @@ func TestConsumer(t *testing.T) {
 	})
 }
 
-
 func TestAck(t *testing.T) {
 	t.Run("Ack ok", func(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
@@ -327,11 +336,12 @@ func TestAck(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION)
-		
-		sqsMock.EXPECT(). 
-		Ack(gomock.All(), gomock.All()). 
-		Return(nil)
+			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
+
+		sqsMock.EXPECT().
+			Ack(gomock.All(), gomock.All()).
+			Return(nil)
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -344,9 +354,9 @@ func TestAck(t *testing.T) {
 		}()
 
 		resp, err := client.Ack(context.Background(), &pb.ConsumerRequest{
-			WorkerId: "consumer-1",
+			WorkerId:  "consumer-1",
 			MessageId: "message-1",
-			GroupId: "consumer-g",
+			GroupId:   "consumer-g",
 		})
 
 		if err != nil {
@@ -370,11 +380,12 @@ func TestAck(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION)
-		
-		evnetMock.EXPECT(). 
-		WriteLog(gomock.All(), enum.ERROR, "Ack", enum.INVALID_ID)
-		
+			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
+
+		evnetMock.EXPECT().
+			WriteLog(gomock.All(), enum.ERROR, "Ack", enum.INVALID_ID).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -387,8 +398,8 @@ func TestAck(t *testing.T) {
 		}()
 
 		_, err := client.Ack(context.Background(), &pb.ConsumerRequest{
-			GroupId: "consumer-g",
-			WorkerId: "consumer-1",
+			GroupId:   "consumer-g",
+			WorkerId:  "consumer-1",
 			MessageId: "",
 		})
 
@@ -410,11 +421,12 @@ func TestAck(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION)
-		
-		evnetMock.EXPECT(). 
-		WriteLog(gomock.All(), enum.ERROR, "Ack", enum.GROUP_ID)
-		
+			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
+
+		evnetMock.EXPECT().
+			WriteLog(gomock.All(), enum.ERROR, "Ack", enum.GROUP_ID).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -427,8 +439,8 @@ func TestAck(t *testing.T) {
 		}()
 
 		_, err := client.Ack(context.Background(), &pb.ConsumerRequest{
-			GroupId: "",
-			WorkerId: "consumer-1",
+			GroupId:   "",
+			WorkerId:  "consumer-1",
 			MessageId: "messag-1",
 		})
 
@@ -450,11 +462,12 @@ func TestAck(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION)
-		
-		evnetMock.EXPECT(). 
-		WriteLog(gomock.All(), enum.ERROR, "Ack", enum.WORKER_ID)
-		
+			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
+
+		evnetMock.EXPECT().
+			WriteLog(gomock.All(), enum.ERROR, "Ack", enum.WORKER_ID).
+			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -467,8 +480,8 @@ func TestAck(t *testing.T) {
 		}()
 
 		_, err := client.Ack(context.Background(), &pb.ConsumerRequest{
-			GroupId: "consumer-g",
-			WorkerId: "",
+			GroupId:   "consumer-g",
+			WorkerId:  "",
 			MessageId: "message-1",
 		})
 
@@ -489,15 +502,16 @@ func TestAck(t *testing.T) {
 		sqsMock := mocks.NewMockSQS(ctrl)
 
 		evnetMock.EXPECT().
-			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION)
-		
-		evnetMock.EXPECT(). 
-		WriteLog(gomock.All(), enum.ERROR, "Ack", enum.WORKER_ID)
+			WriteLog(gomock.All(), enum.DEBUG, "Ack", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
 
-		sqsMock.EXPECT(). 
-		Ack(gomock.All(), gomock.All()). 
-		Return(fmt.Errorf("connection error"))
-		
+		evnetMock.EXPECT().
+			WriteLog(gomock.All(), enum.ERROR, "Ack", enum.WORKER_ID).
+			AnyTimes()
+
+		sqsMock.EXPECT().
+			Ack(gomock.All(), gomock.All()).
+			Return(fmt.Errorf("connection error"))
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -510,8 +524,8 @@ func TestAck(t *testing.T) {
 		}()
 
 		_, err := client.Ack(context.Background(), &pb.ConsumerRequest{
-			GroupId: "consumer-g",
-			WorkerId: "consumer-1",
+			GroupId:   "consumer-g",
+			WorkerId:  "consumer-1",
 			MessageId: "message-1",
 		})
 
