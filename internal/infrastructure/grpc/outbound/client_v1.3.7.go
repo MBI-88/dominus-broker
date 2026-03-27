@@ -210,8 +210,8 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 					}
 				}
 			} else {
+				retry := time.NewTicker(time.Millisecond)
 				for {
-					retry := time.NewTicker(time.Millisecond)
 					select {
 					case <-ctx.Done():
 						retry.Stop()
