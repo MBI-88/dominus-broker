@@ -3,9 +3,9 @@ package broker_test
 import (
 	"context"
 	"dominus-project/internal/application/use_cases/broker"
-	
 	"dominus-project/mocks"
 	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -21,8 +21,9 @@ func TestStreamBiConn(t *testing.T) {
 		{
 			name: "StreamBiConn Ok",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerBidirectionalDto, mrq *mocks.MockBrokerRequestDto) {
-				
+
 				gomock.InOrder(
+					mdto.EXPECT().Context().Return(context.Background()),
 					mdto.EXPECT().Recv().Return(mrq, nil),
 					mdto.EXPECT().Recv().Return(mrq, nil),
 					mdto.EXPECT().Recv().Return(mrq, nil),
@@ -31,38 +32,46 @@ func TestStreamBiConn(t *testing.T) {
 
 				mrq.EXPECT().
 					GetSubscribers().
-					Return([]string{"server1.api.com", "server2.api.com", "server3.api.com", "127.0.0.1:8080"}).AnyTimes()
+					Return([]string{"server1.api.com", "server2.api.com", "server3.api.com", "127.0.0.1:8080"}).
+					AnyTimes()
 
 				mrq.EXPECT().
 					GetPayload().
-					Return([]byte("test")).AnyTimes()
+					Return([]byte("test")).
+					AnyTimes()
 
 				mc.EXPECT().
 					BidirectionalStream(gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All()).
 					Do(func(subscribers, streamProv, streamSub, errMsg, closed, ctx, done any) {
-						// received
+						var recvWG sync.WaitGroup
+						recvWG.Add(1)
 						go func() {
+							defer recvWG.Done()
 							for msg := range streamProv.(<-chan []byte) {
-								println(msg)
+								_ = msg
 								errMsg.(chan<- error) <- fmt.Errorf("test error")
 							}
 							closed.(chan<- struct{}) <- struct{}{}
 						}()
 
-						// subscribers sending messages
+						subTicker := time.NewTicker(time.Second)
+						defer subTicker.Stop()
+						bctx := ctx.(context.Context)
 						for {
 							select {
-							case <-time.Tick(1 * time.Second):
+							case <-subTicker.C:
 								streamSub.(chan<- []byte) <- []byte("test")
-							case <-time.Tick(5 * time.Second):
-							case <-ctx.(context.Context).Done():
+							case <-bctx.Done():
+								subTicker.Stop()
+								recvWG.Wait()
 								for range subscribers.([]string) {
 									done.(chan<- struct{}) <- struct{}{}
 								}
 								return
 							}
 						}
-					}).Times(1)
+					}).
+					Times(1)
 
 				gomock.InOrder(
 					mdto.EXPECT().Send(gomock.All()).Return(nil),
@@ -77,14 +86,20 @@ func TestStreamBiConn(t *testing.T) {
 		{
 			name: "StreamBiConn Recv error",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerBidirectionalDto, mrq *mocks.MockBrokerRequestDto) {
-				mdto.EXPECT().Recv().Return(nil, fmt.Errorf("recv error"))
+				gomock.InOrder(
+					mdto.EXPECT().Context().Return(context.Background()),
+					mdto.EXPECT().Recv().Return(nil, fmt.Errorf("recv error")),
+				)
 			},
 			output: fmt.Errorf("recv error"),
 		},
 		{
 			name: "StreamBiConn subscribers empty",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerBidirectionalDto, mrq *mocks.MockBrokerRequestDto) {
-				mdto.EXPECT().Recv().Return(mrq, nil).Times(1)
+				gomock.InOrder(
+					mdto.EXPECT().Context().Return(context.Background()),
+					mdto.EXPECT().Recv().Return(mrq, nil),
+				)
 
 				mrq.EXPECT().
 					GetSubscribers().
@@ -95,6 +110,7 @@ func TestStreamBiConn(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()

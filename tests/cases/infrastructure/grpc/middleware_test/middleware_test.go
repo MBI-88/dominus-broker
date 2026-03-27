@@ -14,12 +14,11 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-
 type testServerStream struct {
 	ctx context.Context
 }
 
-func (t *testServerStream) SetHeader(metadata.MD) error { return nil }
+func (t *testServerStream) SetHeader(metadata.MD) error  { return nil }
 func (t *testServerStream) SendHeader(metadata.MD) error { return nil }
 func (t *testServerStream) SetTrailer(metadata.MD)       {}
 func (t *testServerStream) Context() context.Context     { return t.ctx }
@@ -58,6 +57,10 @@ func TestApiToken(t *testing.T) {
 			CheckID(ctx).
 			Return(ctx)
 
+		lgMock.EXPECT().
+			WriteLog(ctx, gomock.All(), gomock.All(), gomock.All()).
+			AnyTimes()
+
 		_, err := mid.ApiToken(ctx)
 		if err == nil {
 			t.Fatalf("Expected error got %v\n", err)
@@ -77,6 +80,10 @@ func TestApiToken(t *testing.T) {
 			CheckID(ctx).
 			Return(ctx)
 
+		lgMock.EXPECT().
+			WriteLog(ctx, gomock.All(), gomock.All(), gomock.All()).
+			AnyTimes()
+
 		_, err := mid.ApiToken(ctx)
 		if err == nil {
 			t.Fatalf("Expected error nil got %v\n", err)
@@ -85,7 +92,6 @@ func TestApiToken(t *testing.T) {
 	})
 
 }
-
 
 func TestUnaryLog(t *testing.T) {
 
@@ -166,7 +172,6 @@ func TestStreamLog(t *testing.T) {
 		}
 	})
 }
-
 
 func TestLogErrors(t *testing.T) {
 	t.Run("LogErrors maps levels and writes logs", func(t *testing.T) {

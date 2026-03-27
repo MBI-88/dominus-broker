@@ -3,6 +3,7 @@ package sqs_test
 import (
 	"context"
 	"dominus-project/internal/application/use_cases/sqs"
+	"dominus-project/internal/domain/entities"
 	"dominus-project/mocks"
 	"fmt"
 	"testing"
@@ -29,7 +30,7 @@ func TestConsumer(t *testing.T) {
 
 				mc.EXPECT(). 
 				GetMessage(ctx, "worker-1", "consumer-1"). 
-				Return(gomock.All(), nil)
+				Return(&entities.Message{}, nil)
 			},
 			output: nil,
 
@@ -47,7 +48,7 @@ func TestConsumer(t *testing.T) {
 
 				mc.EXPECT(). 
 				GetMessage(ctx, "worker-1", "consumer-1"). 
-				Return(gomock.All(), fmt.Errorf("connection error"))
+				Return(&entities.Message{}, fmt.Errorf("connection error"))
 			},
 			output: fmt.Errorf("connection error"),
 		},
@@ -66,8 +67,17 @@ func TestConsumer(t *testing.T) {
 			service := sqs.NewSQS(mockClient)
 			_, err := service.Consumer(ctx, mockDto)
 
+			if tt.output == nil {
+				if err != nil {
+					t.Fatalf("expected nil error got %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("expected error %v got nil", tt.output)
+			}
 			if tt.output.Error() != err.Error() {
-				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
+				t.Fatalf("expected %s got %s", tt.output, err)
 			}
 		})
 	}

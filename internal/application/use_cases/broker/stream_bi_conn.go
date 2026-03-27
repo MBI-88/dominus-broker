@@ -61,7 +61,6 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 			if total == 0 {
 				close(streamSub)
 				close(errMsg)
-				close(done)
 				return fmt.Errorf("connection closed")
 			}
 		}

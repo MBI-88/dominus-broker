@@ -20,6 +20,7 @@ func TestStreamServerConn(t *testing.T) {
 		{
 			name: "StreamServerConn ok",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerServerDto, mrq *mocks.MockBrokerRequestDto) {
+
 				mrq.EXPECT().
 					GetSubscribers().
 					Return([]string{"server1.api.com", "server2.api.com", "server3.api.com", "127.0.0.1:8080"}).AnyTimes()
@@ -46,6 +47,7 @@ func TestStreamServerConn(t *testing.T) {
 					}).Times(1)
 
 				gomock.InOrder(
+					mdto.EXPECT().Context().Return(context.Background()),
 					mdto.EXPECT().Send(gomock.All()).Return(nil),
 					mdto.EXPECT().Send(gomock.All()).Return(nil),
 					mdto.EXPECT().Send(gomock.All()).Return(nil),
@@ -57,6 +59,7 @@ func TestStreamServerConn(t *testing.T) {
 		{
 			name: "StreamServerConn subscribers empty",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerServerDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Context().Return(context.Background())
 				mrq.EXPECT().
 					GetSubscribers().
 					Return([]string{}).Times(1)

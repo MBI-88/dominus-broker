@@ -2,9 +2,9 @@ package outbound
 
 import (
 	"context"
-	"dominus-project/internal/infrastructure/event"
-	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
 	"io"
 	"sync"
 	"time"
@@ -37,7 +37,7 @@ func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx contex
 	doQuery := func(url string) func([]byte) {
 		stream, errConn := connect(url)
 		return func(payload []byte) {
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "ClientStream", enum.DEBUG_DESCRIPTION)
+			go g.lgs.WriteLog(ctx, enum.DEBUG, "ClientStream.doQuery", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -48,7 +48,7 @@ func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx contex
 					Payload:     payload})
 				lock.Unlock()
 				if err != nil {
-					go g.lgs.WriteLog(ctx , enum.ERROR ,"ClientStream", err.Error())
+					go g.lgs.WriteLog(ctx, enum.ERROR, "ClientStream.Send", err.Error())
 					lock.Lock()
 					errConn = err
 					lock.Unlock()
@@ -91,25 +91,28 @@ func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 				for {
 					resp, err := stream.Recv()
 					if err == io.EOF {
-						go g.lgs.WriteLog(ctx, enum.DEBUG ,"ServerStream", err.Error())
+						go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.Recv", err.Error())
 						tx <- struct{}{}
 						if err := stream.CloseSend(); err != nil {
-							go g.lgs.WriteLog(ctx, enum.DEBUG ,"ColseSend", err.Error())
+							go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.ColseSend", err.Error())
 						}
 						return
 					} else if err != io.EOF && err != nil {
-						go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream EOF", err.Error())
+						go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.EOF", err.Error())
 						goto connect
 					} else {
 						msg <- resp.GetPayload()
 					}
 				}
 			} else {
+				retry := time.NewTicker(time.Millisecond) // retrying
 				for {
 					select {
 					case <-ctx.Done():
+						retry.Stop()
 						return
-					case <-time.Tick(1 * time.Millisecond):
+					case <-retry.C:
+						retry.Stop()
 						goto connect
 					}
 				}
@@ -121,6 +124,7 @@ func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
 	lock := new(sync.Mutex)
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
+	var workerWG sync.WaitGroup
 
 	connect := func(url string) (pb.BrokerAPI_BidirectionalStreamClient, error) {
 		conn, _ := grpc.NewClient(url, g.opts...)
@@ -130,7 +134,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 
 	doQuey := func(url string, stream pb.BrokerAPI_BidirectionalStreamClient, errConn error) func([]byte) {
 		return func(payload []byte) {
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION)
+			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.doQuery", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -141,7 +145,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 					Payload:     payload})
 				lock.Unlock()
 				if err != nil {
-					go g.lgs.WriteLog(ctx,enum.ERROR ,"BidirectionalStream", err.Error())
+					go g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.doQuery", err.Error())
 					lock.Lock()
 					errConn = err
 					lock.Unlock()
@@ -162,9 +166,21 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 		cls := doQuey(url, stream, err)
 		arrayDoQuery = append(arrayDoQuery, cls)
 
+		workerWG.Add(1)
 		go func(url string, c pb.BrokerAPI_BidirectionalStreamClient, errConn error) {
+			defer workerWG.Done()
+			var signalDoneOnce sync.Once
+			defer func() {
+				if done == nil {
+					return
+				}
+				signalDoneOnce.Do(func() {
+					done <- struct{}{}
+				})
+			}()
+
 		connect:
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", enum.DEBUG_DESCRIPTION)
+			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Connect", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -174,25 +190,34 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 					resp, err := stream.Recv()
 					lock.Unlock()
 					if err == io.EOF {
-						go g.lgs.WriteLog(ctx, enum.ERROR ,"ServerStream", err.Error())
-						tx <- struct{}{}
+						go g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.Recv", err.Error())
 						if err := stream.CloseSend(); err != nil {
-							go g.lgs.WriteLog(ctx, enum.ERROR, "CloseSend", err.Error())
+							go g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.CloseSend", err.Error())
 						}
 						return
 					} else if err != io.EOF && err != nil {
-						go g.lgs.WriteLog(ctx, enum.DEBUG, "Connect", enum.DEBUG_DESCRIPTION)
+						if ctx.Err() != nil {
+							return
+						}
+						go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Connect", enum.DEBUG_DESCRIPTION)
 						goto connect
 					} else {
-						subMsg <- resp.GetPayload()
+						select {
+						case <-ctx.Done():
+							return
+						case subMsg <- resp.GetPayload():
+						}
 					}
 				}
 			} else {
 				for {
+					retry := time.NewTicker(time.Millisecond)
 					select {
 					case <-ctx.Done():
+						retry.Stop()
 						return
-					case <-time.Tick(1 * time.Millisecond):
+					case <-retry.C:
+						retry.Stop()
 						goto connect
 					}
 				}
@@ -205,5 +230,8 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 			go cls(msg)
 		}
 	}
-	tx <- struct{}{}
+	workerWG.Wait()
+	if tx != nil {
+		tx <- struct{}{}
+	}
 }

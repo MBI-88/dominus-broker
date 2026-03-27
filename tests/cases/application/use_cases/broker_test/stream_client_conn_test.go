@@ -1,6 +1,7 @@
 package broker_test
 
 import (
+	"context"
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/mocks"
 	"fmt"
@@ -20,6 +21,7 @@ func TestStreamClientConn(t *testing.T) {
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerClientDto, mrq *mocks.MockBrokerRequestDto) {
 
 				gomock.InOrder(
+					mdto.EXPECT().Context().Return(context.Background()),
 					mdto.EXPECT().Recv().Return(mrq, nil),
 					mdto.EXPECT().Recv().Return(mrq, nil),
 					mdto.EXPECT().Recv().Return(mrq, nil),
@@ -48,6 +50,7 @@ func TestStreamClientConn(t *testing.T) {
 		{
 			name: "StreamClientConn Recv error",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerClientDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Context().Return(context.Background())
 				mdto.EXPECT().Recv().Return(nil, fmt.Errorf("recv error"))
 			},
 			output: fmt.Errorf("recv error"),
@@ -55,6 +58,7 @@ func TestStreamClientConn(t *testing.T) {
 		{
 			name: "StreamClientConn subscribers empty",
 			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerClientDto, mrq *mocks.MockBrokerRequestDto) {
+				mdto.EXPECT().Context().Return(context.Background())
 				mdto.EXPECT().Recv().Return(mrq, nil)
 
 				mrq.EXPECT().

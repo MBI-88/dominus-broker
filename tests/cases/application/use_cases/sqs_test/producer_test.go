@@ -13,31 +13,31 @@ import (
 func TestProducer(t *testing.T) {
 	tests := []struct{
 		name string
-		setupMock func (context.Context, *mocks.MockProducerDto, *mocks.MockMemoryClient)
+		setupMock func ( *mocks.MockProducerDto, *mocks.MockMemoryClient)
 		output error
 	}{
 		{
 			name: "Producer OK",
-			setupMock: func(ctx context.Context, dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
+			setupMock: func(dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().
 				GetPayload().
 				Return([]byte("\n{payload:{data:data}}\n"))
 
 				mc.EXPECT(). 
-				SendMessage(ctx, gomock.All()). 
+				SendMessage(gomock.All(), gomock.All()). 
 				Return(nil)
 			},
 			output: nil,
 		},
 		{
 			name: "Producer connection error",
-			setupMock: func(ctx context.Context, dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
+			setupMock: func(dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().
 				GetPayload().
 				Return([]byte("\n{payload:{data:data}}\n"))
 
 				mc.EXPECT(). 
-				SendMessage(ctx, gomock.All()). 
+				SendMessage(gomock.All(), gomock.All()). 
 				Return(fmt.Errorf("connection error"))
 			},
 			output: fmt.Errorf("connection error"),
@@ -45,7 +45,7 @@ func TestProducer(t *testing.T) {
 		},
 		{
 			name: "Producer empty payload",
-			setupMock: func(ctx context.Context, dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
+			setupMock: func(dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().
 				GetPayload().
 				Return([]byte{})
@@ -63,12 +63,22 @@ func TestProducer(t *testing.T) {
 			mockDto := mocks.NewMockProducerDto(ctrl)
 			mockClient := mocks.NewMockMemoryClient(ctrl)
 
-			tt.setupMock(ctx,mockDto, mockClient)
+			tt.setupMock(mockDto, mockClient)
 			service := sqs.NewSQS(mockClient)
 			err := service.Producer(ctx, mockDto)
 
+			if tt.output == nil {
+				if err != nil {
+					t.Fatalf("expected nil error got %v", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatalf("expected error %v got nil", tt.output)
+			}
+			
 			if tt.output.Error() != err.Error() {
-				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
+				t.Fatalf("expected %s got %s", tt.output, err)
 			}
 
 		})

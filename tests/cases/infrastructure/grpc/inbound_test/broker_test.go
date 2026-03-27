@@ -3,7 +3,6 @@ package inbound_test
 import (
 	"context"
 	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/infrastructure/grpc/inbound"
 	"dominus-project/internal/infrastructure/grpc/outbound"
 	"dominus-project/mocks"
@@ -42,7 +41,7 @@ func TestClientStream(t *testing.T) {
 			Return(nil).AnyTimes()
 
 		eventMock.EXPECT().
-			WriteLog(context.Background(), enum.DEBUG, "ClientStream", enum.DEBUG_DESCRIPTION).
+			WriteLog(context.Background(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
@@ -87,7 +86,7 @@ func TestClientStream(t *testing.T) {
 			Return(fmt.Errorf("error")).AnyTimes()
 
 		eventMock.EXPECT().
-			WriteLog(context.Background(), enum.DEBUG, "ClientStream", enum.DEBUG_DESCRIPTION).
+			WriteLog(context.Background(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
@@ -143,7 +142,7 @@ func TestServerStream(t *testing.T) {
 			}).AnyTimes()
 		
 		eventMock.EXPECT().
-			WriteLog(context.Background(), enum.DEBUG, "ServerStream", enum.DEBUG_DESCRIPTION).
+			WriteLog(context.Background(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
@@ -201,7 +200,7 @@ func TestServerStream(t *testing.T) {
 			}).AnyTimes()
 		
 		eventMock.EXPECT().
-			WriteLog(context.Background(), enum.DEBUG, "ServerStream", enum.DEBUG_DESCRIPTION).
+			WriteLog(context.Background(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
@@ -239,17 +238,19 @@ func TestServerStream(t *testing.T) {
 }
 
 func TestBidirectionalStream(t *testing.T) {
+
 	t.Run("BidirectionalStream Ok", func(t *testing.T) {
-		c := make(chan struct{})
+		c := make(chan struct{})  
 		provMsg := make(chan []byte, 2)
 		subMsg := make(chan []byte, 2)
 		errMsg := make(chan error, 2)
 		tx := make(chan struct{})
-		done := make(chan struct{})
+		done := make(chan struct{}, 8)
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
+		ctx, cancel := context.WithCancel(context.Background())
 
 		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
@@ -280,13 +281,13 @@ func TestBidirectionalStream(t *testing.T) {
 		)
 
 		eventMock.EXPECT().
-			WriteLog(context.Background(), enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION).
+			WriteLog(ctx, gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
-		ctx, cancel := context.WithCancel(context.Background())
+		
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
@@ -338,11 +339,12 @@ func TestBidirectionalStream(t *testing.T) {
 		subMsg := make(chan []byte, 2)
 		errMsg := make(chan error, 2)
 		tx := make(chan struct{})
-		done := make(chan struct{})
+		done := make(chan struct{}, 8)
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		eventMock := mocks.NewMockEvent(ctrl)
 		brokerMock := mocks.NewMockBroker(ctrl)
+		ctx, cancel := context.WithCancel(context.Background())
 
 		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
@@ -368,7 +370,7 @@ func TestBidirectionalStream(t *testing.T) {
 			}).AnyTimes()
 		
 		eventMock.EXPECT().
-			WriteLog(context.Background(), enum.DEBUG, "BidirectionalStream", enum.DEBUG_DESCRIPTION).
+			WriteLog(ctx, gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
 		opts := append([]grpc.DialOption{},
@@ -379,7 +381,6 @@ func TestBidirectionalStream(t *testing.T) {
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
-		ctx, cancel := context.WithCancel(context.Background())
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
