@@ -34,7 +34,7 @@ func (s *brokerAPI) ClientStream(stream pb.BrokerAPI_ClientStreamServer) error {
 	ctx := mappers.NewClientStreamContext(stream)
 	err := s.br.StreamClientConn(ctx)
 	if err != io.EOF {
-		go s.log.WriteLog(stream.Context(), enum.ERROR, "ClientStream", err.Error())
+		go s.log.WriteLog(stream.Context(), enum.ERROR, "ClientStream.StreamClientConn", err.Error())
 		return status.Error(codes.Aborted, err.Error())
 	}
 	return stream.SendAndClose(&pb.StreamResponseMessage{

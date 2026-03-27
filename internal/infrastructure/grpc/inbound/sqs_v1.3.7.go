@@ -29,12 +29,12 @@ func (s *sqsAPI) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.Prod
 	go s.log.WriteLog(ctx, enum.DEBUG, "Producer", enum.REQUEST_OK)
 
 	if len(ms.GetPayload()) == 0 {
-		go s.log.WriteLog(ctx, enum.ERROR, "Producer", enum.INVALID_PAYLOAD)
+		go s.log.WriteLog(ctx, enum.ERROR, "Producer.GetPayload", enum.INVALID_PAYLOAD)
 		return nil, status.Error(codes.OutOfRange, enum.INVALID_PAYLOAD)
 	}
 
 	if err := s.q.Producer(ctx, ms); err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "Producer", err.Error())
+		go s.log.WriteLog(ctx, enum.ERROR, "Producer.Producer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	return &pb.ProducerResponse{Status: 0}, nil
@@ -44,18 +44,18 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 	go s.log.WriteLog(ctx, enum.DEBUG, "Consumer", enum.REQUEST_OK)
 
 	if ms.GetGroupId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.GROUP_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer.GetGroupId", enum.GROUP_ID)
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
 
 	if ms.GetWorkerId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", enum.WORKER_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer.GetWorkerId", enum.WORKER_ID)
 		return nil, status.Error(codes.NotFound, enum.WORKER_ID)
 	}
 
 	response, err := s.q.Consumer(ctx, ms)
 	if err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "Consumer", err.Error())
+		go s.log.WriteLog(ctx, enum.ERROR, "Consumer.Consumer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 	return &pb.ConsumerResponse{
@@ -69,22 +69,22 @@ func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerR
 	go s.log.WriteLog(ctx, enum.DEBUG, "Ack", enum.REQUEST_OK)
 
 	if ms.GetMessageId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.INVALID_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack.GetMessageId", enum.INVALID_ID)
 		return nil, status.Error(codes.NotFound, enum.INVALID_ID)
 	}
 
 	if ms.GetGroupId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.GROUP_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack.GetGroupId", enum.GROUP_ID)
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
 
 	if ms.GetWorkerId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack", enum.WORKER_ID)
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack.GetWorkerId", enum.WORKER_ID)
 		return nil, status.Error(codes.NotFound, enum.WORKER_ID)
 	}
 
 	if err := s.q.Ack(ctx, ms); err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack", err.Error())
+		go s.log.WriteLog(ctx, enum.ERROR, "Ack.Ack", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 
