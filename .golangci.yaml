@@ -36,9 +36,6 @@ linters:
 
 issues:
   exclude:
-    - "shadow: declaration of.*"
-    - "error return value of.*Close.*not checked"
-    - "Error return value of .(Close|Write|Flush).* is not checked"
     - "SA1019:"
   exclude-rules:
     # Respaldo: desactivar SA1029 (claves context.WithValue) si staticcheck no aplica -checks
