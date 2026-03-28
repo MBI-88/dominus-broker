@@ -19,11 +19,12 @@ func TestAck(t *testing.T) {
 		{
 			name: "Ack ok",
 			setupMock: func(dto *mocks.MockConsumerDto, mc *mocks.MockMemoryClient) {
-				dto.EXPECT().GetMessageId().Return("message-1")
+				// Ack llama GetMessageId dos veces: validación y AckMessage.
+				dto.EXPECT().GetMessageId().Return("1700000000001-0").Times(2)
 				dto.EXPECT().GetGroupId().Return("group-1")
 
 				mc.EXPECT().
-					AckMessage(gomock.Any(), "message-1", "group-1").
+					AckMessage(gomock.Any(), "1700000000001-0", "group-1").
 					Return(nil)
 			},
 			output: nil,
@@ -31,11 +32,11 @@ func TestAck(t *testing.T) {
 		{
 			name: "Ack connection error",
 			setupMock: func(dto *mocks.MockConsumerDto, mc *mocks.MockMemoryClient) {
-				dto.EXPECT().GetMessageId().Return("message-1")
+				dto.EXPECT().GetMessageId().Return("1700000000001-0").Times(2)
 				dto.EXPECT().GetGroupId().Return("group-1")
 
 				mc.EXPECT().
-					AckMessage(gomock.Any(), "message-1", "group-1").
+					AckMessage(gomock.Any(), "1700000000001-0", "group-1").
 					Return(fmt.Errorf("connection error"))
 			},
 			output: fmt.Errorf("connection error"),

@@ -12,6 +12,6 @@ func (s *sqs) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 	if len(payload) == 0 {
 		return  fmt.Errorf("empty payload")
 	}
-	q := entities.NewMessage(payload)
+	q := entities.NewMessageWithID(payload)
 	return s.client.SendMessage(ctx, q)
 }

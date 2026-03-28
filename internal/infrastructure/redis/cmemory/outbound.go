@@ -14,6 +14,8 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
+
+
 type memory struct {
 	rdb      *redis.Client
 	lg       event.Event
@@ -76,13 +78,13 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 		return err
 	}
 
-	if err := m.rdb.XAdd(ctx, &redis.XAddArgs{
+	if _, err := m.rdb.XAdd(ctx, &redis.XAddArgs{
 		Stream: m.streamID,
 		Values: map[string]any{
 			enum.PAYLOAD: data,
 		},
 		ID: q.GetMessageId(),
-	}).Err(); err != nil {
+	}).Result(); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.XAdd", err.Error())
 		return err
 	}
@@ -114,13 +116,15 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 		return nil, err
 	}
 
-	message := response[0].Messages[0].Values[enum.PAYLOAD].(string)
+	streamMsg := response[0].Messages[0]
+	message := streamMsg.Values[enum.PAYLOAD].(string)
 
 	var q entities.Message
 	if err := jsoniter.Unmarshal([]byte(message), &q); err != nil {
 		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
 		return nil, err
 	}
+	q.SetMessageId(streamMsg.ID)
 
 	return &q, nil
 }

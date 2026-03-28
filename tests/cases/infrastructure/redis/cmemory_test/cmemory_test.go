@@ -81,7 +81,7 @@ func TestSendMessage(t *testing.T) {
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 
-		msg := entities.NewMessage([]byte("hello-redis"))
+		msg := entities.NewMessageWithID([]byte("hello-redis"))
 		// Redis stream IDs deben ser <ms>-<seq>, no UUID.
 		msg.SetMessageId("1-0")
 
@@ -126,7 +126,7 @@ func TestSendMessage(t *testing.T) {
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 
-		msg := entities.NewMessage([]byte("x"))
+		msg := entities.NewMessageWithID([]byte("x"))
 		msg.SetMessageId("2-0")
 
 		s.SetError("simulated XADD failure")
@@ -155,7 +155,7 @@ func TestAckMessage(t *testing.T) {
 			t.Fatalf("Group: %v", err)
 		}
 
-		msg := entities.NewMessage([]byte("ack-body"))
+		msg := entities.NewMessageWithID([]byte("ack-body"))
 		msg.SetMessageId("10-0")
 		if err := client.SendMessage(ctx, msg); err != nil {
 			t.Fatalf("SendMessage: %v", err)
@@ -214,7 +214,7 @@ func TestAckMessage(t *testing.T) {
 		if err := client.Group(groupID); err != nil {
 			t.Fatalf("Group: %v", err)
 		}
-		msg := entities.NewMessage([]byte("x"))
+		msg := entities.NewMessageWithID([]byte("x"))
 		msg.SetMessageId("20-0")
 		if err := client.SendMessage(ctx, msg); err != nil {
 			t.Fatalf("SendMessage: %v", err)
@@ -258,7 +258,7 @@ func TestGetMessage(t *testing.T) {
 			t.Fatalf("Group: %v", err)
 		}
 
-		sent := entities.NewMessage([]byte("get-payload"))
+		sent := entities.NewMessageWithID([]byte("get-payload"))
 		sent.SetMessageId("30-0")
 		if err := client.SendMessage(ctx, sent); err != nil {
 			t.Fatalf("SendMessage: %v", err)
@@ -290,7 +290,7 @@ func TestGetMessage(t *testing.T) {
 		if err := client.Group(groupID); err != nil {
 			t.Fatalf("Group: %v", err)
 		}
-		msg := entities.NewMessage([]byte("y"))
+		msg := entities.NewMessageWithID([]byte("y"))
 		msg.SetMessageId("31-0")
 		if err := client.SendMessage(ctx, msg); err != nil {
 			t.Fatalf("SendMessage: %v", err)
