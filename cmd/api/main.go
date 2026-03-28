@@ -41,16 +41,7 @@ func init() {
 	}
 }
 
-// @title dominus-project server
-// @description <h3>This server is a bidirectional queue using gRCP. Manager section</h3>
-// @contact.name Maikel Barrios
-// @contact.email ingmbi8807@gmail.com
-// @version 1.2.0
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name x-api-key
-// @host localhost:8000
-// @BasePath /
+
 func main() {
 	//Receives commands from cli
 	flag.Parse()

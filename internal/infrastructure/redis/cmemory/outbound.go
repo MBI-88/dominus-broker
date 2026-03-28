@@ -72,7 +72,7 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 
 	data, err := jsoniter.Marshal(q)
 	if err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
+		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.Marshal", err.Error())
 		return err
 	}
 
@@ -83,16 +83,16 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 		},
 		ID: q.GetMessageId(),
 	}).Err(); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage", err.Error())
+		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.XAdd", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (m *memory) AckMessage(ctx context.Context, messageId, groupId string) error {
-	go m.lg.WriteLog(ctx, enum.DEBUG, "DeleteMessage", enum.DEBUG_DESCRIPTION)
+	go m.lg.WriteLog(ctx, enum.DEBUG, "AckMessage", enum.DEBUG_DESCRIPTION)
 	if err := m.rdb.XAck(ctx, m.streamID, groupId, messageId).Err(); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "AckMessage", err.Error())
+		go m.lg.WriteLog(ctx, enum.ERROR, "AckMessage.XAck", err.Error())
 		return err
 	}
 	return nil
@@ -110,19 +110,19 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 	}).Result()
 
 	if err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
+		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.XReadGroup", err.Error())
 		return nil, err
 	}
 
 	message := response[0].Messages[0].Values[enum.PAYLOAD].(string)
 
-	var q *entities.Message
-	if err := jsoniter.Unmarshal([]byte(message), q); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage", err.Error())
+	var q entities.Message
+	if err := jsoniter.Unmarshal([]byte(message), &q); err != nil {
+		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
 		return nil, err
 	}
 
-	return q, nil
+	return &q, nil
 }
 
 func (m *memory) Group(groupId string) error {

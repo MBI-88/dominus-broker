@@ -48,7 +48,6 @@ type RedisConfig struct {
 
 type InfraConfig struct {
 	LogMode string `json:"log_mode"`
-	Host    string `json:"host"`
 	LogURL  string `json:"log_url"`
 }
 

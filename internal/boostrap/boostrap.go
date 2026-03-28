@@ -3,7 +3,7 @@ package boostrap
 import (
 	"context"
 	"dominus-project/config"
-	"dominus-project/docs"
+
 
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/application/use_cases/sqs"
@@ -184,7 +184,6 @@ func restServer(
 
 	// API
 	fi.NewMonitorAPI(router, reg, logs)
-	fi.NewSwaggerAPI(router)
 
 	r := fasthttp.Server{
 		Handler:                      midF.Middlewares(router.Handler),
@@ -234,7 +233,6 @@ func RunApp(mode, showBanner *bool, banner string) {
 	cf := config.NewConfig(*mode)
 
 	lgs := event.NewEvent(cf.InfraConfig.LogMode, cf.InfraConfig.LogURL, *mode)
-	docs.SwaggerInfo.Host = cf.InfraConfig.Host
 
 	// Signals
 	st := make(chan os.Signal, 1)

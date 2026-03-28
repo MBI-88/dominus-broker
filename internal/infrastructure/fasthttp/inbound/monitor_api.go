@@ -80,12 +80,6 @@ func (m *monitor) collectMetrics() {
 	}
 }
 
-// @Tags Monitor
-// @Description <h3>gets metrics</h3>
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string][]string "Success response"
-// @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /metrics [get]
 func (m *monitor) getMetrics(ctx *fasthttp.RequestCtx) {
 	handler := promhttp.HandlerFor(m.reg, m.opts)
 	resp := &adapter{ctx}
@@ -98,12 +92,6 @@ func (m *monitor) getMetrics(ctx *fasthttp.RequestCtx) {
 	handler.ServeHTTP(resp, req)
 }
 
-// @Tags Monitor
-// @Description <h3>get healthCeck</h3>
-// @Security ApiKeyAuth
-// @Success 200 {object} map[string][]string "Success response"
-// @Failure 406 {object} map[string]string "Response body {message: error}"
-// @Router /health [get]
 func (*monitor) getHealthCheck(ctx *fasthttp.RequestCtx) {
 	ctx.Response.Header.Set("Content-Type", enum.CONTENT_TYPE_TEXT)
 	ctx.Response.Header.SetStatusCode(fasthttp.StatusOK)
