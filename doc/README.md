@@ -8,7 +8,7 @@ In-depth notes for contributors. The [main README](../README.md) stays high-leve
 | [configuration.md](configuration.md) | Viper, JSON shape, dev vs prod |
 | [grpc-security.md](grpc-security.md) | Middleware, API key, idempotency, TLS |
 | [redis.md](redis.md) | `cchecker`, `cmemory`, streams |
-| [sqs-use-cases.md](sqs-use-cases.md) | Producer, consumer, ack over gRPC |
+| [sqs-use-cases.md](sqs-use-cases.md) | Producer, Consumer, Ack: layers, validation, message IDs, test map |
 | [http-monitor.md](http-monitor.md) | fasthttp monitor API and middleware |
 | [testing.md](testing.md) | `tests/cases` vs `tests/integration`, commands |
 | [coverage.md](coverage.md) | **`run_coverage.ps1`** (canonical), `-coverpkg`, baseline **80.9%**, per-function table |

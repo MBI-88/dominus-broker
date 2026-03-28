@@ -9,8 +9,8 @@ Go test packages live under **`tests/...`** so they import **`internal/...`** as
 | Area | Path (example) | Typical focus |
 |------|----------------|----------------|
 | Broker use cases | `tests/cases/application/use_cases/broker_test/` | `StreamClientConn`, `StreamServerConn`, `StreamBiConn` with mocks |
-| SQS use cases | `tests/cases/application/use_cases/sqs_test/` | Producer / consumer / ack with `MockMemoryClient` |
-| gRPC inbound | `tests/cases/infrastructure/grpc/inbound_test/` | `BrokerAPI`, `SqsAPI` handlers with bufconn / mocks |
+| SQS use cases | `tests/cases/application/use_cases/sqs_test/` | Producer / Consumer / Ack with `MockMemoryClient`; payload and message-ID assertions; invalid Ack IDs without calling Redis |
+| gRPC inbound | `tests/cases/infrastructure/grpc/inbound_test/` | `BrokerAPI`, `SqsAPI` handlers with bufconn / mocks; SqsAPI Ack invalid-ID path uses real `sqs.NewSQS` + mock client |
 | gRPC middleware | `tests/cases/infrastructure/grpc/middleware_test/` | `ApiToken`, interceptors, logging |
 | gRPC mappers | `tests/cases/infrastructure/grpc/mappers_test/` | DTO wrappers around streams |
 | Redis | `tests/cases/infrastructure/redis/cchecker_test/`, `cmemory_test/` | miniredis, real `SetArgs` / streams |
@@ -26,9 +26,9 @@ Go test packages live under **`tests/...`** so they import **`internal/...`** as
 | Package | Purpose |
 |---------|---------|
 | `broker_flow_test` | Ingress gRPC over **bufconn**, real `broker` + **`outbound.NewGrpClient`** where applicable; downstream “peers” on **TCP** (`helpers_test.go`) or mocks only for **`Event`** / **`CheckerClient`**; covers ClientStream, ServerStream, BidirectionalStream. |
-| `sqs_flow_test` | Placeholders for full SQS-style flows (extend with Redis / miniredis as needed). |
+| `sqs_flow_test` | End-to-end **SqsAPI** over bufconn with **miniredis** and real **`cmemory`**: Producer (stream payload + errors), Consumer (ordering, empty stream, validation), Ack after consume + pending verification. |
 
-Integration tests are slower and assert **wiring + transport**; keep **unit tests** in `tests/cases/` for branches and errors.
+Integration tests are slower and assert **wiring + transport**; keep **unit tests** in `tests/cases/` for branches, errors, and focused contracts (e.g. Ack message-ID format at the use-case layer).
 
 ---
 

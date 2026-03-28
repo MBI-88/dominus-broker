@@ -18,8 +18,9 @@ Two adapters use [go-redis](https://github.com/redis/go-redis/v9) against the sa
 - Uses **Redis Streams** (`XADD`, `XREADGROUP`, `XACK`, `XGROUP CREATE`): stream name from config `StreamID`, consumer group `GroupID`.
 - Payload field name from `enum.PAYLOAD`; messages are JSON (`jsoniter`) of `entities.Message`.
 - `GetMessage` must unmarshal into a concrete value (e.g. `var q entities.Message` then `&q`); a nil pointer breaks `Unmarshal`.
+- **Ack** at the application layer validates `message_id` as a Redis stream–style ID before `XACK`; see **[sqs-use-cases.md](sqs-use-cases.md)** (validation and gRPC mapping).
 
-**Tests**: `tests/cases/infrastructure/redis/cmemory_test/` (miniredis + `MockEvent` for async `WriteLog`).
+**Tests**: `tests/cases/infrastructure/redis/cmemory_test/` (miniredis + `MockEvent` for async `WriteLog`). Higher-level SQS gRPC + Redis flows: `tests/integration/sqs_flow_test/`.
 
 ## Configuration fields (excerpt)
 

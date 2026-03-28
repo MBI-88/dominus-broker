@@ -161,6 +161,7 @@ go test ./tests/...
 
 - **`tests/cases/`**: domain-focused unit tests (broker, sqs, gRPC, Redis, fasthttp, middlewares).
 - **`tests/integration/broker_flow_test/`**: ClientStream / ServerStream / BidirectionalStream flows with bufconn + TCP peers; mocks limited to logging/checker and simulated downstream peers.
+- **`tests/integration/sqs_flow_test/`**: SqsAPI Producer / Consumer / Ack with miniredis and real stream adapter (see **[doc/sqs-use-cases.md](doc/sqs-use-cases.md)**).
 
 ### Coverage (use `run_coverage.ps1`)
 
