@@ -300,6 +300,36 @@ func TestGetMessage(t *testing.T) {
 			t.Fatal("expected error when Redis returns failure")
 		}
 	})
+
+	t.Run("GetMessage error on invalid payload JSON", func(t *testing.T) {
+		s := miniredis.RunT(t)
+		ctrl := gomock.NewController(t)
+		lgsMock := mocks.NewMockEvent(ctrl)
+		lgsMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		client := newMemoryClient(t, s, streamID, lgsMock)
+		ctx := context.Background()
+
+		if err := client.Group(groupID); err != nil {
+			t.Fatalf("Group: %v", err)
+		}
+		rdb := testRedisClient(t, s)
+		t.Cleanup(func() { _ = rdb.Close() })
+		if _, err := rdb.XAdd(ctx, &redis.XAddArgs{
+			Stream: streamID,
+			ID:     "99-0",
+			Values: map[string]any{enum.PAYLOAD: "{not-valid-json"},
+		}).Result(); err != nil {
+			t.Fatalf("XAdd: %v", err)
+		}
+
+		if _, err := client.GetMessage(ctx, "worker-bad-json", groupID); err == nil {
+			t.Fatal("expected unmarshal error")
+		}
+	})
+
 }
 
 func TestGroupMessage(t *testing.T) {

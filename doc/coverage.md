@@ -81,8 +81,8 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 |--------|--------|
 | **Command** | `.\run_coverage.ps1` from repo root |
 | **Captured** | 2026-03-27 (re-run after code changes and refresh this doc) |
-| **Total statements** | **80.9%** |
-| **Output of** | `go tool cover -func=coverage.out` (last line: `total: (statements) 80.9%`) |
+| **Total statements** | **90.0%** (run `.\run_coverage.ps1`, then `go tool cover -func=coverage.out`) |
+| **Output of** | `go tool cover -func=coverage.out` (last line: `total: (statements) 90.0%`) |
 
 ### By area (summary)
 
@@ -182,7 +182,7 @@ dominus-project/internal/infrastructure/redis/cmemory/outbound.go:70:           
 dominus-project/internal/infrastructure/redis/cmemory/outbound.go:92:              AckMessage              100.0%
 dominus-project/internal/infrastructure/redis/cmemory/outbound.go:101:             GetMessage              81.8%
 dominus-project/internal/infrastructure/redis/cmemory/outbound.go:128:             Group                   100.0%
-total:                                                                             (statements)            80.9%
+total:                                                                             (statements)            90.0%
 ```
 
 ### Packages not listed above

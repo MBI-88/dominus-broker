@@ -12,8 +12,10 @@ import (
 	"testing"
 	"time"
 
+	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"go.uber.org/mock/gomock"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 )
@@ -116,6 +118,71 @@ func TestClientStream(t *testing.T) {
 		close(c)
 		server.GracefulStop()
 		ctrl.Finish()
+	})
+
+	t.Run("ClientStream ingress CloseAndRecv on io.EOF", func(t *testing.T) {
+		lis := bufconn.Listen(buffSize)
+		ctrl := gomock.NewController(t)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+
+		brokerMock.EXPECT().
+			StreamClientConn(gomock.Any()).
+			DoAndReturn(func(st any) error {
+				bc := st.(dtos.BrokerClientDto)
+				if _, err := bc.Recv(); err != nil {
+					return err
+				}
+				for {
+					if _, err := bc.Recv(); err != nil {
+						return err
+					}
+				}
+			}).
+			Times(1)
+
+		eventMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		srv := grpc.NewServer()
+		inbound.NewBrokerAPI(srv, brokerMock, eventMock)
+		go func() {
+			if err := srv.Serve(lis); err != nil {
+				t.Logf("Serve: %v", err)
+			}
+		}()
+		t.Cleanup(srv.Stop)
+
+		conn, err := grpc.NewClient("passthrough:///buf",
+			grpc.WithContextDialer(bufDialer(lis)),
+			grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			t.Fatalf("NewClient: %v", err)
+		}
+		t.Cleanup(func() { _ = conn.Close() })
+
+		cli := pb.NewBrokerAPIClient(conn)
+		stream, err := cli.ClientStream(context.Background())
+		if err != nil {
+			t.Fatalf("ClientStream: %v", err)
+		}
+		if err := stream.Send(&pb.StreamRequestMessage{
+			Subscribers: []string{"s1.example"},
+			Payload:     []byte("one"),
+		}); err != nil {
+			t.Fatalf("Send: %v", err)
+		}
+		if err := stream.CloseSend(); err != nil {
+			t.Fatalf("CloseSend: %v", err)
+		}
+		resp, err := stream.CloseAndRecv()
+		if err != nil {
+			t.Fatalf("CloseAndRecv: %v", err)
+		}
+		if got, want := resp.GetStatus(), int64(codes.OK); got != want {
+			t.Fatalf("status: got %d want %d", got, want)
+		}
 	})
 }
 

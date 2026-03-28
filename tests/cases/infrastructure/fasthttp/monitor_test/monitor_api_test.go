@@ -21,6 +21,7 @@ func TestMonitorController(t *testing.T) {
 		ctx := new(fasthttp.RequestCtx)
 		ctx.Request.SetRequestURI("/metrics")
 		ctx.Request.Header.SetMethod(fasthttp.MethodGet)
+		ctx.Request.Header.Set("X-Metrics-Probe", "1")
 		router.Handler(ctx)
 
 		if ctx.Response.StatusCode() != fasthttp.StatusOK {

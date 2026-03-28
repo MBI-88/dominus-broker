@@ -58,7 +58,7 @@ Use the repo script from the **repository root**:
 .\run_coverage.ps1
 ```
 
-That produces **`coverage.out`** and prints **`go tool cover -func`** including the **total statement %** (baseline **80.9%** when last recorded).
+That produces **`coverage.out`** and prints **`go tool cover -func`** including the **total statement %** (baseline **90.0%** when last recorded).
 
 Full script walkthrough, `-coverpkg` package list rules, HTML report command, **per-function table**, and gaps (`IdPotency` 0%, bootstrap untested, etc.): **[coverage.md](coverage.md)**.
 

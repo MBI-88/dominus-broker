@@ -5,13 +5,16 @@ import (
 	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/infrastructure/grpc/middlewares"
 	"dominus-project/mocks"
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"go.uber.org/mock/gomock"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type testServerStream struct {
@@ -209,6 +212,169 @@ func TestLogErrors(t *testing.T) {
 					t.Fatalf("WriteLog was not called for level %v", tc.level)
 				}
 			})
+		}
+	})
+}
+
+func TestIdPotency(t *testing.T) {
+	t.Run("ok schedules SaveConsumer for new key", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		lgMock := mocks.NewMockEvent(ctrl)
+		checkerMock := mocks.NewMockCheckerClient(ctrl)
+		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
+
+		baseCtx := context.Background()
+		ctx := metadata.NewIncomingContext(baseCtx, metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-key-1"))
+
+		lgMock.EXPECT().
+			WriteLog(gomock.Any(), enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
+
+		checkerMock.EXPECT().
+			CheckConsumer(gomock.Any(), "idem-key-1").
+			Return(false)
+
+		saveDone := make(chan struct{})
+		checkerMock.EXPECT().
+			SaveConsumer(gomock.Any(), "idem-key-1").
+			DoAndReturn(func(context.Context, string) error {
+				close(saveDone)
+				return nil
+			}).
+			Times(1)
+
+		out, err := mid.IdPotency(ctx)
+		if err != nil {
+			t.Fatalf("IdPotency: %v", err)
+		}
+		if out != ctx {
+			t.Fatalf("expected same context, got different pointer")
+		}
+
+		select {
+		case <-saveDone:
+		case <-time.After(500 * time.Millisecond):
+			t.Fatal("SaveConsumer was not invoked")
+		}
+	})
+
+	t.Run("aborted when key already exists", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		lgMock := mocks.NewMockEvent(ctrl)
+		checkerMock := mocks.NewMockCheckerClient(ctrl)
+		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
+
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-dup"))
+
+		lgMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		checkerMock.EXPECT().
+			CheckConsumer(gomock.Any(), "idem-dup").
+			Return(true)
+
+		_, err := mid.IdPotency(ctx)
+		if err == nil {
+			t.Fatal("expected error")
+		}
+		st, ok := status.FromError(err)
+		if !ok {
+			t.Fatalf("not a status error: %v", err)
+		}
+		if st.Code() != codes.Aborted || st.Message() != "id potency found" {
+			t.Fatalf("got code=%v msg=%q want Aborted / id potency found", st.Code(), st.Message())
+		}
+	})
+
+	t.Run("data loss when incoming metadata missing", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		lgMock := mocks.NewMockEvent(ctrl)
+		checkerMock := mocks.NewMockCheckerClient(ctrl)
+		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
+
+		ctx := context.Background()
+
+		lgMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		_, err := mid.IdPotency(ctx)
+		if err == nil {
+			t.Fatal("expected error")
+		}
+		st, ok := status.FromError(err)
+		if !ok {
+			t.Fatalf("not a status error: %v", err)
+		}
+		if st.Code() != codes.DataLoss || st.Message() != enum.NOT_FOUND {
+			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.NOT_FOUND)
+		}
+	})
+
+	t.Run("data loss when idempotency header empty", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		lgMock := mocks.NewMockEvent(ctrl)
+		checkerMock := mocks.NewMockCheckerClient(ctrl)
+		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
+
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, ""))
+
+		lgMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		_, err := mid.IdPotency(ctx)
+		if err == nil {
+			t.Fatal("expected error")
+		}
+		st, ok := status.FromError(err)
+		if !ok {
+			t.Fatalf("not a status error: %v", err)
+		}
+		if st.Code() != codes.DataLoss || st.Message() != enum.NOT_FOUND {
+			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.NOT_FOUND)
+		}
+	})
+
+	t.Run("SaveConsumer error is logged", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		lgMock := mocks.NewMockEvent(ctrl)
+		checkerMock := mocks.NewMockCheckerClient(ctrl)
+		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
+
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-fail-save"))
+
+		lgMock.EXPECT().
+			WriteLog(gomock.Any(), enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION).
+			AnyTimes()
+
+		checkerMock.EXPECT().
+			CheckConsumer(gomock.Any(), "idem-fail-save").
+			Return(false)
+
+		saveErr := errors.New("redis down")
+		logDone := make(chan struct{})
+		checkerMock.EXPECT().
+			SaveConsumer(gomock.Any(), "idem-fail-save").
+			Return(saveErr)
+
+		lgMock.EXPECT().
+			WriteLog(gomock.Any(), enum.ERROR, "IdPotency.SaveConsumer", saveErr.Error()).
+			Do(func(context.Context, string, string, string) { close(logDone) })
+
+		out, err := mid.IdPotency(ctx)
+		if err != nil {
+			t.Fatalf("IdPotency: %v", err)
+		}
+		if out != ctx {
+			t.Fatalf("expected same context")
+		}
+
+		select {
+		case <-logDone:
+		case <-time.After(500 * time.Millisecond):
+			t.Fatal("WriteLog for SaveConsumer error was not called")
 		}
 	})
 }

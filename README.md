@@ -55,7 +55,7 @@ Detailed design and file-level notes live under **[`doc/`](doc/)**:
 | [doc/sqs-use-cases.md](doc/sqs-use-cases.md) | Producer / consumer / ack over gRPC |
 | [doc/http-monitor.md](doc/http-monitor.md) | fasthttp monitor API and middleware |
 | [doc/testing.md](doc/testing.md) | `tests/cases` vs `tests/integration`, commands |
-| [doc/coverage.md](doc/coverage.md) | **`run_coverage.ps1`** (required for real %), baseline **80.9%**, per-function breakdown |
+| [doc/coverage.md](doc/coverage.md) | **`run_coverage.ps1`** (required for real %), baseline **90.0%**, per-function breakdown |
 
 ---
 
@@ -175,7 +175,7 @@ Coverage that attributes statements to **`internal/...`** must use the root scri
 
 - Runs: `go test -timeout 120s -race -coverpkg=<all non-excluded packages> -covermode=atomic -coverprofile=coverage.out ./tests/...`
 - Then: `go tool cover -func=coverage.out`
-- **Latest recorded total: 80.9%** statements (update after major changes; see **[doc/coverage.md](doc/coverage.md)** for the full per-function table, HTML export, and gaps).
+- **Latest recorded total: 90.0%** statements (update after major changes; see **[doc/coverage.md](doc/coverage.md)** for the full per-function table, HTML export, and gaps).
 
 `coverage.out` is gitignored (`*.out`).
 
