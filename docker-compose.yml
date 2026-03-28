@@ -1,12 +1,12 @@
 
 services:
   app:
-    extends: 
+    extends:
       file: ./docker/dominus/docker-compose.yml
       service: dominus
 
   worker:
-    extends: 
+    extends:
       file: ./docker/sidecar/docker-compose.yml
       service: sidecar
 
@@ -21,7 +21,7 @@ services:
     extends:
      file: ./docker/grafana/docker-compose.yml
      service: grafana
-  
+
   memory:
     extends:
       file: ./docker/redis/docker-compose.yml

@@ -25,7 +25,7 @@ cd <path-to>\dominus-project
    - `docs`
    - `mocks`
 
-   Any `go list ./...` package whose path matches one of these patterns is dropped.  
+   Any `go list ./...` package whose path matches one of these patterns is dropped.
    **Note:** the documentation folder is `doc/`, not `docs/`; `doc` is **not** excluded and would be included if it ever contained Go packages.
 
 2. **`go list ./...`** — Enumerates all module packages.

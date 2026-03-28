@@ -14,4 +14,3 @@ scrape_configs:
     honor_labels: true
     static_configs:
       - targets: ['sidecar:80']
-
