@@ -3,6 +3,7 @@ package sqs_test
 import (
 	"context"
 	"dominus-project/internal/application/use_cases/sqs"
+	"dominus-project/internal/domain/entities"
 	"dominus-project/mocks"
 	"fmt"
 	"testing"
@@ -11,44 +12,58 @@ import (
 )
 
 func TestProducer(t *testing.T) {
+	payloadOK := []byte("\n{payload:{data:data}}\n")
 	tests := []struct{
 		name string
-		setupMock func ( *mocks.MockProducerDto, *mocks.MockMemoryClient)
+		setupMock func (*testing.T, *mocks.MockProducerDto, *mocks.MockMemoryClient)
 		output error
 	}{
 		{
 			name: "Producer OK",
-			setupMock: func(dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
+			setupMock: func(t *testing.T, dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().
-				GetPayload().
-				Return([]byte("\n{payload:{data:data}}\n"))
+					GetPayload().
+					Return(payloadOK)
 
-				mc.EXPECT(). 
-				SendMessage(gomock.All(), gomock.All()). 
-				Return(nil)
+				mc.EXPECT().
+					SendMessage(gomock.Any(), gomock.AssignableToTypeOf(&entities.Message{})).
+					Do(func(_ context.Context, q *entities.Message) {
+						if string(q.GetMessage()) != string(payloadOK) {
+							t.Errorf("SendMessage message body: got %q want %q", q.GetMessage(), payloadOK)
+						}
+						if q.GetMessageId() == "" {
+							t.Error("SendMessage: expected non-empty stream-style message id")
+						}
+					}).
+					Return(nil)
 			},
 			output: nil,
 		},
 		{
 			name: "Producer connection error",
-			setupMock: func(dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
+			setupMock: func(t *testing.T, dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().
-				GetPayload().
-				Return([]byte("\n{payload:{data:data}}\n"))
+					GetPayload().
+					Return(payloadOK)
 
-				mc.EXPECT(). 
-				SendMessage(gomock.All(), gomock.All()). 
-				Return(fmt.Errorf("connection error"))
+				mc.EXPECT().
+					SendMessage(gomock.Any(), gomock.AssignableToTypeOf(&entities.Message{})).
+					Do(func(_ context.Context, q *entities.Message) {
+						if string(q.GetMessage()) != string(payloadOK) {
+							t.Errorf("SendMessage message body: got %q want %q", q.GetMessage(), payloadOK)
+						}
+					}).
+					Return(fmt.Errorf("connection error"))
 			},
 			output: fmt.Errorf("connection error"),
 
 		},
 		{
 			name: "Producer empty payload",
-			setupMock: func(dto *mocks.MockProducerDto, mc *mocks.MockMemoryClient) {
+			setupMock: func(_ *testing.T, dto *mocks.MockProducerDto, _ *mocks.MockMemoryClient) {
 				dto.EXPECT().
-				GetPayload().
-				Return([]byte{})
+					GetPayload().
+					Return([]byte{})
 			},
 			output: fmt.Errorf("empty payload") ,
 		},
@@ -63,7 +78,7 @@ func TestProducer(t *testing.T) {
 			mockDto := mocks.NewMockProducerDto(ctrl)
 			mockClient := mocks.NewMockMemoryClient(ctrl)
 
-			tt.setupMock(mockDto, mockClient)
+			tt.setupMock(t, mockDto, mockClient)
 			service := sqs.NewSQS(mockClient)
 			err := service.Producer(ctx, mockDto)
 

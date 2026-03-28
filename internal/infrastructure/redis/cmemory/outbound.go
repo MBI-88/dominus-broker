@@ -124,7 +124,10 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
 		return nil, err
 	}
-	q.SetMessageId(streamMsg.ID)
+	
+	if !q.SetMessageId(streamMsg.ID) {
+		return nil, fmt.Errorf("invalid messageID format")
+	}
 
 	return &q, nil
 }
