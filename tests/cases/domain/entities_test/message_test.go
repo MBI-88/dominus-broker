@@ -21,13 +21,13 @@ func TestMessage(t *testing.T) {
 			t.Fatalf("%s != %s\n", message, rmessage)
 		}
 
-	}) 
+	})
 
-	t.Run("CreatedAt field", func(t *testing.T){
+	t.Run("CreatedAt field", func(t *testing.T) {
 		msg := entities.NewMessageWithID(message)
 		now := time.Now()
 		msg.SetCreateAt(now)
-		rnow := msg.GetCreatedAt() 
+		rnow := msg.GetCreatedAt()
 
 		if !now.Equal(rnow) {
 			t.Fatalf("%s != %s\n", now, rnow)
@@ -57,6 +57,5 @@ func TestMessage(t *testing.T) {
 			t.Fatalf("id should be unchanged on reject: got %q want %q", msg.GetMessageId(), before)
 		}
 	})
-
 
 }

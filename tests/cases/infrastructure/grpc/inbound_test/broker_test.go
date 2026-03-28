@@ -140,7 +140,7 @@ func TestServerStream(t *testing.T) {
 				}
 				return nil
 			}).AnyTimes()
-		
+
 		eventMock.EXPECT().
 			WriteLog(context.Background(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
@@ -198,7 +198,7 @@ func TestServerStream(t *testing.T) {
 				}
 				return fmt.Errorf("error")
 			}).AnyTimes()
-		
+
 		eventMock.EXPECT().
 			WriteLog(context.Background(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
@@ -240,7 +240,7 @@ func TestServerStream(t *testing.T) {
 func TestBidirectionalStream(t *testing.T) {
 
 	t.Run("BidirectionalStream Ok", func(t *testing.T) {
-		c := make(chan struct{})  
+		c := make(chan struct{})
 		provMsg := make(chan []byte, 2)
 		subMsg := make(chan []byte, 2)
 		errMsg := make(chan error, 2)
@@ -287,7 +287,6 @@ func TestBidirectionalStream(t *testing.T) {
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewBrokerAPI(server, brokerMock, eventMock)
 		client := outbound.NewGrpClient(opts, eventMock)
-		
 
 		go func() {
 			if err := server.Serve(lis); err != nil {
@@ -368,7 +367,7 @@ func TestBidirectionalStream(t *testing.T) {
 
 				return fmt.Errorf("error")
 			}).AnyTimes()
-		
+
 		eventMock.EXPECT().
 			WriteLog(ctx, gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()

@@ -2,7 +2,6 @@ package repositories
 
 import "context"
 
-
 // Broker outputs
 type BrokerClient interface {
 	ClientStream(urls []string, msg <-chan []byte, ctx context.Context)

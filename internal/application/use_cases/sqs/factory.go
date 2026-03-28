@@ -8,13 +8,13 @@ import (
 )
 
 type SQS interface {
-	Producer(ctx context.Context, ms dtos.ProducerDto) error 
+	Producer(ctx context.Context, ms dtos.ProducerDto) error
 	Consumer(ctx context.Context, ms dtos.ConsumerDto) (*entities.Message, error)
 	Ack(ctx context.Context, ms dtos.ConsumerDto) error
 }
 
 type sqs struct {
-	client   repositories.MemoryClient
+	client repositories.MemoryClient
 }
 
 func NewSQS(client repositories.MemoryClient) SQS {

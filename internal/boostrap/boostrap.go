@@ -4,7 +4,6 @@ import (
 	"context"
 	"dominus-project/config"
 
-
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/application/use_cases/sqs"
 	"dominus-project/internal/infrastructure/enum"
@@ -149,7 +148,6 @@ func gRPServer(
 	gi.NewBrokerAPI(server, broker, logs)
 	gi.NewSqsAPI(server, sqs, logs)
 
-	
 	// Reflecting server
 	reflection.Register(server)
 

@@ -74,8 +74,7 @@ func TestStreamClientConn(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			
-		    mockClientDto := mocks.NewMockBrokerClientDto(ctrl)
+			mockClientDto := mocks.NewMockBrokerClientDto(ctrl)
 			mockClient := mocks.NewMockBrokerClient(ctrl)
 			mockRequestDto := mocks.NewMockBrokerRequestDto(ctrl)
 

@@ -22,8 +22,6 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 )
 
-
-
 func TestClientStreamFlow(t *testing.T) {
 	t.Run("ClientStream flow", func(t *testing.T) {
 		lis := bufconn.Listen(buffSize)

@@ -10,7 +10,6 @@ import (
 
 var (
 	mode       *bool
-	st         chan os.Signal
 	showBanner *bool
 	banner     = `
 ==========================================================
@@ -40,7 +39,6 @@ func init() {
 		flag.PrintDefaults()
 	}
 }
-
 
 func main() {
 	//Receives commands from cli

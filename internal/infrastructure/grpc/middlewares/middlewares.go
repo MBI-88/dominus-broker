@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
-	"dominus-project/internal/infrastructure/event"
-	"dominus-project/internal/infrastructure/enum"
 	"dominus-project/internal/domain/repositories"
+	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"
@@ -26,14 +26,14 @@ type Middleware interface {
 type middlewares struct {
 	token []byte
 	logs  event.Event
-	ch   repositories.CheckerClient
+	ch    repositories.CheckerClient
 }
 
 func NewMiddleware(t string, lg event.Event, checker repositories.CheckerClient) Middleware {
 	return &middlewares{
 		token: []byte(t),
 		logs:  lg,
-		ch: checker,
+		ch:    checker,
 	}
 }
 
@@ -60,7 +60,7 @@ func (m *middlewares) UnaryLog(ctx context.Context, req any, info *grpc.UnarySer
 }
 
 func (m *middlewares) StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	go m.logs.WriteLog(ss.Context(), enum.DEBUG ,info.FullMethod, enum.DEBUG_DESCRIPTION)
+	go m.logs.WriteLog(ss.Context(), enum.DEBUG, info.FullMethod, enum.DEBUG_DESCRIPTION)
 	return handler(srv, ss)
 }
 
@@ -68,13 +68,13 @@ func (m *middlewares) LogErrors() logging.Logger {
 	return logging.LoggerFunc(func(ctx context.Context, level logging.Level, msg string, fields ...any) {
 		var l string
 		switch level {
-			case logging.LevelDebug:
+		case logging.LevelDebug:
 			l = enum.DEBUG
-			case logging.LevelInfo:
+		case logging.LevelInfo:
 			l = enum.INFO
-			case logging.LevelWarn:
+		case logging.LevelWarn:
 			l = enum.WARN
-			default:
+		default:
 			l = enum.ERROR
 
 		}

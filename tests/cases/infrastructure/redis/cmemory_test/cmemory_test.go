@@ -15,8 +15,8 @@ import (
 	"dominus-project/mocks"
 
 	"github.com/alicebob/miniredis/v2"
-	"github.com/redis/go-redis/v9"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/redis/go-redis/v9"
 	"go.uber.org/mock/gomock"
 )
 
@@ -75,7 +75,6 @@ func TestSendMessage(t *testing.T) {
 		lgsMock := mocks.NewMockEvent(ctrl)
 		client := newMemoryClient(t, s, streamID, lgsMock)
 		ctx := context.Background()
-
 
 		lgsMock.EXPECT().
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).

@@ -11,11 +11,11 @@ import (
 )
 
 func TestAck(t *testing.T) {
-	tests := []struct{
-		name string 
-		setupMock func (*mocks.MockConsumerDto, *mocks.MockMemoryClient)
-		output error
-	}{	
+	tests := []struct {
+		name      string
+		setupMock func(*mocks.MockConsumerDto, *mocks.MockMemoryClient)
+		output    error
+	}{
 		{
 			name: "Ack ok",
 			setupMock: func(dto *mocks.MockConsumerDto, mc *mocks.MockMemoryClient) {

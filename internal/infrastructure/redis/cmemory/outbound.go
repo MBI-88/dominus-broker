@@ -10,11 +10,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/redis/go-redis/v9"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/redis/go-redis/v9"
 )
-
-
 
 type memory struct {
 	rdb      *redis.Client
@@ -124,7 +122,7 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
 		return nil, err
 	}
-	
+
 	if !q.SetMessageId(streamMsg.ID) {
 		return nil, fmt.Errorf("invalid messageID format")
 	}

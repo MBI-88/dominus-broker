@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"context"
-	"dominus-project/internal/infrastructure/event"
 	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -18,13 +18,13 @@ type Interceptor interface {
 
 type interceptor struct {
 	apiToken string
-	log  event.Event
+	log      event.Event
 }
 
 func NewInterceptor(token string, log event.Event) Interceptor {
 	return &interceptor{
 		apiToken: token,
-		log: log,
+		log:      log,
 	}
 }
 

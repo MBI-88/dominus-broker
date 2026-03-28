@@ -53,7 +53,7 @@ func NewMonitorAPI(r *router.Router, reg *prometheus.Registry, log event.Event) 
 		router: r,
 		reg:    reg,
 		opts:   promhttp.HandlerOpts{EnableOpenMetrics: true, DisableCompression: true},
-		log:  log,
+		log:    log,
 	}
 	m.path()
 }
@@ -63,7 +63,7 @@ func (m *monitor) convertToHTTP(ctx *fasthttp.RequestCtx) (*http.Request, error)
 		Method: string(ctx.Method()),
 		Header: make(http.Header),
 	}
-	for k,v := range ctx.Request.Header.All() {
+	for k, v := range ctx.Request.Header.All() {
 		req.Header.Set(string(k), string(v))
 	}
 	return req, nil

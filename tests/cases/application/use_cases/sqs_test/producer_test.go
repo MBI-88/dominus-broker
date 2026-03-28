@@ -13,10 +13,10 @@ import (
 
 func TestProducer(t *testing.T) {
 	payloadOK := []byte("\n{payload:{data:data}}\n")
-	tests := []struct{
-		name string
-		setupMock func (*testing.T, *mocks.MockProducerDto, *mocks.MockMemoryClient)
-		output error
+	tests := []struct {
+		name      string
+		setupMock func(*testing.T, *mocks.MockProducerDto, *mocks.MockMemoryClient)
+		output    error
 	}{
 		{
 			name: "Producer OK",
@@ -56,7 +56,6 @@ func TestProducer(t *testing.T) {
 					Return(fmt.Errorf("connection error"))
 			},
 			output: fmt.Errorf("connection error"),
-
 		},
 		{
 			name: "Producer empty payload",
@@ -65,7 +64,7 @@ func TestProducer(t *testing.T) {
 					GetPayload().
 					Return([]byte{})
 			},
-			output: fmt.Errorf("empty payload") ,
+			output: fmt.Errorf("empty payload"),
 		},
 	}
 
@@ -91,7 +90,7 @@ func TestProducer(t *testing.T) {
 			if err == nil {
 				t.Fatalf("expected error %v got nil", tt.output)
 			}
-			
+
 			if tt.output.Error() != err.Error() {
 				t.Fatalf("expected %s got %s", tt.output, err)
 			}

@@ -19,6 +19,7 @@ linters-settings:
       - all
       - '-SA4006' # variable declarada pero no usada
       - '-SA1019' # uso de APIs obsoletas
+      - '-SA1029' # context.WithValue: claves string / tipo con underlying string (p. ej. enum.ID)
   errcheck:
     exclude-functions:
       - (*os.File).Close
@@ -39,5 +40,10 @@ issues:
     - "error return value of.*Close.*not checked"
     - "Error return value of .(Close|Write|Flush).* is not checked"
     - "SA1019:"
+  exclude-rules:
+    # Respaldo: desactivar SA1029 (claves context.WithValue) si staticcheck no aplica -checks
+    - linters:
+        - staticcheck
+      text: "SA1029:"
   max-same-issues: 3
   max-issues-per-linter: 50

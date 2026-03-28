@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"go.uber.org/mock/gomock"
 	"github.com/valyala/fasthttp"
+	"go.uber.org/mock/gomock"
 )
 
 func newFastHTTPCtx(uri, token, ip string) *fasthttp.RequestCtx {

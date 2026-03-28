@@ -1,10 +1,10 @@
 package inbound
 
 import (
-	"dominus-project/internal/infrastructure/event"
-	"dominus-project/internal/infrastructure/grpc/mappers"
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
+	"dominus-project/internal/infrastructure/grpc/mappers"
 	"fmt"
 	"io"
 
@@ -21,12 +21,10 @@ type brokerAPI struct {
 	log event.Event
 }
 
-func NewBrokerAPI(server *grpc.Server, br broker.Broker, log event.Event)  {
+func NewBrokerAPI(server *grpc.Server, br broker.Broker, log event.Event) {
 	gsrv := &brokerAPI{br: br, log: log}
 	pb.RegisterBrokerAPIServer(server, gsrv)
 }
-
-
 
 // Receives array messages from client
 func (s *brokerAPI) ClientStream(stream pb.BrokerAPI_ClientStreamServer) error {

@@ -121,7 +121,7 @@ func TestCheckID(t *testing.T) {
 		lgs := event.NewEvent("", "", false)
 		ctx := context.WithValue(context.Background(), enum.ID, "test-1123")
 		ctx = lgs.CheckID(ctx)
-		
+
 		if ctx.Value(enum.ID) != "test-1123" {
 			t.Fatalf("Expected %s, got %s", "test-1123", ctx.Value(enum.ID))
 		}

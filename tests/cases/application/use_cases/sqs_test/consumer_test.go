@@ -20,11 +20,11 @@ func TestConsumer(t *testing.T) {
 		CreatedAt: fixedAt,
 	}
 
-	tests := []struct{
-		name string
-		setupMock func (context.Context, *mocks.MockConsumerDto, *mocks.MockMemoryClient)
-		output error
-		want *entities.Message
+	tests := []struct {
+		name      string
+		setupMock func(context.Context, *mocks.MockConsumerDto, *mocks.MockMemoryClient)
+		output    error
+		want      *entities.Message
 	}{
 		{
 			name: "Consumer OK",
@@ -47,17 +47,17 @@ func TestConsumer(t *testing.T) {
 		{
 			name: "Consumer connection error",
 			setupMock: func(ctx context.Context, dto *mocks.MockConsumerDto, mc *mocks.MockMemoryClient) {
-				dto.EXPECT(). 
-				GetWorkerId(). 
-				Return("worker-1")
+				dto.EXPECT().
+					GetWorkerId().
+					Return("worker-1")
 
-				dto.EXPECT(). 
-				GetGroupId(). 
-				Return("consumer-1")
+				dto.EXPECT().
+					GetGroupId().
+					Return("consumer-1")
 
-				mc.EXPECT(). 
-				GetMessage(ctx, "worker-1", "consumer-1"). 
-				Return(&entities.Message{}, fmt.Errorf("connection error"))
+				mc.EXPECT().
+					GetMessage(ctx, "worker-1", "consumer-1").
+					Return(&entities.Message{}, fmt.Errorf("connection error"))
 			},
 			output: fmt.Errorf("connection error"),
 			want:   nil,

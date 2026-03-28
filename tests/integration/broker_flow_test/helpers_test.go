@@ -11,7 +11,6 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 )
 
-
 const buffSize = 1024 * 1024
 
 func bufDialer(lis *bufconn.Listener) func(context.Context, string) (net.Conn, error) {
@@ -19,6 +18,7 @@ func bufDialer(lis *bufconn.Listener) func(context.Context, string) (net.Conn, e
 		return lis.Dial()
 	}
 }
+
 // bidirEchoPeer simula un broker remoto: eco por cada StreamRequest recibido.
 type bidirEchoPeer struct {
 	pb.UnimplementedBrokerAPIServer

@@ -17,11 +17,6 @@ type RestConfig struct {
 	AllowOrigins string `json:"allow_origins"`
 }
 
-type domainConfig struct {
-	TopicLimit int `json:"topic_limit"`
-	QueueLimit int `json:"queue_limit"`
-}
-
 type CertConfig struct {
 	KeyFile   string `json:"key_file"`
 	SslCaCert string `json:"ssl_ca_cert"`
@@ -30,11 +25,11 @@ type CertConfig struct {
 
 type RedisConfig struct {
 	Port         int64  `json:"port"`
-	PoolSize     int  `json:"pool_size"`
-	MaxRetries   int  `json:"max_retries"`
-	DialTimeOut  int  `json:"dial_time_out"`
-	ReadTimeOut  int  `json:"read_time_out"`
-	WriteTimeOut int  `json:"write_time_out"`
+	PoolSize     int    `json:"pool_size"`
+	MaxRetries   int    `json:"max_retries"`
+	DialTimeOut  int    `json:"dial_time_out"`
+	ReadTimeOut  int    `json:"read_time_out"`
+	WriteTimeOut int    `json:"write_time_out"`
 	MemoryDB     int    `json:"memory_db"`
 	CheckerDB    int    `json:"checker_db"`
 	IdPotency    int    `json:"id_potency"`

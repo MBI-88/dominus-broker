@@ -3,8 +3,8 @@ package middlewares
 import (
 	"crypto/sha256"
 	"crypto/subtle"
-	"dominus-project/internal/infrastructure/event"
 	"dominus-project/internal/infrastructure/enum"
+	"dominus-project/internal/infrastructure/event"
 	"fmt"
 
 	"strings"
@@ -14,13 +14,13 @@ import (
 
 type apMiddleware struct {
 	token []byte
-	log event.Event
+	log   event.Event
 }
 
 func NewMiddlewareApiToken(t string, log event.Event) Middlewares {
 	return &apMiddleware{
 		token: []byte(t),
-		log: log,
+		log:   log,
 	}
 }
 

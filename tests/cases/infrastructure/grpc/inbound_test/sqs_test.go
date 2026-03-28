@@ -123,13 +123,12 @@ func TestProducer(t *testing.T) {
 
 		sqsMock.EXPECT().
 			Producer(gomock.All(), gomock.All()).
-			Return(fmt.Errorf("connection error")). 
+			Return(fmt.Errorf("connection error")).
 			AnyTimes()
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
-		
 
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, sqsMock, evnetMock)
@@ -325,7 +324,7 @@ func TestConsumer(t *testing.T) {
 }
 
 func TestAck(t *testing.T) {
-	
+
 	t.Run("Ack ok", func(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
@@ -493,7 +492,6 @@ func TestAck(t *testing.T) {
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
-
 
 		sqsMock.EXPECT().
 			Ack(gomock.All(), gomock.All()).
