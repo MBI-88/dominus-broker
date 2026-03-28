@@ -142,7 +142,6 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 	var workerWG sync.WaitGroup
 
 	for _, u := range urls {
-		u := u
 		stream, err := connect(u)
 		ep := &endpoint{url: u, stream: stream, err: err}
 

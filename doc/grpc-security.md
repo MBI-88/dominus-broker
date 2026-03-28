@@ -15,6 +15,14 @@ Server and client interceptors are wired in `internal/boostrap/boostrap.go`. Mid
 - **Server**: `auth.UnaryServerInterceptor(midGs.IdPotency)` — **not** applied to streaming RPCs in the current bootstrap chain.
 - Uses header from `enum` (e.g. idempotency key) and `repositories.CheckerClient` (`cchecker`) to reject duplicates or persist keys.
 
+### Concurrency semantics (important for operators and future changes)
+
+The middleware flow is roughly: `CheckConsumer` (Redis `EXISTS` on the idempotency key) → if missing, spawn a goroutine that calls `SaveConsumer` (`SET` with `NX` and TTL) → continue to the handler.
+
+**Limitation:** two concurrent unary requests with the **same** idempotency key can both observe “key absent” before either `SET NX` completes, so **both** may reach the handler. This is a classic check-then-act window at the application level; the race detector will not flag it because Redis handles its own concurrency.
+
+**Stronger guarantee (if required):** reserve the key **synchronously** before invoking the handler (for example: single `SET key NX` — proceed only if the set succeeds; if the key already exists, return duplicate/aborted). That collapses check and insert into one atomic step. See also `doc/concurrency.md`.
+
 ## TLS
 
 When cert, key, and CA files exist:

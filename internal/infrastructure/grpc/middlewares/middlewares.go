@@ -87,24 +87,24 @@ func (m *middlewares) IdPotency(ctx context.Context) (context.Context, error) {
 	go m.logs.WriteLog(ctx, enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION)
 
 	if !ok {
-		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency", enum.NOT_FOUND)
+		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency.FromIncomingContext", enum.NOT_FOUND)
 		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
 	}
 
 	key := md.Get(enum.ID_POTENCY_HEADER)[0]
 	if key == "" {
-		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency", enum.NOT_FOUND)
+		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency.Get", enum.NOT_FOUND)
 		return nil, status.Error(codes.DataLoss, enum.NOT_FOUND)
 	}
 
 	if ok := m.ch.CheckConsumer(ctx, key); ok {
-		go m.logs.WriteLog(ctx, enum.INFO, "CheckConsumer", "id potency found")
+		go m.logs.WriteLog(ctx, enum.INFO, "IdPotency.CheckConsumer", "id potency found")
 		return nil, status.Error(codes.Aborted, "id potency found")
 	}
 
 	go func(key string) {
 		if err := m.ch.SaveConsumer(ctx, key); err != nil {
-			m.logs.WriteLog(ctx, enum.ERROR, "SaveConsumer", err.Error())
+			m.logs.WriteLog(ctx, enum.ERROR, "IdPotency.SaveConsumer", err.Error())
 		}
 	}(key)
 

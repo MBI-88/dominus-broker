@@ -4,9 +4,10 @@ In-depth notes for contributors. The [main README](../README.md) stays high-leve
 
 | Document | Topics |
 |----------|--------|
-| [broker-streaming.md](broker-streaming.md) | `BrokerAPI` flows, use cases, outbound fan-out |
+| [broker-streaming.md](broker-streaming.md) | `BrokerAPI` flows, use cases, outbound fan-out, bidi shutdown (`done` / `closed`) |
+| [concurrency.md](concurrency.md) | Race detector, logging, broker/idempotency concurrency notes |
 | [configuration.md](configuration.md) | Viper, JSON shape, dev vs prod |
-| [grpc-security.md](grpc-security.md) | Middleware, API key, idempotency, TLS |
+| [grpc-security.md](grpc-security.md) | Middleware, API key, idempotency (incl. concurrent duplicate keys), TLS |
 | [redis.md](redis.md) | `cchecker`, `cmemory`, streams |
 | [sqs-use-cases.md](sqs-use-cases.md) | Producer, Consumer, Ack: layers, validation, message IDs, test map |
 | [http-monitor.md](http-monitor.md) | fasthttp monitor API and middleware |

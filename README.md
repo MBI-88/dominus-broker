@@ -47,7 +47,8 @@ Detailed design and file-level notes live under **[`doc/`](doc/)**:
 | Guide | Description |
 |-------|-------------|
 | [doc/README.md](doc/README.md) | Index of all technical docs |
-| [doc/broker-streaming.md](doc/broker-streaming.md) | Broker gRPC streams, use cases, outbound fan-out |
+| [doc/broker-streaming.md](doc/broker-streaming.md) | Broker gRPC streams, use cases, outbound fan-out, bidi shutdown |
+| [doc/concurrency.md](doc/concurrency.md) | Race detector, channel shutdown, idempotency vs concurrency |
 | [doc/configuration.md](doc/configuration.md) | Viper, JSON schema, dev vs prod |
 | [doc/grpc-security.md](doc/grpc-security.md) | Middleware, API key, idempotency, TLS, metrics |
 | [doc/redis.md](doc/redis.md) | Checker (idempotency) and cmemory (streams) |
