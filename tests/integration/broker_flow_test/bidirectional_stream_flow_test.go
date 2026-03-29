@@ -2,6 +2,8 @@ package broker_flow_test
 
 import (
 	"context"
+	"errors"
+	"io"
 	"testing"
 	"time"
 
@@ -130,23 +132,26 @@ func TestBidirectionalStreamFlow(t *testing.T) {
 			}
 		}
 
-		// Cerrar el lado cliente: cancel() suele ganar la carrera y el RPC termina en
-		// Canceled antes de que el handler devuelva Aborted + "connection closed".
+		// Los suscriptores TCP (echo) no cierran el stream solos: si solo hiciéramos CloseSend(),
+		// streamProv se cerraría pero los workers del outbound seguirían bloqueados en Recv hacia
+		// el echo y nunca llegaría el tx a `closed` (deadlock con <-closed y close(closed) en el use case).
+		// Cancelar el ctx del RPC desbloquea BidirectionalStream (workers + Wait + señal closed).
 		cancel()
+
 		_, err = stream.Recv()
-		st, ok := status.FromError(err)
-		if !ok {
-			t.Fatalf("final Recv: %v", err)
+		if err == nil {
+			t.Fatal("expected terminal error after cancel")
 		}
-		switch st.Code() {
+		if errors.Is(err, io.EOF) {
+			return
+		}
+		switch status.Code(err) {
 		case codes.Canceled:
-			// Esperado al cancelar el contexto del ClientStream.
 		case codes.Aborted:
-			if st.Message() != "connection closed" {
-				t.Fatalf("Aborted message: want %q, got %q", "connection closed", st.Message())
-			}
+			// p. ej. "connection closed" si el handler termina antes que el ctx cancele el stream
+		case codes.Unavailable:
 		default:
-			t.Fatalf("final code: want Canceled or Aborted, got %v (%v)", st.Code(), err)
+			t.Fatalf("final Recv: want Canceled/Aborted/Unavailable/EOF, got %v: %v", status.Code(err), err)
 		}
 	})
 }

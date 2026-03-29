@@ -19,6 +19,22 @@ See **`doc/broker-streaming.md`** (section *Bidirectional shutdown: `done` vs `c
 
 Do not replace these with a single channel without re-deriving the same ordering guarantees.
 
+### Integration tests: `CloseSend` vs context cancel (`broker_flow_test`)
+
+`tests/integration/broker_flow_test/bidirectional_stream_flow_test.go` dials **real TCP** subscriber peers (`bidirEchoPeer` in `helpers_test.go`) that loop forever on `Recv` until the connection breaks. That mirrors long-lived third-party brokers.
+
+**Important:** if the test only calls **`CloseSend()`** on the ingress client and expects a clean shutdown:
+
+1. The server’s provider goroutine gets **EOF**, **`close(streamProv)`**, and the outbound exits `for msg := range provMsg`.
+2. Outbound then **`workerWG.Wait()`** for each per-URL worker.
+3. Those workers are often still blocked on **`Recv()`** toward the echo peer, which does **not** close the stream just because the ingress half-closed.
+
+So **`Wait()` never completes**, the outbound never sends on **`tx` (`closed`)**, and the provider stays blocked on **`<-closed`** → **deadlock**. Closing channels in the use case does not fix that; the workers must be unblocked.
+
+**Recommended teardown in tests:** after asserting application-level responses, **`cancel()`** the RPC context (the same tree passed into `BidirectionalStream`). Workers observe `ctx.Done()`, exit, emit **`done`**, and the outbound can finish and signal **`closed`**. Then drain the final client **`Recv()`** and accept terminal codes such as **`Canceled`**, **`Aborted`**, **`Unavailable`**, or **`io.EOF`** depending on timing and gRPC version.
+
+Documented channel rules and the `closed` / `done` split: **`doc/broker-streaming.md`** (*Channel lifecycle in `StreamBiConn`*).
+
 ## Outbound `BrokerClient` (`client_v1.3.7.go`)
 
 - **ClientStream**: one mutex per subscriber URL serializes access to the stream handle and connection error state; each ingress message fans out with `go cls(m)` (same `[]byte` must remain read-only for all callees).

@@ -47,14 +47,15 @@ Detailed design and file-level notes live under **[`doc/`](doc/)**:
 | Guide | Description |
 |-------|-------------|
 | [doc/README.md](doc/README.md) | Index of all technical docs |
-| [doc/broker-streaming.md](doc/broker-streaming.md) | Broker gRPC streams, use cases, outbound fan-out, bidi shutdown |
-| [doc/concurrency.md](doc/concurrency.md) | Race detector, channel shutdown, idempotency vs concurrency |
+| [doc/broker-streaming.md](doc/broker-streaming.md) | Broker gRPC streams, outbound fan-out, bidi shutdown, channel lifecycle, payload sharing |
+| [doc/concurrency.md](doc/concurrency.md) | Race detector, bidi integration teardown, channel rules, idempotency |
 | [doc/configuration.md](doc/configuration.md) | Viper, JSON schema, dev vs prod |
 | [doc/grpc-security.md](doc/grpc-security.md) | Middleware, API key, idempotency, TLS, metrics |
 | [doc/redis.md](doc/redis.md) | Checker (idempotency) and cmemory (streams) |
 | [doc/sqs-use-cases.md](doc/sqs-use-cases.md) | Producer / consumer / ack over gRPC |
 | [doc/http-monitor.md](doc/http-monitor.md) | fasthttp monitor API and middleware |
 | [doc/testing.md](doc/testing.md) | `tests/cases` vs `tests/integration`, commands |
+| [doc/tradeoffs.md](doc/tradeoffs.md) | Trade-offs: architecture, broker concurrency, Redis, security, ops |
 | [doc/coverage.md](doc/coverage.md) | **`run_coverage.ps1`** (required for real %), baseline **90.0%**, per-function breakdown |
 
 ---

@@ -56,7 +56,7 @@ type Config struct {
 
 func NewConfig(prod bool) *Config {
 	var (
-		cf *Config
+		cf Config
 	)
 
 	if prod {
@@ -73,10 +73,10 @@ func NewConfig(prod bool) *Config {
 				panic("[-] File not found!")
 			}
 		}
-		if err := viper.Unmarshal(cf); err != nil {
+		if err := viper.Unmarshal(&cf); err != nil {
 			panic(err)
 		}
 	}
 
-	return cf
+	return &cf
 }

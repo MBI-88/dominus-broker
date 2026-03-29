@@ -57,8 +57,28 @@ When the ingress `Recv` loop hits an error, it `close(streamProv)` then blocks o
 
 `StreamBiConn` calls `cancel()` when `stream.Send` to the client fails (and `defer cancel()` on exit). Workers observe `ctx` in their send `select` and in retry loops, so cancellation can unblock a blocked send path. Normal subscriber completion is usually driven by `Recv` returning `EOF` rather than by an explicit cancel before `close(streamSub)`.
 
+### Channel lifecycle in `StreamBiConn` (`stream_bi_conn.go`)
+
+These channels coordinate the provider goroutine, the main loop, the error logger, and `BidirectionalStream` in `outbound/client_v1.3.7.go`.
+
+| Channel | Capacity | Who closes | Role |
+|---------|----------|------------|------|
+| **`streamProv`** | unbuffered | Provider goroutine on first ingress `Recv` error | Feeds payloads into outbound `for msg := range provMsg`; closing it ends that loop so the outbound can `workerWG.Wait()` and signal `tx` (`closed`). |
+| **`streamSub`** | buffered | Main loop when `total == 0` after all `<-done` | Merges subscriber responses toward `stream.Send`; safe to close only after every worker has returned (see `done` above). |
+| **`errMsg`** | buffered | Main loop together with `streamSub` | Consumed by a small goroutine `for range errMsg`; must be closed so that goroutine exits. |
+| **`done`** | `len(subscribers)` | **`defer close(done)`** after allocation | One send per worker when the worker goroutine exits; main counts down to zero, then closes `streamSub` / `errMsg`. |
+| **`closed`** | unbuffered | **Provider goroutine only**, after `<-closed` | Handed to outbound as `tx`. Outbound sends **once** after `provMsg` is drained and workers have joined. The provider waits on `<-closed` so it does not exit before that handshake; then it **`close(closed)`**. |
+
+**Do not `defer close(closed)` at the start of `StreamBiConn`.** The main loop can return (`"connection closed"`) while the outbound goroutine has not yet executed `tx <- struct{}{}`. A top-level `defer close(closed)` would run on return and race the send → **panic: send on closed channel**. The `closed` channel is therefore closed **only** in the provider path, **after** the outbound’s single send has been received.
+
+**`defer close(done)`** is safe here: the main loop only returns after receiving exactly `len(subscribers)` values from `done`, so no worker should still send on `done` when the defer runs. Early returns before `BidirectionalStream` is started never write to `done`; closing an empty buffered channel is fine.
+
+### Payload fan-out and shared `[]byte`
+
+For each `msg` from `provMsg`, outbound `BidirectionalStream` launches `go cls(msg)` per subscriber URL. All goroutines for that iteration observe the **same** slice header (same backing array). Treat payloads as **read-only** until all sends for that message complete; if the producer reuses or mutates the buffer before gRPC finishes reading, you get subtle races or corrupted payloads.
+
 ## Related tests
 
 - Unit-style: `tests/cases/application/use_cases/broker_test/`
 - gRPC wiring: `tests/cases/infrastructure/grpc/inbound_test/broker_test.go`
-- Integration: `tests/integration/broker_flow_test/` (real broker + outbound + TCP peers or bufconn)
+- Integration: `tests/integration/broker_flow_test/` (real broker + outbound + TCP peers or bufconn). For **BidirectionalStream** shutdown expectations when subscribers keep streams open, see **`doc/concurrency.md`** (*Integration tests: CloseSend vs context cancel*).

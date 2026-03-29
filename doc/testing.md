@@ -25,7 +25,7 @@ Go test packages live under **`tests/...`** so they import **`internal/...`** as
 
 | Package | Purpose |
 |---------|---------|
-| `broker_flow_test` | Ingress gRPC over **bufconn**, real `broker` + **`outbound.NewGrpClient`** where applicable; downstream “peers” on **TCP** (`helpers_test.go`) or mocks only for **`Event`** / **`CheckerClient`**; covers ClientStream, ServerStream, BidirectionalStream. |
+| `broker_flow_test` | Ingress gRPC over **bufconn**, real `broker` + **`outbound.NewGrpClient`** where applicable; downstream “peers” on **TCP** (`helpers_test.go`) or mocks only for **`Event`** / **`CheckerClient`**; covers ClientStream, ServerStream, BidirectionalStream. **BidirectionalStream:** see **`doc/concurrency.md`** (*Integration tests: CloseSend vs context cancel*) — use **`context.Cancel`** after assertions, not **`CloseSend()`** alone, when peers keep their gRPC stream open (e.g. echo loop). |
 | `sqs_flow_test` | End-to-end **SqsAPI** over bufconn with **miniredis** and real **`cmemory`**: Producer (stream payload + errors), Consumer (ordering, empty stream, validation), Ack after consume + pending verification. |
 
 Integration tests are slower and assert **wiring + transport**; keep **unit tests** in `tests/cases/` for branches, errors, and focused contracts (e.g. Ack message-ID format at the use-case layer).
@@ -61,6 +61,8 @@ Use the repo script from the **repository root**:
 That produces **`coverage.out`** and prints **`go tool cover -func`** including the **total statement %** (baseline **90.0%** when last recorded).
 
 Full script walkthrough, `-coverpkg` package list rules, HTML report command, **per-function table**, and gaps (`IdPotency` 0%, bootstrap untested, etc.): **[coverage.md](coverage.md)**.
+
+Engineering trade-offs (testing vs production realism, coverage scope): **[tradeoffs.md](tradeoffs.md)**.
 
 ---
 
