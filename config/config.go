@@ -7,57 +7,55 @@ import (
 )
 
 type GrpcConfig struct {
-	GRPCPort      int64  `json:"grpc_port"`
-	ConnectionKey string `json:"connection_key"`
+	GRPCPort      int64
+	ConnectionKey string
 }
 
 type RestConfig struct {
-	RestPort     int64  `json:"rest_port"`
-	ApiToken     string `json:"api_token"`
-	AllowOrigins string `json:"allow_origins"`
+	RestPort     int64
+	ApiToken     string
+	AllowOrigins string
 }
 
 type CertConfig struct {
-	KeyFile   string `json:"key_file"`
-	SslCaCert string `json:"ssl_ca_cert"`
-	SslCert   string `json:"ssl_cert"`
+	KeyFile   string
+	SslCaCert string
+	SslCert   string
 }
 
 type RedisConfig struct {
-	Port         int64  `json:"port"`
-	PoolSize     int    `json:"pool_size"`
-	MaxRetries   int    `json:"max_retries"`
-	DialTimeOut  int    `json:"dial_time_out"`
-	ReadTimeOut  int    `json:"read_time_out"`
-	WriteTimeOut int    `json:"write_time_out"`
-	MemoryDB     int    `json:"memory_db"`
-	CheckerDB    int    `json:"checker_db"`
-	IdPotency    int    `json:"id_potency"`
-	Host         string `json:"host"`
-	Password     string `json:"password"`
-	Username     string `json:"username"`
-	StreamID     string `json:"stream_id"`
-	GroupID      string `json:"group_id"`
-	Tls          bool   `json:"tls"`
+	Port         int64
+	PoolSize     int
+	MaxRetries   int
+	DialTimeOut  int
+	ReadTimeOut  int
+	WriteTimeOut int
+	MemoryDB     int
+	CheckerDB    int
+	IdPotency    int
+	Host         string
+	Password     string
+	Username     string
+	StreamID     string
+	GroupID      string
+	Tls          bool
 }
 
 type InfraConfig struct {
-	LogMode string `json:"log_mode"`
-	LogURL  string `json:"log_url"`
+	LogMode string
+	LogURL  string
 }
 
 type Config struct {
-	GrpcConfig  *GrpcConfig  `json:"grpc_config"`
-	RestConfig  *RestConfig  `json:"rest_config"`
-	CertConfig  *CertConfig  `json:"cert_config"`
-	RedisConfig *RedisConfig `json:"redis_config"`
-	InfraConfig *InfraConfig `json:"infra_config"`
+	GrpcConfig  GrpcConfig
+	RestConfig  RestConfig
+	CertConfig  CertConfig
+	RedisConfig RedisConfig
+	InfraConfig InfraConfig
 }
 
 func NewConfig(prod bool) *Config {
-	var (
-		cf Config
-	)
+	var cf Config
 
 	if prod {
 		viper.AutomaticEnv()
