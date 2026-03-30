@@ -5,7 +5,6 @@ import (
 	"dominus-project/internal/application/use_cases/broker"
 	"dominus-project/mocks"
 	"fmt"
-	"sync"
 	"testing"
 	"time"
 
@@ -41,35 +40,37 @@ func TestStreamBiConn(t *testing.T) {
 					AnyTimes()
 
 				mc.EXPECT().
-					BidirectionalStream(gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All()).
-					Do(func(subscribers, streamProv, streamSub, errMsg, closed, ctx, done any) {
-						var recvWG sync.WaitGroup
-						recvWG.Add(1)
+					BidirectionalStream(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					Do(func(urls, streamProv, streamSub, txArg, ctx any) {
+						prov := streamProv.(<-chan []byte)
+						sub := streamSub.(chan<- []byte)
+						txCh := txArg.(chan<- struct{})
+						cctx := ctx.(context.Context)
+
 						go func() {
-							defer recvWG.Done()
-							for msg := range streamProv.(<-chan []byte) {
-								_ = msg
-								errMsg.(chan<- error) <- fmt.Errorf("test error")
+							for range prov {
 							}
-							closed.(chan<- struct{}) <- struct{}{}
+							// Let the handler drain streamSub for Send() expectations before tx closes the session.
+							time.Sleep(100 * time.Millisecond)
+							// Always signal tx after prov closes so StreamBiConn can leave <-closed even if ctx was canceled first.
+							txCh <- struct{}{}
 						}()
 
-						subTicker := time.NewTicker(time.Second)
-						defer subTicker.Stop()
-						bctx := ctx.(context.Context)
-						for {
-							select {
-							case <-subTicker.C:
-								streamSub.(chan<- []byte) <- []byte("test")
-							case <-bctx.Done():
-								subTicker.Stop()
-								recvWG.Wait()
-								for range subscribers.([]string) {
-									done.(chan<- struct{}) <- struct{}{}
+						go func() {
+							tick := time.NewTicker(5 * time.Millisecond)
+							defer tick.Stop()
+							for {
+								select {
+								case <-cctx.Done():
+									return
+								case <-tick.C:
+									select {
+									case sub <- []byte("test"):
+									default:
+									}
 								}
-								return
 							}
-						}
+						}()
 					}).
 					Times(1)
 

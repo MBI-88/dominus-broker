@@ -16,10 +16,10 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))
-	done := make(chan struct{}, total)
+	closed := make(chan struct{})
 	initialRequest := req.GetPayload()
 
-	go b.client.ServerStream(subscribers, initialRequest, stream, ctx, done)
+	go b.client.ServerStream(subscribers, initialRequest, stream, ctx, closed)
 
 	for {
 		select {
@@ -29,13 +29,10 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 					cancel()
 				}
 			}
-		case <-done:
-			total--
-			if total == 0 {
-				close(done)
-				close(stream)
-				return fmt.Errorf("connection closed")
-			}
+		case <-closed:
+			close(closed)
+			close(stream)
+			return fmt.Errorf("connection closed")
 		}
 	}
 }

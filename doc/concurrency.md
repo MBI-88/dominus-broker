@@ -4,7 +4,7 @@ Notes for contributors maintaining goroutines, channels, and gRPC streams.
 
 ## Race detector
 
-CI-style coverage uses `go test -race` (see `doc/coverage.md` and `run_coverage.ps1`). A green run means no **memory** data races were observed under the executed tests; it does not prove absence of **logical** races (e.g. idempotency).
+CI-style coverage uses `go test -race` (see `doc/coverage.md` and **`Makefile.ps1 -Target test-cover`**). A green run means no **memory** data races were observed under the executed tests; it does not prove absence of **logical** races (e.g. idempotency).
 
 ## Logging
 

@@ -30,18 +30,23 @@ func TestStreamServerConn(t *testing.T) {
 					Return([]byte("test")).Times(1)
 
 				mc.EXPECT().
-					ServerStream(gomock.All(), gomock.All(), gomock.All(), gomock.All(), gomock.All()).
-					Do(func(subscribers, initialRequest, stream, ctx, done any) {
+					ServerStream(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					Do(func(urls, initialRequest, stream, ctx, tx any) {
+						ch := stream.(chan<- []byte)
+						cctx := ctx.(context.Context)
+						txCh := tx.(chan<- struct{})
+						tick := time.NewTicker(5 * time.Millisecond)
+						defer tick.Stop()
 						for {
 							select {
-							case <-time.Tick(1 * time.Second):
-								stream.(chan<- []byte) <- []byte("test")
-							case <-ctx.(context.Context).Done():
-								for range subscribers.([]string) {
-									done.(chan<- struct{}) <- struct{}{}
+							case <-tick.C:
+								select {
+								case ch <- []byte("test"):
+								default:
 								}
+							case <-cctx.Done():
+								txCh <- struct{}{}
 								return
-							case <-time.Tick(5 * time.Second):
 							}
 						}
 					}).Times(1)
@@ -67,6 +72,32 @@ func TestStreamServerConn(t *testing.T) {
 			},
 			output: fmt.Errorf("subscribers not found"),
 		},
+		{
+			name: "StreamServerConn send error then connection closed",
+			setupMock: func(mc *mocks.MockBrokerClient, mdto *mocks.MockBrokerServerDto, mrq *mocks.MockBrokerRequestDto) {
+				mrq.EXPECT().GetSubscribers().Return([]string{"a"}).Times(1)
+				mrq.EXPECT().GetPayload().Return([]byte("init")).Times(1)
+				mdto.EXPECT().Context().Return(context.Background()).Times(1)
+				mc.EXPECT().
+					ServerStream(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+					Do(func(_, _, stream, ctx, tx any) {
+						ch := stream.(chan<- []byte)
+						cctx := ctx.(context.Context)
+						txCh := tx.(chan<- struct{})
+						go func() {
+							select {
+							case ch <- []byte("body"):
+							case <-cctx.Done():
+								return
+							}
+							<-cctx.Done()
+							txCh <- struct{}{}
+						}()
+					}).Times(1)
+				mdto.EXPECT().Send(gomock.Any()).Return(fmt.Errorf("send failed")).Times(1)
+			},
+			output: fmt.Errorf("connection closed"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -84,11 +115,15 @@ func TestStreamServerConn(t *testing.T) {
 
 			err := service.StreamServerConn(mockRequestDto, mockDto)
 
-			if tt.output != nil && err == nil {
-				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
-			}
-			if tt.output == nil && err != nil {
-				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
+			if tt.output != nil {
+				if err == nil {
+					t.Fatalf("expected error %v, got nil", tt.output)
+				}
+				if tt.output.Error() != err.Error() {
+					t.Fatalf("expected error %q, got %q", tt.output.Error(), err.Error())
+				}
+			} else if err != nil {
+				t.Fatalf("expected nil error, got %v", err)
 			}
 
 		})

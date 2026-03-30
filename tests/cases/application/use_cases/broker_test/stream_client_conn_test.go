@@ -65,7 +65,7 @@ func TestStreamClientConn(t *testing.T) {
 					GetSubscribers().
 					Return([]string{}).Times(1)
 			},
-			output: fmt.Errorf("subscribers empty"),
+			output: fmt.Errorf("subscribers not found"),
 		},
 	}
 
@@ -84,11 +84,15 @@ func TestStreamClientConn(t *testing.T) {
 
 			err := service.StreamClientConn(mockClientDto)
 
-			if tt.output != nil && err == nil {
-				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
-			}
-			if tt.output == nil && err != nil {
-				t.Fatalf("Expected output different from output %s != %s", tt.output, err)
+			if tt.output != nil {
+				if err == nil {
+					t.Fatalf("expected error %v, got nil", tt.output)
+				}
+				if tt.output.Error() != err.Error() {
+					t.Fatalf("expected error %q, got %q", tt.output.Error(), err.Error())
+				}
+			} else if err != nil {
+				t.Fatalf("expected nil error, got %v", err)
 			}
 
 		})

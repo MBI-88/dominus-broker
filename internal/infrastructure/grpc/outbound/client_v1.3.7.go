@@ -77,8 +77,11 @@ func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx contex
 }
 
 func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, ctx context.Context, tx chan<- struct{}) {
+	var workerWG sync.WaitGroup
+	workerWG.Add(len(urls))
 	for _, url := range urls {
 		go func(url string) {
+			defer workerWG.Done()
 			conn, _ := grpc.NewClient(url, g.opts...)
 			client := pb.NewBrokerAPIClient(conn)
 			reqMsg := &pb.StreamRequestMessage{
@@ -92,7 +95,6 @@ func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 					resp, err := stream.Recv()
 					if err == io.EOF {
 						go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.Recv", err.Error())
-						tx <- struct{}{}
 						if err := stream.CloseSend(); err != nil {
 							go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.ColseSend", err.Error())
 						}
@@ -119,9 +121,15 @@ func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 			}
 		}(url)
 	}
+
+	workerWG.Wait()
+	if tx != nil {
+		tx <- struct{}{}
+	}
+
 }
 
-func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, errMsg chan<- error, tx chan<- struct{}, ctx context.Context, done chan<- struct{}) {
+func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte, subMsg chan<- []byte, tx chan<- struct{}, ctx context.Context) {
 	lock := new(sync.Mutex)
 	type endpoint struct {
 		url    string
@@ -138,8 +146,10 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 		return c.BidirectionalStream(ctx)
 	}
 
-	arrayDoQuery := make([]func([]byte), 0, len(urls))
+	total := len(urls)
+	arrayDoQuery := make([]func([]byte), 0, total)
 	var workerWG sync.WaitGroup
+	workerWG.Add(total)
 
 	for _, u := range urls {
 		stream, err := connect(u)
@@ -173,18 +183,8 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 		}
 		arrayDoQuery = append(arrayDoQuery, cls)
 
-		workerWG.Add(1)
 		go func(ep *endpoint) {
 			defer workerWG.Done()
-			var signalDoneOnce sync.Once
-			defer func() {
-				if done == nil {
-					return
-				}
-				signalDoneOnce.Do(func() {
-					done <- struct{}{}
-				})
-			}()
 
 		connectLabel:
 			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Connect", enum.DEBUG_DESCRIPTION)
@@ -246,6 +246,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 			go cls(msg)
 		}
 	}
+
 	workerWG.Wait()
 	if tx != nil {
 		tx <- struct{}{}

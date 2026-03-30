@@ -68,11 +68,11 @@ func NewMemoryClient(
 }
 
 func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
-	go m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
+	m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
 
 	data, err := jsoniter.Marshal(q)
 	if err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.Marshal", err.Error())
+		m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.Marshal", err.Error())
 		return err
 	}
 
@@ -83,23 +83,23 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 		},
 		ID: q.GetMessageId(),
 	}).Result(); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.XAdd", err.Error())
+		m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.XAdd", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (m *memory) AckMessage(ctx context.Context, messageId, groupId string) error {
-	go m.lg.WriteLog(ctx, enum.DEBUG, "AckMessage", enum.DEBUG_DESCRIPTION)
+	m.lg.WriteLog(ctx, enum.DEBUG, "AckMessage", enum.DEBUG_DESCRIPTION)
 	if err := m.rdb.XAck(ctx, m.streamID, groupId, messageId).Err(); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "AckMessage.XAck", err.Error())
+		m.lg.WriteLog(ctx, enum.ERROR, "AckMessage.XAck", err.Error())
 		return err
 	}
 	return nil
 }
 
 func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*entities.Message, error) {
-	go m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
+	m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
 
 	response, err := m.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
 		Group:    groupId,
@@ -110,7 +110,7 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 	}).Result()
 
 	if err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.XReadGroup", err.Error())
+		m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.XReadGroup", err.Error())
 		return nil, err
 	}
 
@@ -119,11 +119,12 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 
 	var q entities.Message
 	if err := jsoniter.Unmarshal([]byte(message), &q); err != nil {
-		go m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
+		m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
 		return nil, err
 	}
 
 	if !q.SetMessageId(streamMsg.ID) {
+		m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.SetMessageId", enum.INVALID_ID)
 		return nil, fmt.Errorf("invalid messageID format")
 	}
 

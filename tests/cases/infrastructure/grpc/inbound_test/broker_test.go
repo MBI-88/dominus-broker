@@ -17,6 +17,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/test/bufconn"
 )
 
@@ -184,6 +185,99 @@ func TestClientStream(t *testing.T) {
 			t.Fatalf("status: got %d want %d", got, want)
 		}
 	})
+
+	t.Run("ClientStream ingress broker returns error", func(t *testing.T) {
+		lis := bufconn.Listen(buffSize)
+		ctrl := gomock.NewController(t)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+
+		brokerMock.EXPECT().
+			StreamClientConn(gomock.Any()).
+			Return(fmt.Errorf("stream failure")).
+			Times(1)
+
+		eventMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		srv := grpc.NewServer()
+		inbound.NewBrokerAPI(srv, brokerMock, eventMock)
+		go func() {
+			if err := srv.Serve(lis); err != nil {
+				t.Logf("Serve: %v", err)
+			}
+		}()
+		t.Cleanup(srv.Stop)
+
+		conn, err := grpc.NewClient("passthrough:///buf",
+			grpc.WithContextDialer(bufDialer(lis)),
+			grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			t.Fatalf("NewClient: %v", err)
+		}
+		t.Cleanup(func() { _ = conn.Close() })
+
+		cli := pb.NewBrokerAPIClient(conn)
+		stream, err := cli.ClientStream(context.Background())
+		if err != nil {
+			t.Fatalf("ClientStream: %v", err)
+		}
+		_, err = stream.CloseAndRecv()
+		if err == nil {
+			t.Fatal("expected error from CloseAndRecv")
+		}
+		st, ok := status.FromError(err)
+		if !ok || st.Code() != codes.Aborted || st.Message() != "stream failure" {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("ClientStream ingress broker returns nil", func(t *testing.T) {
+		lis := bufconn.Listen(buffSize)
+		ctrl := gomock.NewController(t)
+		brokerMock := mocks.NewMockBroker(ctrl)
+		eventMock := mocks.NewMockEvent(ctrl)
+
+		brokerMock.EXPECT().
+			StreamClientConn(gomock.Any()).
+			Return(nil).
+			Times(1)
+
+		eventMock.EXPECT().
+			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+			AnyTimes()
+
+		srv := grpc.NewServer()
+		inbound.NewBrokerAPI(srv, brokerMock, eventMock)
+		go func() {
+			if err := srv.Serve(lis); err != nil {
+				t.Logf("Serve: %v", err)
+			}
+		}()
+		t.Cleanup(srv.Stop)
+
+		conn, err := grpc.NewClient("passthrough:///buf",
+			grpc.WithContextDialer(bufDialer(lis)),
+			grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			t.Fatalf("NewClient: %v", err)
+		}
+		t.Cleanup(func() { _ = conn.Close() })
+
+		cli := pb.NewBrokerAPIClient(conn)
+		stream, err := cli.ClientStream(context.Background())
+		if err != nil {
+			t.Fatalf("ClientStream: %v", err)
+		}
+		resp, err := stream.CloseAndRecv()
+		if err != nil {
+			t.Fatalf("CloseAndRecv: %v", err)
+		}
+		if got, want := resp.GetStatus(), int64(codes.OK); got != want {
+			t.Fatalf("status: got %d want %d", got, want)
+		}
+	})
 }
 
 func TestServerStream(t *testing.T) {
@@ -234,8 +328,12 @@ func TestServerStream(t *testing.T) {
 		}()
 
 		go func() {
-			for _, ok := <-msg; ok; {
+			for range msg {
 			}
+		}()
+
+		go func() {
+			<-done
 		}()
 
 		client.ServerStream([]string{"server1.api.com", "server2.api.com"}, []byte("test-initial"), msg, ctx, done)
@@ -292,8 +390,12 @@ func TestServerStream(t *testing.T) {
 		}()
 
 		go func() {
-			for _, ok := <-msg; ok; {
+			for range msg {
 			}
+		}()
+
+		go func() {
+			<-done
 		}()
 
 		client.ServerStream([]string{"server1.api.com", "server2.api.com"}, []byte("test-initial"), msg, ctx, done)
@@ -310,7 +412,6 @@ func TestBidirectionalStream(t *testing.T) {
 		c := make(chan struct{})
 		provMsg := make(chan []byte, 2)
 		subMsg := make(chan []byte, 2)
-		errMsg := make(chan error, 2)
 		tx := make(chan struct{})
 		done := make(chan struct{}, 8)
 		lis := bufconn.Listen(buffSize)
@@ -380,18 +481,15 @@ func TestBidirectionalStream(t *testing.T) {
 		}()
 
 		go func() {
-			for _, ok := <-subMsg; ok; {
+			for range subMsg {
 			}
-			close(subMsg)
 		}()
 
 		client.BidirectionalStream([]string{"server1.api.com", "server2.api.com"},
 			provMsg,
 			subMsg,
-			errMsg,
 			tx,
 			ctx,
-			done,
 		)
 
 		close(c)
@@ -403,7 +501,6 @@ func TestBidirectionalStream(t *testing.T) {
 		c := make(chan struct{})
 		provMsg := make(chan []byte, 2)
 		subMsg := make(chan []byte, 2)
-		errMsg := make(chan error, 2)
 		tx := make(chan struct{})
 		done := make(chan struct{}, 8)
 		lis := bufconn.Listen(buffSize)
@@ -473,18 +570,15 @@ func TestBidirectionalStream(t *testing.T) {
 		}()
 
 		go func() {
-			for _, ok := <-subMsg; ok; {
+			for range subMsg {
 			}
-			close(subMsg)
 		}()
 
 		client.BidirectionalStream([]string{"server1.api.com", "server2.api.com"},
 			provMsg,
 			subMsg,
-			errMsg,
 			tx,
 			ctx,
-			done,
 		)
 
 		close(c)

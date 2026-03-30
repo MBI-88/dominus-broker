@@ -79,7 +79,7 @@ This document captures deliberate choices, known limitations, and engineering tr
 
 | Trade-off | Benefit | Cost |
 |-----------|---------|------|
-| **`run_coverage.ps1` with broad `-coverpkg`** | Meaningful % across `internal/...`. | Slower runs; `-race` multiplies time. |
+| **`Makefile.ps1` / `-coverpkg` over `internal/...` and `tests/...`** | Meaningful % across `internal/...`. | Slower runs; `-race` multiplies time. |
 | **bufconn for ingress, TCP for broker peers** | Mix of hermetic and realistic I/O. | Flaky tests if ports/timeouts are tight; different failure modes than full mesh bufconn. |
 | **miniredis for Redis tests** | Fast, no Docker required for CI. | Behaviour diverges from real Redis / cluster edge cases (ACL, TLS to Redis, etc.). |
 

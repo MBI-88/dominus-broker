@@ -61,9 +61,9 @@ func TestServerStreamFlow(t *testing.T) {
 
 				msg <- []byte("chunk-1")
 				msg <- []byte("chunk-2")
-				for range urls {
-					tx <- struct{}{}
-				}
+				// stream is buffered; StreamServerConn select can pick <-tx before draining msg unless we yield.
+				time.Sleep(50 * time.Millisecond)
+				tx <- struct{}{}
 			}).
 			AnyTimes()
 

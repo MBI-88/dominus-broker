@@ -56,7 +56,7 @@ Detailed design and file-level notes live under **[`doc/`](doc/)**:
 | [doc/http-monitor.md](doc/http-monitor.md) | fasthttp monitor API and middleware |
 | [doc/testing.md](doc/testing.md) | `tests/cases` vs `tests/integration`, commands |
 | [doc/tradeoffs.md](doc/tradeoffs.md) | Trade-offs: architecture, broker concurrency, Redis, security, ops |
-| [doc/coverage.md](doc/coverage.md) | **`run_coverage.ps1`** (required for real %), baseline **90.0%**, per-function breakdown |
+| [doc/coverage.md](doc/coverage.md) | **`Makefile.ps1 -Target test-cover`**, baseline **91.0%**, per-function breakdown |
 
 ---
 
@@ -73,6 +73,7 @@ internal/
   infrastructure/     # gRPC in/out, Redis, fasthttp, event, enum
   boostrap/           # Server bootstrap and wiring
 mocks/                # go.uber.org/mock (generated)
+Makefile.ps1          # Windows PowerShell: build, test, coverage, lint, audit (see Tests / Development)
 tests/
   cases/              # Layered tests (unit / component)
   integration/        # broker_flow_test, sqs_flow_test, etc.
@@ -158,25 +159,26 @@ docker compose up -d
 Test packages live under `tests/...` (separate from `internal` packages):
 
 ```bash
-go test ./tests/...
+go test -race -count=1 ./tests/...
 ```
+
+Use **`-race`** (race detector) and **`-count=1`** (disable test result cache) to match **`Makefile.ps1 -Target test`** / **`test-cover`** and avoid cached passes hiding races. For the full module: **`go test -race -count=1 ./...`**.
 
 - **`tests/cases/`**: domain-focused unit tests (broker, sqs, gRPC, Redis, fasthttp, middlewares).
 - **`tests/integration/broker_flow_test/`**: ClientStream / ServerStream / BidirectionalStream flows with bufconn + TCP peers; mocks limited to logging/checker and simulated downstream peers.
 - **`tests/integration/sqs_flow_test/`**: SqsAPI Producer / Consumer / Ack with miniredis and real stream adapter (see **[doc/sqs-use-cases.md](doc/sqs-use-cases.md)**).
 
-### Coverage (use `run_coverage.ps1`)
+### Coverage (`Makefile.ps1`)
 
-Coverage that attributes statements to **`internal/...`** must use the root script (it builds `-coverpkg` from `go list ./...` minus `mocks` / `docs`):
+Meaningful totals for **`internal/...`** need **`-coverpkg`** (see **[doc/coverage.md](doc/coverage.md)**). From the repository root:
 
 ```powershell
-# From repository root (same directory as go.mod)
-.\run_coverage.ps1
+.\Makefile.ps1 -Target test-cover      # writes coverage.out + go tool cover -func
+.\Makefile.ps1 -Target check-coverage  # same, then fails if total is below -CoverageMinPct (see script default)
 ```
 
-- Runs: `go test -timeout 120s -race -coverpkg=<all non-excluded packages> -covermode=atomic -coverprofile=coverage.out ./tests/...`
-- Then: `go tool cover -func=coverage.out`
-- **Latest recorded total: 90.0%** statements (update after major changes; see **[doc/coverage.md](doc/coverage.md)** for the full per-function table, HTML export, and gaps).
+- **test-cover** builds **`-coverpkg`** from **`go list ./internal/...`** (minus **`internal/boostrap`**) + **`go list ./tests/...`**, so **`cmd/`**, **`config/`**, **`mocks/`**, and bootstrap are **not** in the profile (see **[doc/coverage.md](doc/coverage.md)**).
+- **Latest recorded total: 91.0%** statements in **[doc/coverage.md](doc/coverage.md)** (refresh that doc after large changes).
 
 `coverage.out` is gitignored (`*.out`).
 
@@ -186,6 +188,7 @@ Coverage that attributes statements to **`internal/...`** must use the root scri
 
 - **Mocks**: `go generate` / `mockgen` per code comments; output in `mocks/`.
 - **Lint**: `.golangci.yaml`, optional hooks in `.pre-commit-config.yaml`.
+- **Windows automation**: **`Makefile.ps1`** at repo root (`-Target build`, `test`, `test-cover`, `fmt`, `lint`, `vuln`, `audit`, `deploy-check`). **`go`**, **`golangci-lint`**, and **`govulncheck`** must already be on **`PATH`** (e.g. via your Go version manager); the script does not modify `PATH`.
 
 ---
 

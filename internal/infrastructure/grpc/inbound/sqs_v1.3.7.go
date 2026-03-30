@@ -69,22 +69,22 @@ func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerR
 	go s.log.WriteLog(ctx, enum.DEBUG, "Ack", enum.REQUEST_OK)
 
 	if ms.GetMessageId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack.GetMessageId", enum.INVALID_ID)
+		s.log.WriteLog(ctx, enum.ERROR, "Ack.GetMessageId", enum.INVALID_ID)
 		return nil, status.Error(codes.NotFound, enum.INVALID_ID)
 	}
 
 	if ms.GetGroupId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack.GetGroupId", enum.GROUP_ID)
+		s.log.WriteLog(ctx, enum.ERROR, "Ack.GetGroupId", enum.GROUP_ID)
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
 
 	if ms.GetWorkerId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack.GetWorkerId", enum.WORKER_ID)
+		s.log.WriteLog(ctx, enum.ERROR, "Ack.GetWorkerId", enum.WORKER_ID)
 		return nil, status.Error(codes.NotFound, enum.WORKER_ID)
 	}
 
 	if err := s.q.Ack(ctx, ms); err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "Ack.Ack", err.Error())
+		s.log.WriteLog(ctx, enum.ERROR, "Ack.Ack", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
 

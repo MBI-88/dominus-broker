@@ -8,8 +8,8 @@ Go test packages live under **`tests/...`** so they import **`internal/...`** as
 
 | Area | Path (example) | Typical focus |
 |------|----------------|----------------|
-| Broker use cases | `tests/cases/application/use_cases/broker_test/` | `StreamClientConn`, `StreamServerConn`, `StreamBiConn` with mocks |
-| SQS use cases | `tests/cases/application/use_cases/sqs_test/` | Producer / Consumer / Ack with `MockMemoryClient`; payload and message-ID assertions; invalid Ack IDs without calling Redis |
+| Broker use cases | `tests/cases/application/use_cases/broker_test/` | `broker_test.go` (`NewBroker`); `StreamClientConn` / `StreamServerConn` / `StreamBiConn` in dedicated `*_test.go` files with mocks |
+| SQS use cases | `tests/cases/application/use_cases/sqs_test/` | `sqs_test.go` (`NewSQS`); Producer / Consumer / Ack in dedicated `*_test.go` files with `MockMemoryClient`; payload and message-ID assertions; invalid Ack IDs without calling Redis |
 | gRPC inbound | `tests/cases/infrastructure/grpc/inbound_test/` | `BrokerAPI`, `SqsAPI` handlers with bufconn / mocks; SqsAPI Ack invalid-ID path uses real `sqs.NewSQS` + mock client |
 | gRPC middleware | `tests/cases/infrastructure/grpc/middleware_test/` | `ApiToken`, interceptors, logging |
 | gRPC mappers | `tests/cases/infrastructure/grpc/mappers_test/` | DTO wrappers around streams |
@@ -34,33 +34,35 @@ Integration tests are slower and assert **wiring + transport**; keep **unit test
 
 ## Commands
 
-Run all tests (no full-module coverage attribution):
+Run all tests with the **race detector** and **without test-cache reuse** (same defaults as **`Makefile.ps1`**):
 
 ```bash
-go test ./tests/...
+go test -race -count=1 ./tests/...
 ```
 
 Verbose / single package:
 
 ```bash
-go test -v ./tests/integration/broker_flow_test/...
+go test -race -count=1 -v ./tests/integration/broker_flow_test/...
 ```
+
+**`-race`** instruments memory accesses and fails if a data race is detected; **`-count=1`** avoids a previously cached success skipping a fresh instrumented run. See [race detector](https://go.dev/doc/articles/race_detector).
 
 ---
 
-## Coverage (mandatory: `run_coverage.ps1`)
+## Coverage (use `Makefile.ps1`)
 
-**Do not** treat `go test -cover ./tests/...` alone as project coverage: it does not set `-coverpkg` across `internal/...`.
+**Do not** treat plain `go test -cover` without **`-coverpkg`** as the project’s coverage view for **`internal/...`**.
 
-Use the repo script from the **repository root**:
+From the **repository root**:
 
 ```powershell
-.\run_coverage.ps1
+.\Makefile.ps1 -Target test-cover
 ```
 
-That produces **`coverage.out`** and prints **`go tool cover -func`** including the **total statement %** (baseline **90.0%** when last recorded).
+That writes **`coverage.out`** and runs **`go tool cover -func`** (baseline **total** tracked in **[coverage.md](coverage.md)**). For a failing gate when total is too low: **`-Target check-coverage`** (see README).
 
-Full script walkthrough, `-coverpkg` package list rules, HTML report command, **per-function table**, and gaps (`IdPotency` 0%, bootstrap untested, etc.): **[coverage.md](coverage.md)**.
+Exclusions (**`cmd/`**, **`config/`**, **`mocks/`**, **`internal/boostrap`**), HTML report, **per-function table**, and gaps: **[coverage.md](coverage.md)**.
 
 Engineering trade-offs (testing vs production realism, coverage scope): **[tradeoffs.md](tradeoffs.md)**.
 
