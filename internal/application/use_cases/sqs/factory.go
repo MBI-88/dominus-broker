@@ -2,9 +2,9 @@ package sqs
 
 import (
 	"context"
-	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repositories"
+	"dominus-broker/internal/application/dtos"
+	"dominus-broker/internal/domain/entities"
+	"dominus-broker/internal/domain/repositories"
 )
 
 type SQS interface {

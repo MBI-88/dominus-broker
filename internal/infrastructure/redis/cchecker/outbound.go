@@ -3,8 +3,8 @@ package cchecker
 import (
 	"context"
 	"crypto/tls"
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/infrastructure/enum"
+	"dominus-broker/internal/domain/repositories"
+	"dominus-broker/internal/infrastructure/enum"
 	"fmt"
 	"time"
 

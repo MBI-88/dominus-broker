@@ -1,7 +1,7 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Build and quality targets for dominus-project (Go module: dominus-project).
+    Build and quality targets for dominus-broker (Go module: dominus-broker).
 
 .DESCRIPTION
     PowerShell equivalent of a Makefile for Windows. Ensures commands run from the
@@ -63,7 +63,7 @@ function Write-StepMessage {
         [Parameter(Mandatory)]
         [string] $Message
     )
-    Write-Host "[dominus-project] $Message" -ForegroundColor Cyan
+    Write-Host "[dominus-broker] $Message" -ForegroundColor Cyan
 }
 
 function Assert-LastExitCode {
@@ -292,7 +292,7 @@ function Invoke-DeployCheckStep {
 function Show-Help {
     $bin = Get-BinaryFileName
     Write-Host @"
-dominus-project - local automation (PowerShell)
+dominus-broker - local automation (PowerShell)
 
 Usage:
   .\Makefile.ps1 [-Target <name>] [-CoverageMinPct <n>] [-AuditDocsDir <path>]

@@ -3,7 +3,7 @@ package broker
 import (
 	"context"
 
-	"dominus-project/internal/application/dtos"
+	"dominus-broker/internal/application/dtos"
 	"fmt"
 )
 

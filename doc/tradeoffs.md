@@ -8,7 +8,7 @@ This document captures deliberate choices, known limitations, and engineering tr
 
 | Trade-off | Benefit | Cost |
 |-----------|---------|------|
-| **`internal/` + `tests/...` packages** | Production code cannot be imported by other modules; tests stay as first-class packages with clear `dominus-project/tests/...` imports. | Extra path depth; no `_test.go` next to handlers (must open two trees when editing). |
+| **`internal/` + `tests/...` packages** | Production code cannot be imported by other modules; tests stay as first-class packages with clear `dominus-broker/tests/...` imports. | Extra path depth; no `_test.go` next to handlers (must open two trees when editing). |
 | **Thin domain (`entities`, `repositories` interfaces)** | Swappable Redis / gRPC adapters; mocks in `mocks/`. | More boilerplate and `mockgen` churn when interfaces change. |
 | **Application use cases as facades** | Single place for orchestration (broker streams, SQS-like flows). | Complex stream code (channels, defers) is harder to follow than a single linear handler. |
 

@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"dominus-project/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/enum"
 
 	"github.com/valyala/fasthttp"
 )

@@ -4,9 +4,9 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/event"
+	"dominus-broker/internal/domain/repositories"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/event"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"dominus-project/internal/infrastructure/grpc/outbound"
+	"dominus-broker/internal/infrastructure/grpc/outbound"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"google.golang.org/grpc"

@@ -2,10 +2,10 @@ package inbound_test
 
 import (
 	"context"
-	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/infrastructure/grpc/inbound"
-	"dominus-project/internal/infrastructure/grpc/outbound"
-	"dominus-project/mocks"
+	"dominus-broker/internal/application/dtos"
+	"dominus-broker/internal/infrastructure/grpc/inbound"
+	"dominus-broker/internal/infrastructure/grpc/outbound"
+	"dominus-broker/mocks"
 	"fmt"
 	"log"
 	"net"

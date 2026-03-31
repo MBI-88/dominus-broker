@@ -2,10 +2,10 @@ package inbound_test
 
 import (
 	"context"
-	appsqs "dominus-project/internal/application/use_cases/sqs"
-	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/infrastructure/grpc/inbound"
-	"dominus-project/mocks"
+	appsqs "dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/domain/entities"
+	"dominus-broker/internal/infrastructure/grpc/inbound"
+	"dominus-broker/mocks"
 	"fmt"
 	"testing"
 	"time"

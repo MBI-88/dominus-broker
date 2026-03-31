@@ -2,8 +2,8 @@ package sqs_test
 
 import (
 	"context"
-	"dominus-project/internal/application/use_cases/sqs"
-	"dominus-project/mocks"
+	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/mocks"
 	"fmt"
 	"testing"
 

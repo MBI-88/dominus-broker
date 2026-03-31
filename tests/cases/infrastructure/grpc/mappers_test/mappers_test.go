@@ -2,7 +2,7 @@ package mappers_test
 
 import (
 	"context"
-	"dominus-project/internal/infrastructure/grpc/mappers"
+	"dominus-broker/internal/infrastructure/grpc/mappers"
 	"testing"
 
 	"github.com/MBI-88/dominus-proto-definition/dominus"

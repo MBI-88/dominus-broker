@@ -2,8 +2,8 @@ package broker_test
 
 import (
 	"context"
-	"dominus-project/internal/application/use_cases/broker"
-	"dominus-project/mocks"
+	"dominus-broker/internal/application/use_cases/broker"
+	"dominus-broker/mocks"
 	"fmt"
 	"testing"
 

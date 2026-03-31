@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"dominus-project/internal/application/use_cases/sqs"
-	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/infrastructure/grpc/inbound"
-	"dominus-project/mocks"
+	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/domain/entities"
+	"dominus-broker/internal/infrastructure/grpc/inbound"
+	"dominus-broker/mocks"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"github.com/alicebob/miniredis/v2"

@@ -2,9 +2,9 @@ package inbound
 
 import (
 	"context"
-	"dominus-project/internal/application/use_cases/sqs"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/event"
+	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/event"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"google.golang.org/grpc"

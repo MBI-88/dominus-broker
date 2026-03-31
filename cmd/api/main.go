@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dominus-project/internal/boostrap"
+	"dominus-broker/internal/boostrap"
 
 	"flag"
 	"fmt"
@@ -32,7 +32,7 @@ func init() {
 	showBanner = flag.Bool("banner", true, "show banner")
 
 	flag.Usage = func() {
-		info := "[*] ***dominus-project*** [*]\n"
+		info := "[*] ***dominus-broker*** [*]\n"
 		info += "mode: boolean\n"
 		info += "banner: boolean\n"
 		fmt.Fprintf(os.Stderr, "%s\n", info)

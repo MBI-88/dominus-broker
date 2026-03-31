@@ -1,8 +1,8 @@
 package broker
 
 import (
-	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/domain/repositories"
+	"dominus-broker/internal/application/dtos"
+	"dominus-broker/internal/domain/repositories"
 )
 
 type Broker interface {

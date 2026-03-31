@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/infrastructure/event"
-	"dominus-project/internal/infrastructure/redis/cmemory"
+	"dominus-broker/internal/domain/repositories"
+	"dominus-broker/internal/infrastructure/event"
+	"dominus-broker/internal/infrastructure/redis/cmemory"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"github.com/alicebob/miniredis/v2"

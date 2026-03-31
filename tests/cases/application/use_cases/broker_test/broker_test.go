@@ -3,8 +3,8 @@ package broker_test
 import (
 	"testing"
 
-	"dominus-project/internal/application/use_cases/broker"
-	"dominus-project/mocks"
+	"dominus-broker/internal/application/use_cases/broker"
+	"dominus-broker/mocks"
 
 	"go.uber.org/mock/gomock"
 )

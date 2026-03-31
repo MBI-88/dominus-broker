@@ -1,6 +1,6 @@
 # Testing layout
 
-Go test packages live under **`tests/...`** so they import **`internal/...`** as normal dependencies of the same module (`dominus-project`), without placing `_test.go` files next to production packages.
+Go test packages live under **`tests/...`** so they import **`internal/...`** as normal dependencies of the same module (`dominus-broker`), without placing `_test.go` files next to production packages.
 
 ---
 

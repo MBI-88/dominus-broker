@@ -1,9 +1,9 @@
 package middleware_test
 
 import (
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/fasthttp/middlewares"
-	"dominus-project/mocks"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/fasthttp/middlewares"
+	"dominus-broker/mocks"
 	"fmt"
 	"net"
 	"testing"

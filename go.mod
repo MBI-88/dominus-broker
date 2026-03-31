@@ -1,4 +1,4 @@
-module dominus-project
+module dominus-broker
 
 go 1.26.1
 

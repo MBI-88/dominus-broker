@@ -2,20 +2,20 @@ package boostrap
 
 import (
 	"context"
-	"dominus-project/config"
+	"dominus-broker/config"
 
-	"dominus-project/internal/application/use_cases/broker"
-	"dominus-project/internal/application/use_cases/sqs"
-	"dominus-project/internal/infrastructure/enum"
+	"dominus-broker/internal/application/use_cases/broker"
+	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/infrastructure/enum"
 
-	"dominus-project/internal/infrastructure/event"
-	fi "dominus-project/internal/infrastructure/fasthttp/inbound"
-	fm "dominus-project/internal/infrastructure/fasthttp/middlewares"
-	gi "dominus-project/internal/infrastructure/grpc/inbound"
-	gm "dominus-project/internal/infrastructure/grpc/middlewares"
-	gt "dominus-project/internal/infrastructure/grpc/outbound"
-	"dominus-project/internal/infrastructure/redis/cchecker"
-	"dominus-project/internal/infrastructure/redis/cmemory"
+	"dominus-broker/internal/infrastructure/event"
+	fi "dominus-broker/internal/infrastructure/fasthttp/inbound"
+	fm "dominus-broker/internal/infrastructure/fasthttp/middlewares"
+	gi "dominus-broker/internal/infrastructure/grpc/inbound"
+	gm "dominus-broker/internal/infrastructure/grpc/middlewares"
+	gt "dominus-broker/internal/infrastructure/grpc/outbound"
+	"dominus-broker/internal/infrastructure/redis/cchecker"
+	"dominus-broker/internal/infrastructure/redis/cmemory"
 
 	"fmt"
 	"log"

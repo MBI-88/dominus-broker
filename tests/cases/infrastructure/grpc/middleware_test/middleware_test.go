@@ -2,9 +2,9 @@ package middleware_test
 
 import (
 	"context"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/grpc/middlewares"
-	"dominus-project/mocks"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/grpc/middlewares"
+	"dominus-broker/mocks"
 	"errors"
 	"testing"
 	"time"

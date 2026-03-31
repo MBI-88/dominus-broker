@@ -13,7 +13,7 @@ This project measures coverage with **`Makefile.ps1`** at the repository root (*
 | **Go toolchain** | Matches `go.mod` (e.g. 1.26.x). **`go`** on **`PATH`**. |
 
 ```powershell
-cd <path-to>\dominus-project
+cd <path-to>\dominus-broker
 .\Makefile.ps1 -Target test-cover
 ```
 
@@ -21,7 +21,7 @@ cd <path-to>\dominus-project
 
 ## What `test-cover` does
 
-1. **`-coverpkg`** is built from **`go list ./internal/...`** and **`go list ./tests/...`**, joined as comma-separated import paths, with **`dominus-project/internal/boostrap`** (package **`internal/boostrap`**) **removed** — bootstrap wiring is not part of the coverage budget here.
+1. **`-coverpkg`** is built from **`go list ./internal/...`** and **`go list ./tests/...`**, joined as comma-separated import paths, with **`dominus-broker/internal/boostrap`** (package **`internal/boostrap`**) **removed** — bootstrap wiring is not part of the coverage budget here.
 
 2. **`go test ./...`** with that **`-coverpkg`**, **`-race`**, **`-count=1`**, **`-coverprofile=coverage.out`**.
 
@@ -97,82 +97,82 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 Snapshot from a recent **`test-cover`** run; re-run locally after changes—line-level % can drift while **total** above stays the tracked baseline until you refresh it.
 
 ```
-dominus-project/internal/application/use_cases/broker/factory.go:18:                    NewBroker               100.0%
-dominus-project/internal/application/use_cases/broker/stream_bi_conn.go:10:         StreamBiConn            100.0%
-dominus-project/internal/application/use_cases/broker/stream_client_conn.go:10:       StreamClientConn        100.0%
-dominus-project/internal/application/use_cases/broker/stream_server_conn.go:10:       StreamServerConn        100.0%
-dominus-project/internal/application/use_cases/sqs/ack.go:8:                          Ack                     100.0%
-dominus-project/internal/application/use_cases/sqs/consumer.go:9:                     Consumer                100.0%
-dominus-project/internal/application/use_cases/sqs/factory.go:20:                     NewSQS                  100.0%
-dominus-project/internal/application/use_cases/sqs/producer.go:10:                    Producer                100.0%
-dominus-project/internal/domain/entities/sqs_message.go:15:                            NewMessage              100.0%
-dominus-project/internal/domain/entities/sqs_message.go:23:                            SetMessage              100.0%
-dominus-project/internal/domain/entities/sqs_message.go:26:                            GetMessage              100.0%
-dominus-project/internal/domain/entities/sqs_message.go:30:                            SetMessageId            100.0%
-dominus-project/internal/domain/entities/sqs_message.go:33:                            GetMessageId            100.0%
-dominus-project/internal/domain/entities/sqs_message.go:37:                            GetCreatedAt            100.0%
-dominus-project/internal/domain/entities/sqs_message.go:40:                            SetCreateAt             100.0%
-dominus-project/internal/infrastructure/event/event.go:26:                            NewEvent                100.0%
-dominus-project/internal/infrastructure/event/event.go:39:                            WriteLog                88.9%
-dominus-project/internal/infrastructure/event/event.go:60:                            CheckID                 100.0%
-dominus-project/internal/infrastructure/event/event.go:69:                            typeLog                 100.0%
-dominus-project/internal/infrastructure/event/event.go:78:                            clientLog               0.0%
-dominus-project/internal/infrastructure/event/event.go:81:                            cmdLog                  100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:31:           Header                  100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:35:           Write                   100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:39:           WriteHeader             0.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:50:           NewMonitorAPI           100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:61:           convertToHTTP           100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:72:           collectMetrics          100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:83:           getMetrics              75.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:95:           getHealthCheck          100.0%
-dominus-project/internal/infrastructure/fasthttp/inbound/monitor_api.go:101:          path                    100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/api_middleware.go:20:    NewMiddlewareApiToken   100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/api_middleware.go:27:    CheckMiddleware         100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/host_allowed.go:17:      NewMiddlewareHost       100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/host_allowed.go:24:    CheckMiddleware         100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/middlewares.go:22:     NewMiddleware           100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/middlewares.go:28:     AddMiddleware           100.0%
-dominus-project/internal/infrastructure/fasthttp/middlewares/middlewares.go:32:     Middlewares             100.0%
-dominus-project/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:24:           NewBrokerAPI            100.0%
-dominus-project/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:30:           ClientStream            100.0%
-dominus-project/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:49:           ServerStream            100.0%
-dominus-project/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:56:           BidirectionalStream     100.0%
-dominus-project/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:22:              NewSqsAPI               100.0%
-dominus-project/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:28:              Producer                100.0%
-dominus-project/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:43:              Consumer                100.0%
-dominus-project/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:68:              Ack                     100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:14:                  NewBiStreamConn         100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:20:                  Recv                    100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:24:                  Send                    100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:31:                  Context                 100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:39:                  NewClientStreamContext  100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:45:                  Recv                    100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:49:                  Context                 100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:57:                  NewServerStreamContext  100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:63:                  Send                    100.0%
-dominus-project/internal/infrastructure/grpc/mappers/mappers.go:70:                  Context                 100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/interceptors.go:24:       NewInterceptor          100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/interceptors.go:31:       UnaryAuthInterceptor    100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/interceptors.go:38:       StreamAuthInterceptor   100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/middlewares.go:32:        NewMiddleware           100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/middlewares.go:40:        ApiToken                100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/middlewares.go:57:        UnaryLog                100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/middlewares.go:62:        StreamLog               100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/middlewares.go:67:        LogErrors               100.0%
-dominus-project/internal/infrastructure/grpc/middlewares/middlewares.go:85:        IdPotency               100.0%
-dominus-project/internal/infrastructure/grpc/outbound/client_v1.3.7.go:22:          NewGrpClient            100.0%
-dominus-project/internal/infrastructure/grpc/outbound/client_v1.3.7.go:29:          ClientStream            78.8%
-dominus-project/internal/infrastructure/grpc/outbound/client_v1.3.7.go:79:          ServerStream            90.6%
-dominus-project/internal/infrastructure/grpc/outbound/client_v1.3.7.go:132:         BidirectionalStream     73.1%
-dominus-project/internal/infrastructure/redis/cchecker/outbound.go:19:             NewCheckerClient        71.4%
-dominus-project/internal/infrastructure/redis/cchecker/outbound.go:64:             SaveConsumer            100.0%
-dominus-project/internal/infrastructure/redis/cchecker/outbound.go:74:             CheckConsumer           100.0%
-dominus-project/internal/infrastructure/redis/cmemory/outbound.go:23:              NewMemoryClient         71.4%
-dominus-project/internal/infrastructure/redis/cmemory/outbound.go:70:              SendMessage             77.8%
-dominus-project/internal/infrastructure/redis/cmemory/outbound.go:92:              AckMessage              100.0%
-dominus-project/internal/infrastructure/redis/cmemory/outbound.go:101:             GetMessage              92.9%
-dominus-project/internal/infrastructure/redis/cmemory/outbound.go:133:             Group                   100.0%
+dominus-broker/internal/application/use_cases/broker/factory.go:18:                    NewBroker               100.0%
+dominus-broker/internal/application/use_cases/broker/stream_bi_conn.go:10:         StreamBiConn            100.0%
+dominus-broker/internal/application/use_cases/broker/stream_client_conn.go:10:       StreamClientConn        100.0%
+dominus-broker/internal/application/use_cases/broker/stream_server_conn.go:10:       StreamServerConn        100.0%
+dominus-broker/internal/application/use_cases/sqs/ack.go:8:                          Ack                     100.0%
+dominus-broker/internal/application/use_cases/sqs/consumer.go:9:                     Consumer                100.0%
+dominus-broker/internal/application/use_cases/sqs/factory.go:20:                     NewSQS                  100.0%
+dominus-broker/internal/application/use_cases/sqs/producer.go:10:                    Producer                100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:15:                            NewMessage              100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:23:                            SetMessage              100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:26:                            GetMessage              100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:30:                            SetMessageId            100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:33:                            GetMessageId            100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:37:                            GetCreatedAt            100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:40:                            SetCreateAt             100.0%
+dominus-broker/internal/infrastructure/event/event.go:26:                            NewEvent                100.0%
+dominus-broker/internal/infrastructure/event/event.go:39:                            WriteLog                88.9%
+dominus-broker/internal/infrastructure/event/event.go:60:                            CheckID                 100.0%
+dominus-broker/internal/infrastructure/event/event.go:69:                            typeLog                 100.0%
+dominus-broker/internal/infrastructure/event/event.go:78:                            clientLog               0.0%
+dominus-broker/internal/infrastructure/event/event.go:81:                            cmdLog                  100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:31:           Header                  100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:35:           Write                   100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:39:           WriteHeader             0.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:50:           NewMonitorAPI           100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:61:           convertToHTTP           100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:72:           collectMetrics          100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:83:           getMetrics              75.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:95:           getHealthCheck          100.0%
+dominus-broker/internal/infrastructure/fasthttp/inbound/monitor_api.go:101:          path                    100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/api_middleware.go:20:    NewMiddlewareApiToken   100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/api_middleware.go:27:    CheckMiddleware         100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/host_allowed.go:17:      NewMiddlewareHost       100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/host_allowed.go:24:    CheckMiddleware         100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/middlewares.go:22:     NewMiddleware           100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/middlewares.go:28:     AddMiddleware           100.0%
+dominus-broker/internal/infrastructure/fasthttp/middlewares/middlewares.go:32:     Middlewares             100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:24:           NewBrokerAPI            100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:30:           ClientStream            100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:49:           ServerStream            100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:56:           BidirectionalStream     100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:22:              NewSqsAPI               100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:28:              Producer                100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:43:              Consumer                100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:68:              Ack                     100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:14:                  NewBiStreamConn         100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:20:                  Recv                    100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:24:                  Send                    100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:31:                  Context                 100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:39:                  NewClientStreamContext  100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:45:                  Recv                    100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:49:                  Context                 100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:57:                  NewServerStreamContext  100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:63:                  Send                    100.0%
+dominus-broker/internal/infrastructure/grpc/mappers/mappers.go:70:                  Context                 100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/interceptors.go:24:       NewInterceptor          100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/interceptors.go:31:       UnaryAuthInterceptor    100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/interceptors.go:38:       StreamAuthInterceptor   100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:32:        NewMiddleware           100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:40:        ApiToken                100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:57:        UnaryLog                100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:62:        StreamLog               100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:67:        LogErrors               100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:85:        IdPotency               100.0%
+dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:22:          NewGrpClient            100.0%
+dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:29:          ClientStream            78.8%
+dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:79:          ServerStream            90.6%
+dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:132:         BidirectionalStream     73.1%
+dominus-broker/internal/infrastructure/redis/cchecker/outbound.go:19:             NewCheckerClient        71.4%
+dominus-broker/internal/infrastructure/redis/cchecker/outbound.go:64:             SaveConsumer            100.0%
+dominus-broker/internal/infrastructure/redis/cchecker/outbound.go:74:             CheckConsumer           100.0%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:23:              NewMemoryClient         71.4%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:70:              SendMessage             77.8%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:92:              AckMessage              100.0%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:101:             GetMessage              92.9%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:133:             Group                   100.0%
 total:                                                                             (statements)            91.0%
 ```
 

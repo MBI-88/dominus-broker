@@ -2,7 +2,7 @@ package mappers
 
 import (
 	"context"
-	"dominus-project/internal/application/dtos"
+	"dominus-broker/internal/application/dtos"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 )

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"dominus-project/internal/infrastructure/fasthttp/inbound"
-	"dominus-project/mocks"
+	"dominus-broker/internal/infrastructure/fasthttp/inbound"
+	"dominus-broker/mocks"
 
 	"github.com/fasthttp/router"
 	"github.com/prometheus/client_golang/prometheus"

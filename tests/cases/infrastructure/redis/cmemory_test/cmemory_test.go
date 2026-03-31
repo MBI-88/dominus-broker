@@ -7,12 +7,12 @@ import (
 	"testing"
 	"time"
 
-	"dominus-project/internal/domain/entities"
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/event"
-	"dominus-project/internal/infrastructure/redis/cmemory"
-	"dominus-project/mocks"
+	"dominus-broker/internal/domain/entities"
+	"dominus-broker/internal/domain/repositories"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/event"
+	"dominus-broker/internal/infrastructure/redis/cmemory"
+	"dominus-broker/mocks"
 
 	"github.com/alicebob/miniredis/v2"
 	jsoniter "github.com/json-iterator/go"

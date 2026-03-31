@@ -2,8 +2,8 @@ package sqs
 
 import (
 	"context"
-	"dominus-project/internal/application/dtos"
-	"dominus-project/internal/domain/entities"
+	"dominus-broker/internal/application/dtos"
+	"dominus-broker/internal/domain/entities"
 	"fmt"
 )
 

@@ -11,7 +11,7 @@ package mocks
 
 import (
 	context "context"
-	entities "dominus-project/internal/domain/entities"
+	entities "dominus-broker/internal/domain/entities"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"

@@ -25,7 +25,7 @@
 
 | | |
 |---|---|
-| **Module** | `dominus-project` |
+| **Module** | `dominus-broker` |
 | **Go** | 1.26.1 (see `go.mod`) |
 | **Contracts** | [dominus-proto-definition](https://github.com/MBI-88/dominus-proto-definition) v1.3.7 |
 

@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"dominus-project/internal/application/use_cases/broker"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/grpc/inbound"
-	"dominus-project/internal/infrastructure/grpc/middlewares"
-	"dominus-project/mocks"
+	"dominus-broker/internal/application/use_cases/broker"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/grpc/inbound"
+	"dominus-broker/internal/infrastructure/grpc/middlewares"
+	"dominus-broker/mocks"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/auth"

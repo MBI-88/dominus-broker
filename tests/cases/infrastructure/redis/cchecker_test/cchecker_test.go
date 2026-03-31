@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"dominus-project/internal/domain/repositories"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/redis/cchecker"
+	"dominus-broker/internal/domain/repositories"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/redis/cchecker"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"

@@ -3,8 +3,8 @@ package event_test
 import (
 	"bytes"
 	"context"
-	"dominus-project/internal/infrastructure/enum"
-	"dominus-project/internal/infrastructure/event"
+	"dominus-broker/internal/infrastructure/enum"
+	"dominus-broker/internal/infrastructure/event"
 	"io"
 	"os"
 	"testing"

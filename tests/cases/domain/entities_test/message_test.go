@@ -1,7 +1,7 @@
 package entities_test
 
 import (
-	"dominus-project/internal/domain/entities"
+	"dominus-broker/internal/domain/entities"
 	"testing"
 	"time"
 

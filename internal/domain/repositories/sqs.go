@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"dominus-project/internal/domain/entities"
+	"dominus-broker/internal/domain/entities"
 )
 
 type MemoryClient interface {

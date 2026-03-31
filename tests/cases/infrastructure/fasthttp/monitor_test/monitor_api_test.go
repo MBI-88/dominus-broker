@@ -1,8 +1,8 @@
 package monitor_test
 
 import (
-	"dominus-project/internal/infrastructure/fasthttp/inbound"
-	"dominus-project/mocks"
+	"dominus-broker/internal/infrastructure/fasthttp/inbound"
+	"dominus-broker/mocks"
 	"testing"
 
 	"github.com/fasthttp/router"
