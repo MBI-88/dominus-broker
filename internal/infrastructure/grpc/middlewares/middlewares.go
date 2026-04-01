@@ -7,6 +7,7 @@ import (
 	"dominus-broker/internal/domain/repositories"
 	"dominus-broker/internal/infrastructure/enum"
 	"dominus-broker/internal/infrastructure/event"
+	"fmt"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"google.golang.org/grpc"
@@ -41,26 +42,26 @@ func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
 	ctx = m.logs.CheckID(ctx)
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		go m.logs.WriteLog(ctx, enum.ERROR, "ApiToken", enum.NOT_FOUND)
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.ApiToken", enum.NOT_FOUND)
 		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
 	}
 	token := md.Get(enum.X_API_KEY)[0]
 	hashedTokenRecived := sha256.Sum256([]byte(token))
 	hashedKey := sha256.Sum256(m.token)
 	if subtle.ConstantTimeCompare(hashedTokenRecived[:], hashedKey[:]) == 0 {
-		go m.logs.WriteLog(ctx, enum.ERROR, "ApiToken", enum.MATCH_TOKEN)
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.ApiToken", enum.MATCH_TOKEN)
 		return nil, status.Errorf(codes.Unauthenticated, enum.MATCH_TOKEN)
 	}
 	return ctx, nil
 }
 
 func (m *middlewares) UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
-	go m.logs.WriteLog(ctx, enum.DEBUG, info.FullMethod, enum.DEBUG_DESCRIPTION)
+	m.logs.WriteLog(ctx, enum.DEBUG, fmt.Sprintf("middlewares.%s", info.FullMethod), enum.DEBUG_DESCRIPTION)
 	return handler(ctx, req)
 }
 
 func (m *middlewares) StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	go m.logs.WriteLog(ss.Context(), enum.DEBUG, info.FullMethod, enum.DEBUG_DESCRIPTION)
+	m.logs.WriteLog(ss.Context(), enum.DEBUG, fmt.Sprintf("middlewares.%s", info.FullMethod), enum.DEBUG_DESCRIPTION)
 	return handler(srv, ss)
 }
 
@@ -84,27 +85,27 @@ func (m *middlewares) LogErrors() logging.Logger {
 
 func (m *middlewares) IdPotency(ctx context.Context) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
-	go m.logs.WriteLog(ctx, enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION)
+	m.logs.WriteLog(ctx, enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION)
 
 	if !ok {
-		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency.FromIncomingContext", enum.NOT_FOUND)
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdPotency.FromIncomingContext", enum.NOT_FOUND)
 		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
 	}
 
 	key := md.Get(enum.ID_POTENCY_HEADER)[0]
 	if key == "" {
-		go m.logs.WriteLog(ctx, enum.ERROR, "IdPotency.Get", enum.NOT_FOUND)
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdPotency.Get", enum.NOT_FOUND)
 		return nil, status.Error(codes.DataLoss, enum.NOT_FOUND)
 	}
 
 	if ok := m.ch.CheckConsumer(ctx, key); ok {
-		go m.logs.WriteLog(ctx, enum.INFO, "IdPotency.CheckConsumer", "id potency found")
-		return nil, status.Error(codes.Aborted, "id potency found")
+		m.logs.WriteLog(ctx, enum.INFO, "middlewares.IdPotency.CheckConsumer", enum.ID_POTENCY_NOT_FOUND)
+		return nil, status.Error(codes.Aborted, enum.ID_POTENCY_NOT_FOUND)
 	}
 
 	go func(key string) {
 		if err := m.ch.SaveConsumer(ctx, key); err != nil {
-			m.logs.WriteLog(ctx, enum.ERROR, "IdPotency.SaveConsumer", err.Error())
+			m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdPotency.SaveConsumer", err.Error())
 		}
 	}(key)
 

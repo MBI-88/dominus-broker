@@ -36,7 +36,7 @@ func (a *apMiddleware) CheckMiddleware(ctx *fasthttp.RequestCtx) error {
 	hashedToken := sha256.Sum256(token)
 	hashedKey := sha256.Sum256(a.token)
 	if subtle.ConstantTimeCompare(hashedKey[:], hashedToken[:]) == 0 {
-		go a.log.WriteLog(ctx, enum.ERROR, "CheckMiddleware", enum.MATCH_TOKEN)
+		a.log.WriteLog(ctx, enum.ERROR, "apMiddleware.CheckMiddleware", enum.MATCH_TOKEN)
 		return fmt.Errorf(enum.MATCH_TOKEN)
 	}
 	return nil

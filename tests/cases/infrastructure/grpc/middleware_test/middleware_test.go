@@ -108,9 +108,8 @@ func TestUnaryLog(t *testing.T) {
 		req := "request-body"
 		handlerCalled := false
 
-		// UnaryLog writes logs in a goroutine; allow it without making the test timing-sensitive.
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, info.FullMethod, enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, "middlewares."+info.FullMethod, enum.DEBUG_DESCRIPTION).
 			AnyTimes()
 
 		handler := func(hCtx context.Context, hReq any) (any, error) {
@@ -134,7 +133,6 @@ func TestUnaryLog(t *testing.T) {
 		if !handlerCalled {
 			t.Fatalf("Expected handler to be called")
 		}
-
 	})
 
 }
@@ -150,9 +148,8 @@ func TestStreamLog(t *testing.T) {
 		info := &grpc.StreamServerInfo{FullMethod: "/dominus.Api/PublishStream"}
 		handlerCalled := false
 
-		// StreamLog writes logs in a goroutine; allow async invocation.
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, info.FullMethod, enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, "middlewares."+info.FullMethod, enum.DEBUG_DESCRIPTION).
 			AnyTimes()
 
 		handler := func(srv any, stream grpc.ServerStream) error {
@@ -227,7 +224,7 @@ func TestIdPotency(t *testing.T) {
 		ctx := metadata.NewIncomingContext(baseCtx, metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-key-1"))
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION).
 			AnyTimes()
 
 		checkerMock.EXPECT().
@@ -282,8 +279,8 @@ func TestIdPotency(t *testing.T) {
 		if !ok {
 			t.Fatalf("not a status error: %v", err)
 		}
-		if st.Code() != codes.Aborted || st.Message() != "id potency found" {
-			t.Fatalf("got code=%v msg=%q want Aborted / id potency found", st.Code(), st.Message())
+		if st.Code() != codes.Aborted || st.Message() != enum.ID_POTENCY_NOT_FOUND {
+			t.Fatalf("got code=%v msg=%q want Aborted / %q", st.Code(), st.Message(), enum.ID_POTENCY_NOT_FOUND)
 		}
 	})
 
@@ -346,7 +343,7 @@ func TestIdPotency(t *testing.T) {
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-fail-save"))
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "IdPotency", enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION).
 			AnyTimes()
 
 		checkerMock.EXPECT().
@@ -360,7 +357,7 @@ func TestIdPotency(t *testing.T) {
 			Return(saveErr)
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.ERROR, "IdPotency.SaveConsumer", saveErr.Error()).
+			WriteLog(gomock.Any(), enum.ERROR, "middlewares.IdPotency.SaveConsumer", saveErr.Error()).
 			Do(func(context.Context, string, string, string) { close(logDone) })
 
 		out, err := mid.IdPotency(ctx)

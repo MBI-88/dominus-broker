@@ -29,4 +29,5 @@ const (
 	START_FROM_NEW_MESSAGE     = "$"
 	GROUP_ID                   = "empty group id"
 	WORKER_ID                  = "empty worker id"
+	ID_POTENCY_NOT_FOUND       = "id potency not found"
 )

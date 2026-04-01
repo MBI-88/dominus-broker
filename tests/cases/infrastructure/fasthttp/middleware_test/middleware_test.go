@@ -58,7 +58,7 @@ func TestCheckMiddleware(t *testing.T) {
 			CheckID(gomock.Any()).
 			Return(ctx)
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.ERROR, "CheckMiddleware", enum.MATCH_TOKEN).
+			WriteLog(gomock.Any(), enum.ERROR, "apMiddleware.CheckMiddleware", enum.MATCH_TOKEN).
 			Do(func(any, string, string, string) {
 				close(done)
 			})
@@ -114,7 +114,7 @@ func TestAllowedHost(t *testing.T) {
 		done := make(chan struct{})
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.ERROR, "CheckMiddleware", enum.NO_HOST_ALLOW).
+			WriteLog(gomock.Any(), enum.ERROR, "hostAllowed.CheckMiddleware", enum.NO_HOST_ALLOW).
 			Do(func(any, string, string, string) { close(done) })
 
 		err := mid.CheckMiddleware(ctx)
@@ -137,7 +137,7 @@ func TestAllowedHost(t *testing.T) {
 		done := make(chan struct{})
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.ERROR, "CheckMiddleware", enum.NO_HOST_ALLOW).
+			WriteLog(gomock.Any(), enum.ERROR, "hostAllowed.CheckMiddleware", enum.NO_HOST_ALLOW).
 			Do(func(any, string, string, string) { close(done) })
 
 		err := mid.CheckMiddleware(ctx)

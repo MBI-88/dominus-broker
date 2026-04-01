@@ -2,9 +2,9 @@ package cchecker_test
 
 import (
 	"context"
-	"errors"
 	"net"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -71,8 +71,9 @@ func TestSaveConsumer(t *testing.T) {
 		if err == nil {
 			t.Fatal("second SaveConsumer: expected error (SET NX)")
 		}
-		if !errors.Is(err, redis.Nil) {
-			t.Fatalf("expected redis.Nil, got: %v", err)
+		// SaveConsumer wraps with fmt.Errorf("... %s", err) (no %w), so errors.Is(redis.Nil) does not apply.
+		if !strings.Contains(err.Error(), redis.Nil.Error()) {
+			t.Fatalf("expected wrapped redis nil error, got: %v", err)
 		}
 	})
 }

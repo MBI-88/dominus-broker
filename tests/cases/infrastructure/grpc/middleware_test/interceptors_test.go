@@ -6,6 +6,7 @@ import (
 	"dominus-broker/internal/infrastructure/grpc/middlewares"
 	"dominus-broker/mocks"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -22,7 +23,7 @@ func TestUnaryAuthInterceptor(t *testing.T) {
 		done := make(chan struct{})
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "UnaryAuthInterceptor", enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, "interceptor.UnaryAuthInterceptor", enum.DEBUG_DESCRIPTION).
 			Do(func(context.Context, string, string, string) {
 				close(done)
 			})
@@ -66,7 +67,7 @@ func TestStreamAuthInterceptor(t *testing.T) {
 		done := make(chan struct{})
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "StreamAuthInterceptor", enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, "interceptor.StreamAuthInterceptor", enum.DEBUG_DESCRIPTION).
 			Do(func(context.Context, string, string, string) {
 				close(done)
 			})
@@ -108,18 +109,16 @@ func TestStreamAuthInterceptor(t *testing.T) {
 		lgMock := mocks.NewMockEvent(ctrl)
 		it := middlewares.NewInterceptor("test-token", lgMock)
 		errBoom := errors.New("boom")
-		debugDone := make(chan struct{})
-		errorDone := make(chan struct{})
+		var mu sync.Mutex
+		seen := make(map[string]int)
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "StreamAuthInterceptor", enum.DEBUG_DESCRIPTION).
-			Do(func(context.Context, string, string, string) {
-				close(debugDone)
-			})
-		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.ERROR, "StreamAuthInterceptor", "boom").
-			Do(func(context.Context, string, string, string) {
-				close(errorDone)
+			WriteLog(gomock.Any(), gomock.Any(), "interceptor.StreamAuthInterceptor", gomock.Any()).
+			Times(2).
+			Do(func(_ context.Context, level, op, dsc string) {
+				mu.Lock()
+				seen[level+"|"+dsc]++
+				mu.Unlock()
 			})
 
 		streamer := func(context.Context, *grpc.StreamDesc, *grpc.ClientConn, string, ...grpc.CallOption) (grpc.ClientStream, error) {
@@ -137,15 +136,22 @@ func TestStreamAuthInterceptor(t *testing.T) {
 			t.Fatalf("expected nil stream on error")
 		}
 
-		select {
-		case <-debugDone:
-		case <-time.After(200 * time.Millisecond):
-			t.Fatalf("expected debug log call")
-		}
-		select {
-		case <-errorDone:
-		case <-time.After(200 * time.Millisecond):
-			t.Fatalf("expected error log call")
+		deadline := time.After(200 * time.Millisecond)
+		for {
+			mu.Lock()
+			ok := seen[enum.DEBUG+"|"+enum.DEBUG_DESCRIPTION] == 1 && seen[enum.ERROR+"|boom"] == 1
+			mu.Unlock()
+			if ok {
+				break
+			}
+			select {
+			case <-deadline:
+				mu.Lock()
+				got := seen
+				mu.Unlock()
+				t.Fatalf("expected debug+error StreamAuthInterceptor logs, got %#v", got)
+			case <-time.After(5 * time.Millisecond):
+			}
 		}
 	})
 }

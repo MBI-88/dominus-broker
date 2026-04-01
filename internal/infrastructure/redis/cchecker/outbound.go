@@ -66,7 +66,7 @@ func (c *checker) SaveConsumer(ctx context.Context, key string) error {
 		Mode: "NX",
 		TTL:  time.Duration(c.exp) * time.Second,
 	}).Result(); err != nil {
-		return err
+		return fmt.Errorf("checker.SaveConsumer %s", err)
 	}
 	return nil
 }
