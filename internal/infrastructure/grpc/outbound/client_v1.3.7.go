@@ -37,7 +37,7 @@ func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx contex
 	doQuery := func(url string) func([]byte) {
 		stream, errConn := connect(url)
 		return func(payload []byte) {
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "ClientStream.doQuery", enum.DEBUG_DESCRIPTION)
+			g.lgs.WriteLog(ctx, enum.DEBUG, "ClientStream.doQuery", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			err := errConn
 			lock.Unlock()
@@ -48,7 +48,7 @@ func (g *brokerClient) ClientStream(urls []string, msg <-chan []byte, ctx contex
 					Payload:     payload})
 				lock.Unlock()
 				if err != nil {
-					go g.lgs.WriteLog(ctx, enum.ERROR, "ClientStream.Send", err.Error())
+					g.lgs.WriteLog(ctx, enum.ERROR, "ClientStream.Send", err.Error())
 					lock.Lock()
 					errConn = err
 					lock.Unlock()
@@ -94,13 +94,13 @@ func (g *brokerClient) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 				for {
 					resp, err := stream.Recv()
 					if err == io.EOF {
-						go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.Recv", err.Error())
+						g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.Recv", enum.DEBUG_DESCRIPTION)
 						if err := stream.CloseSend(); err != nil {
-							go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.ColseSend", err.Error())
+							g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.ColseSend", err.Error())
 						}
 						return
 					} else if err != io.EOF && err != nil {
-						go g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.EOF", err.Error())
+						g.lgs.WriteLog(ctx, enum.DEBUG, "ServerStream.EOF", err.Error())
 						goto connect
 					} else {
 						msg <- resp.GetPayload()
@@ -156,7 +156,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 		ep := &endpoint{url: u, stream: stream, err: err}
 
 		cls := func(payload []byte) {
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.doQuery", enum.DEBUG_DESCRIPTION)
+			g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.doQuery", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			st := ep.stream
 			e := ep.err
@@ -167,7 +167,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 					Payload:     payload,
 				})
 				if serr != nil {
-					go g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.doQuery", serr.Error())
+					g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.doQuery", serr.Error())
 					lock.Lock()
 					ep.err = serr
 					lock.Unlock()
@@ -187,7 +187,7 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 			defer workerWG.Done()
 
 		connectLabel:
-			go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Connect", enum.DEBUG_DESCRIPTION)
+			g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Connect", enum.DEBUG_DESCRIPTION)
 			lock.Lock()
 			e := ep.err
 			st := ep.stream
@@ -216,17 +216,17 @@ func (g *brokerClient) BidirectionalStream(urls []string, provMsg <-chan []byte,
 			for {
 				resp, rerr := st.Recv()
 				if rerr == io.EOF {
-					go g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.Recv", rerr.Error())
+					g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Recv", enum.DEBUG_DESCRIPTION)
 					if err := st.CloseSend(); err != nil {
-						go g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.CloseSend", err.Error())
+						g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.CloseSend", err.Error())
 					}
 					return
 				}
 				if rerr != nil && rerr != io.EOF {
 					if ctx.Err() != nil {
+						g.lgs.WriteLog(ctx, enum.ERROR, "BidirectionalStream.ctx", ctx.Err().Error())
 						return
 					}
-					go g.lgs.WriteLog(ctx, enum.DEBUG, "BidirectionalStream.Connect", enum.DEBUG_DESCRIPTION)
 					lock.Lock()
 					ep.err = rerr
 					lock.Unlock()

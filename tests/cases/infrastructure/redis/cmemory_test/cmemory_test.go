@@ -43,7 +43,6 @@ func newMemoryClient(t *testing.T, s *miniredis.Miniredis, streamID string, lg e
 		false,
 		"",
 		streamID,
-		lg,
 	)
 }
 

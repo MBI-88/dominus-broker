@@ -129,7 +129,6 @@ func gRPServer(
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
 		cf.RedisConfig.StreamID,
-		logs,
 	)
 
 	// Interactors

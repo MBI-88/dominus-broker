@@ -6,7 +6,6 @@ import (
 	"dominus-broker/internal/domain/entities"
 	"dominus-broker/internal/domain/repositories"
 	"dominus-broker/internal/infrastructure/enum"
-	"dominus-broker/internal/infrastructure/event"
 	"fmt"
 	"time"
 
@@ -16,7 +15,6 @@ import (
 
 type memory struct {
 	rdb      *redis.Client
-	lg       event.Event
 	streamID string
 }
 
@@ -33,7 +31,6 @@ func NewMemoryClient(
 	Tls bool,
 	Username string,
 	StreamID string,
-	lg event.Event,
 ) repositories.MemoryClient {
 
 	var cfTls *tls.Config
@@ -62,20 +59,15 @@ func NewMemoryClient(
 	}
 	return &memory{
 		rdb:      client,
-		lg:       lg,
 		streamID: StreamID,
 	}
 }
 
 func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
-	m.lg.WriteLog(ctx, enum.DEBUG, "SendMessage", enum.DEBUG_DESCRIPTION)
-
 	data, err := jsoniter.Marshal(q)
 	if err != nil {
-		m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.Marshal", err.Error())
 		return err
 	}
-
 	if _, err := m.rdb.XAdd(ctx, &redis.XAddArgs{
 		Stream: m.streamID,
 		Values: map[string]any{
@@ -83,24 +75,19 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 		},
 		ID: q.GetMessageId(),
 	}).Result(); err != nil {
-		m.lg.WriteLog(ctx, enum.ERROR, "SendMessage.XAdd", err.Error())
-		return err
+		return fmt.Errorf("cmemory.SendMessage %s", err)
 	}
 	return nil
 }
 
 func (m *memory) AckMessage(ctx context.Context, messageId, groupId string) error {
-	m.lg.WriteLog(ctx, enum.DEBUG, "AckMessage", enum.DEBUG_DESCRIPTION)
 	if err := m.rdb.XAck(ctx, m.streamID, groupId, messageId).Err(); err != nil {
-		m.lg.WriteLog(ctx, enum.ERROR, "AckMessage.XAck", err.Error())
-		return err
+		return fmt.Errorf("cmemory.AckMessage %s", err)
 	}
 	return nil
 }
 
 func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*entities.Message, error) {
-	m.lg.WriteLog(ctx, enum.DEBUG, "GetMessage", enum.DEBUG_DESCRIPTION)
-
 	response, err := m.rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
 		Group:    groupId,
 		Consumer: workerId,
@@ -110,8 +97,7 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 	}).Result()
 
 	if err != nil {
-		m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.XReadGroup", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("cmemory.GetMessage %s", err)
 	}
 
 	streamMsg := response[0].Messages[0]
@@ -119,12 +105,10 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 
 	var q entities.Message
 	if err := jsoniter.Unmarshal([]byte(message), &q); err != nil {
-		m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.Unmarshal", err.Error())
-		return nil, err
+		return nil, fmt.Errorf("cmemory.GetMessage %s", err)
 	}
 
 	if !q.SetMessageId(streamMsg.ID) {
-		m.lg.WriteLog(ctx, enum.ERROR, "GetMessage.SetMessageId", enum.INVALID_ID)
 		return nil, fmt.Errorf("invalid messageID format")
 	}
 
