@@ -82,7 +82,7 @@ func TestStreamBiConn(t *testing.T) {
 				)
 
 			},
-			output: fmt.Errorf("connection closed"),
+			output: fmt.Errorf("broker.StreamBiConn connection closed"),
 		},
 		{
 			name: "StreamBiConn Recv error",
@@ -92,7 +92,7 @@ func TestStreamBiConn(t *testing.T) {
 					mdto.EXPECT().Recv().Return(nil, fmt.Errorf("recv error")),
 				)
 			},
-			output: fmt.Errorf("recv error"),
+			output: fmt.Errorf("broker.StreamBiConn recv error"),
 		},
 		{
 			name: "StreamBiConn subscribers empty",
@@ -106,7 +106,7 @@ func TestStreamBiConn(t *testing.T) {
 					GetSubscribers().
 					Return([]string{}).Times(1)
 			},
-			output: fmt.Errorf("subscribers not found"),
+			output: fmt.Errorf("broker.StreamBiConn subscribers not found"),
 		},
 	}
 

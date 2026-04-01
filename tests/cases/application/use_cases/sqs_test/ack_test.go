@@ -46,14 +46,14 @@ func TestAck(t *testing.T) {
 			setupMock: func(dto *mocks.MockConsumerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().GetMessageId().Return("message-1").Times(1)
 			},
-			output: fmt.Errorf("invalid messageId"),
+			output: fmt.Errorf("sqs.Ack invalid messageId"),
 		},
 		{
 			name: "Ack invalid message id without sequence part",
 			setupMock: func(dto *mocks.MockConsumerDto, mc *mocks.MockMemoryClient) {
 				dto.EXPECT().GetMessageId().Return("123456789").Times(1)
 			},
-			output: fmt.Errorf("invalid messageId"),
+			output: fmt.Errorf("sqs.Ack invalid messageId"),
 		},
 	}
 

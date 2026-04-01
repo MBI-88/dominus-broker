@@ -13,11 +13,11 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 	defer cancel()
 	req, err := stream.Recv()
 	if err != nil {
-		return err
+		return fmt.Errorf("broker.StreamBiConn %s", err)
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("subscribers not found")
+		return fmt.Errorf("broker.StreamBiConn subscribers not found")
 	}
 	total := len(subscribers)
 	streamProv := make(chan []byte)
@@ -50,7 +50,7 @@ func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
 		case <-closed:
 			close(streamSub)
 			close(closed)
-			return fmt.Errorf("connection closed")
+			return fmt.Errorf("broker.StreamBiConn connection closed")
 		}
 	}
 }

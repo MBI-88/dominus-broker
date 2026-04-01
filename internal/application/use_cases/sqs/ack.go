@@ -10,7 +10,7 @@ import (
 func (s *sqs) Ack(ctx context.Context, ms dtos.ConsumerDto) error {
 	qs := entities.NewMessage()
 	if !qs.SetMessageId(ms.GetMessageId()) {
-		return fmt.Errorf("invalid messageId")
+		return fmt.Errorf("sqs.Ack invalid messageId")
 	}
 	return s.client.AckMessage(ctx, ms.GetMessageId(), ms.GetGroupId())
 }

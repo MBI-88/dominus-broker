@@ -59,7 +59,7 @@ func TestStreamServerConn(t *testing.T) {
 					mdto.EXPECT().Send(gomock.All()).Return(fmt.Errorf("connection closed")),
 				)
 			},
-			output: fmt.Errorf("connection closed"),
+			output: fmt.Errorf("broker.StreamServerConn connection closed"),
 		},
 		{
 			name: "StreamServerConn subscribers empty",
@@ -70,7 +70,7 @@ func TestStreamServerConn(t *testing.T) {
 					Return([]string{}).Times(1)
 
 			},
-			output: fmt.Errorf("subscribers not found"),
+			output: fmt.Errorf("broker.StreamServerConn subscribers not found"),
 		},
 		{
 			name: "StreamServerConn send error then connection closed",
@@ -96,7 +96,7 @@ func TestStreamServerConn(t *testing.T) {
 					}).Times(1)
 				mdto.EXPECT().Send(gomock.Any()).Return(fmt.Errorf("send failed")).Times(1)
 			},
-			output: fmt.Errorf("connection closed"),
+			output: fmt.Errorf("broker.StreamServerConn connection closed"),
 		},
 	}
 

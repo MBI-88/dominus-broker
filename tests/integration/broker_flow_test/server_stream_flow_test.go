@@ -126,8 +126,8 @@ func TestServerStreamFlow(t *testing.T) {
 				if st.Code() != codes.Aborted {
 					t.Fatalf("want code Aborted, got %v: %v", st.Code(), err)
 				}
-				if st.Message() != "connection closed" {
-					t.Fatalf("want message %q, got %q", "connection closed", st.Message())
+				if st.Message() != "broker.StreamServerConn connection closed" {
+					t.Fatalf("want message %q, got %q", "broker.StreamServerConn connection closed", st.Message())
 				}
 				break
 			}

@@ -12,7 +12,7 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 	defer cancel()
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("subscribers not found")
+		return fmt.Errorf("broker.StreamServerConn subscribers not found")
 	}
 	total := len(subscribers)
 	stream := make(chan []byte, total+int(total*2/3))
@@ -32,7 +32,7 @@ func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServe
 		case <-closed:
 			close(closed)
 			close(stream)
-			return fmt.Errorf("connection closed")
+			return fmt.Errorf("broker.StreamServerConn connection closed")
 		}
 	}
 }

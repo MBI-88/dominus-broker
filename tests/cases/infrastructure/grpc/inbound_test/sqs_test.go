@@ -556,8 +556,8 @@ func TestAck(t *testing.T) {
 		if !ok || st.Code() != codes.Aborted {
 			t.Fatalf("expected Aborted, got %v (%v)", st.Code(), err)
 		}
-		if st.Message() != "invalid messageId" {
-			t.Fatalf("expected invalid messageId, got %q", st.Message())
+		if st.Message() != "sqs.Ack invalid messageId" {
+			t.Fatalf("expected sqs.Ack invalid messageId, got %q", st.Message())
 		}
 
 		t.Cleanup(func() {

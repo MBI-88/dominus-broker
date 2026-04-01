@@ -65,7 +65,7 @@ func TestStreamClientConn(t *testing.T) {
 					GetSubscribers().
 					Return([]string{}).Times(1)
 			},
-			output: fmt.Errorf("subscribers not found"),
+			output: fmt.Errorf("broker.StreamClientConn subscribers not found"),
 		},
 	}
 

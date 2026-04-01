@@ -64,7 +64,7 @@ func TestProducer(t *testing.T) {
 					GetPayload().
 					Return([]byte{})
 			},
-			output: fmt.Errorf("empty payload"),
+			output: fmt.Errorf("sqs.Producer empty payload"),
 		},
 	}
 

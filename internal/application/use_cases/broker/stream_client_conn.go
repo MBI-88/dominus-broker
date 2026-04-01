@@ -17,7 +17,7 @@ func (b *broker) StreamClientConn(st dtos.BrokerClientDto) error {
 	}
 	subscribers := req.GetSubscribers()
 	if len(subscribers) == 0 {
-		return fmt.Errorf("subscribers not found")
+		return fmt.Errorf("broker.StreamClientConn subscribers not found")
 	}
 
 	go b.client.ClientStream(subscribers, stream, ctx)
