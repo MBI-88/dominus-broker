@@ -36,7 +36,7 @@ cd <path-to>\dominus-broker
 
 So the profile reflects **application, domain, infrastructure** under **`internal/`** (except bootstrap) plus **`tests/...`**, not mains nor generated mocks.
 
-3. **`go tool cover -func=coverage.out`** — per-function lines and **total** statement %.
+3. **`go tool cover -func coverage.out`** — per-function lines and **total** statement %.
 
 There is **no** `timeout` flag in the Makefile target; add one in CI if jobs need a hard cap.
 
@@ -69,9 +69,9 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 | Field | Value |
 |--------|--------|
 | **Command** | `.\Makefile.ps1 -Target test-cover` from repo root |
-| **Captured** | 2026-03-27 (re-run after code changes and refresh this doc) |
-| **Total statements** | **91.0%** (then `go tool cover -func=coverage.out`) |
-| **Output of** | `go tool cover -func=coverage.out` (last line: `total: (statements) 91.0%`) |
+| **Captured** | 2026-04-01 (re-run after code changes and refresh this doc) |
+| **Total statements** | **91.8%** (then `go tool cover -func coverage.out`) |
+| **Output of** | `go tool cover -func coverage.out` (last line: `total: (statements) 91.8%`) |
 
 ### By area (summary)
 
@@ -79,20 +79,20 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 |------|----------------|
 | **Broker use cases** | `StreamClientConn`, `StreamServerConn`, `StreamBiConn`, `NewBroker` — **100%** |
 | **SQS use cases** | `Producer`, `Consumer`, `Ack`, `NewSQS` — **100%** |
-| **Domain `Message`** | All listed methods — **100%** |
+| **Domain `Message`** | `NewMessageWithID`, `NewMessage`, getters/setters, `checkValidFormatID` — **100%** |
 | **gRPC mappers** | All listed methods — **100%** |
 | **gRPC interceptors** | `NewInterceptor`, `UnaryAuthInterceptor`, `StreamAuthInterceptor` — **100%** |
 | **gRPC middleware** | `ApiToken`, `UnaryLog`, `StreamLog`, `LogErrors`, `NewMiddleware`, **`IdPotency`** — **100%** (last full run) |
 | **gRPC inbound broker** | `ClientStream`, `ServerStream`, `BidirectionalStream`, `NewBrokerAPI` — **100%** |
 | **gRPC inbound SQS** | **100%** on listed handlers |
-| **gRPC outbound** | **`BidirectionalStream` — 73.5%**, **`ClientStream` — 66.7%**, **`ServerStream` — 55.6%** (retry / error branches partially hit) |
+| **gRPC outbound** | **`ClientStream` — 78.8%**, **`ServerStream` — 90.6%**, **`BidirectionalStream` — 74.4%** (retry / error branches partially hit) |
 | **Redis `cchecker`** | **`SaveConsumer` / `CheckConsumer` — 100%**; **`NewCheckerClient` — 71.4%** (e.g. TLS branch not hit) |
-| **Redis `cmemory`** | **`AckMessage` / `Group` — 100%**; **`GetMessage` — 81.8%**; **`SendMessage` — 77.8%**; **`NewMemoryClient` — 71.4%** |
+| **Redis `cmemory`** | **`AckMessage` / `Group` — 100%**; **`GetMessage` — 90.9%**; **`SendMessage` — 83.3%**; **`NewMemoryClient` — 71.4%** |
 | **Event** | **`CheckID` / `NewEvent` / `typeLog` / `cmdLog` — 100%**; **`WriteLog` — 88.9%**; **`clientLog` — 0.0%** (`LOGCLIENT` path) |
 | **fasthttp monitor** | **`getHealthCheck` / `collectMetrics` / `NewMonitorAPI` / `convertToHTTP` — 100%**; **`getMetrics` — 75%**; **`WriteHeader` — 0%** |
 | **fasthttp middleware** | **API token** and **host** `CheckMiddleware` — **100%**; **chain** (`middlewares.go`) — **100%** (last full run) |
 
-### Per-function detail (`go tool cover -func=coverage.out`)
+### Per-function detail (`go tool cover -func coverage.out`)
 
 Snapshot from a recent **`test-cover`** run; re-run locally after changes—line-level % can drift while **total** above stays the tracked baseline until you refresh it.
 
@@ -101,17 +101,19 @@ dominus-broker/internal/application/use_cases/broker/factory.go:18:             
 dominus-broker/internal/application/use_cases/broker/stream_bi_conn.go:10:         StreamBiConn            100.0%
 dominus-broker/internal/application/use_cases/broker/stream_client_conn.go:10:       StreamClientConn        100.0%
 dominus-broker/internal/application/use_cases/broker/stream_server_conn.go:10:       StreamServerConn        100.0%
-dominus-broker/internal/application/use_cases/sqs/ack.go:8:                          Ack                     100.0%
+dominus-broker/internal/application/use_cases/sqs/ack.go:10:                          Ack                     100.0%
 dominus-broker/internal/application/use_cases/sqs/consumer.go:9:                     Consumer                100.0%
 dominus-broker/internal/application/use_cases/sqs/factory.go:20:                     NewSQS                  100.0%
 dominus-broker/internal/application/use_cases/sqs/producer.go:10:                    Producer                100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:15:                            NewMessage              100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:23:                            SetMessage              100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:26:                            GetMessage              100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:30:                            SetMessageId            100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:33:                            GetMessageId            100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:37:                            GetCreatedAt            100.0%
-dominus-broker/internal/domain/entities/sqs_message.go:40:                            SetCreateAt             100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:16:                            NewMessageWithID        100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:24:                            NewMessage              100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:28:                            SetMessage              100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:31:                            GetMessage              100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:35:                            SetMessageId            100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:43:                            GetMessageId            100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:47:                            GetCreatedAt            100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:50:                            SetCreateAt             100.0%
+dominus-broker/internal/domain/entities/sqs_message.go:54:                            checkValidFormatID      100.0%
 dominus-broker/internal/infrastructure/event/event.go:26:                            NewEvent                100.0%
 dominus-broker/internal/infrastructure/event/event.go:39:                            WriteLog                88.9%
 dominus-broker/internal/infrastructure/event/event.go:60:                            CheckID                 100.0%
@@ -136,8 +138,8 @@ dominus-broker/internal/infrastructure/fasthttp/middlewares/middlewares.go:28:  
 dominus-broker/internal/infrastructure/fasthttp/middlewares/middlewares.go:32:     Middlewares             100.0%
 dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:24:           NewBrokerAPI            100.0%
 dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:30:           ClientStream            100.0%
-dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:49:           ServerStream            100.0%
-dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:56:           BidirectionalStream     100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:50:           ServerStream            100.0%
+dominus-broker/internal/infrastructure/grpc/inbound/broker_v1.3.7.go:57:           BidirectionalStream     100.0%
 dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:22:              NewSqsAPI               100.0%
 dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:28:              Producer                100.0%
 dominus-broker/internal/infrastructure/grpc/inbound/sqs_v1.3.7.go:43:              Consumer                100.0%
@@ -164,16 +166,16 @@ dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:85:      
 dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:22:          NewGrpClient            100.0%
 dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:29:          ClientStream            78.8%
 dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:79:          ServerStream            90.6%
-dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:132:         BidirectionalStream     73.1%
+dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:132:         BidirectionalStream     74.4%
 dominus-broker/internal/infrastructure/redis/cchecker/outbound.go:19:             NewCheckerClient        71.4%
 dominus-broker/internal/infrastructure/redis/cchecker/outbound.go:64:             SaveConsumer            100.0%
 dominus-broker/internal/infrastructure/redis/cchecker/outbound.go:74:             CheckConsumer           100.0%
-dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:23:              NewMemoryClient         71.4%
-dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:70:              SendMessage             77.8%
-dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:92:              AckMessage              100.0%
-dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:101:             GetMessage              92.9%
-dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:133:             Group                   100.0%
-total:                                                                             (statements)            91.0%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:21:              NewMemoryClient         71.4%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:66:              SendMessage             83.3%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:83:              AckMessage              100.0%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:90:              GetMessage              90.9%
+dominus-broker/internal/infrastructure/redis/cmemory/outbound.go:118:             Group                   100.0%
+total:                                                                             (statements)            91.8%
 ```
 
 ### Packages not listed above

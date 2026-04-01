@@ -13,4 +13,4 @@ In-depth notes for contributors. The [main README](../README.md) stays high-leve
 | [http-monitor.md](http-monitor.md) | fasthttp monitor API and middleware |
 | [testing.md](testing.md) | `tests/cases` vs `tests/integration`, commands |
 | [tradeoffs.md](tradeoffs.md) | Architectural choices, limits, Redis/gRPC/broker trade-offs (English) |
-| [coverage.md](coverage.md) | **`Makefile.ps1 -Target test-cover`**, `-coverpkg`, baseline **91.0%**, per-function table |
+| [coverage.md](coverage.md) | **`Makefile.ps1 -Target test-cover`**, `-coverpkg`, baseline **91.8%**, per-function table |

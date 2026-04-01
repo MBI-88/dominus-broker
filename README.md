@@ -56,7 +56,7 @@ Detailed design and file-level notes live under **[`doc/`](doc/)**:
 | [doc/http-monitor.md](doc/http-monitor.md) | fasthttp monitor API and middleware |
 | [doc/testing.md](doc/testing.md) | `tests/cases` vs `tests/integration`, commands |
 | [doc/tradeoffs.md](doc/tradeoffs.md) | Trade-offs: architecture, broker concurrency, Redis, security, ops |
-| [doc/coverage.md](doc/coverage.md) | **`Makefile.ps1 -Target test-cover`**, baseline **91.0%**, per-function breakdown |
+| [doc/coverage.md](doc/coverage.md) | **`Makefile.ps1 -Target test-cover`**, baseline **91.8%**, per-function breakdown |
 
 ---
 
@@ -178,7 +178,7 @@ Meaningful totals for **`internal/...`** need **`-coverpkg`** (see **[doc/covera
 ```
 
 - **test-cover** builds **`-coverpkg`** from **`go list ./internal/...`** (minus **`internal/boostrap`**) + **`go list ./tests/...`**, so **`cmd/`**, **`config/`**, **`mocks/`**, and bootstrap are **not** in the profile (see **[doc/coverage.md](doc/coverage.md)**).
-- **Latest recorded total: 91.0%** statements in **[doc/coverage.md](doc/coverage.md)** (refresh that doc after large changes).
+- **Latest recorded total: 91.8%** statements in **[doc/coverage.md](doc/coverage.md)** (refresh that doc after large changes).
 
 `coverage.out` is gitignored (`*.out`).
 
