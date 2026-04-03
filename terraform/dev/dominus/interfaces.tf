@@ -5,18 +5,9 @@ variable "dominus_image_name" {
   default = "dominus-broker:latest"
 }
 
-variable "dominus_platform" {
-  type = string
-  default = "golang:1.26.1-alpine3.23.3"
-}
-
 variable "dominus_file" {
-  type = string
-
-}
-
-variable "dominus_dependencies" {
-  type = list(string)
+  type        = string
+  description = "Path to the Docker build context (repo root with Dockerfile), relative to Terraform cwd or absolute"
 }
 
 variable "dominus_container_name" {
@@ -29,10 +20,6 @@ variable "dominus_container_ports" {
     internal = number
     external = number
   }))
-  default = [
-    { internal = 8000, external = 8000 },
-    { internal = 5000, external = 5000 },
-  ]
 }
 
 variable "dominus_volume_cert" {
@@ -54,4 +41,14 @@ variable "dominus_volume_env_driver" {
   type        = string
   default     = "local"
   description = "Docker volume driver for the env volume"
+}
+
+variable "dominus_network_mode" {
+  type = string
+  default = "bridge"
+}
+
+variable "dominus_network_name" {
+  type = string
+
 }

@@ -21,3 +21,6 @@
 *.sum
 *.log
 .vscode/
+
+.terraform/
+*.hcl

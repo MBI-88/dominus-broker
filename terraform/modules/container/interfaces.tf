@@ -12,3 +12,11 @@ variable "container_ports" {
     external = number
   }))
 }
+
+variable "network_mode" {
+  type = string
+}
+
+variable "network_name" {
+  type = string
+}

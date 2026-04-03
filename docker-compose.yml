@@ -4,6 +4,8 @@ services:
     extends:
       file: ./docker/dominus/docker-compose.yml
       service: dominus
+    depends_on:
+      - memory
 
   worker:
     extends:
