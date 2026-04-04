@@ -1,4 +1,4 @@
-output "docker_image" {
+output "image_id" {
   value       = docker_image.image.image_id
   description = "Image ID for docker_container.image (or use image_name if the engine prefers a tag)"
 }

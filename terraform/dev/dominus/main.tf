@@ -11,12 +11,9 @@ module "dominus_image" {
 module "dominus_container" {
   source = "../../modules/container"
 
-  container_image = module.dominus_image.docker_image
+  container_image = module.dominus_image.image_id
   container_name  = var.dominus_container_name
   container_ports  = var.dominus_container_ports
-  network_mode = var.dominus_network_mode
-  network_name = var.dominus_network_name
-
 }
 
 module "dominus_volume" {
@@ -25,4 +22,12 @@ module "dominus_volume" {
 
   name   = each.value.name
   driver = each.value.driver
+}
+
+module "dominus_network" {
+  source = "../../modules/network"
+  name = var.dominus_network_name
+  driver = var.dominus_network_driver
+  attachable = var.dominus_network_attachable
+
 }

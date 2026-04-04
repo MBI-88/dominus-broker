@@ -1,3 +1,4 @@
+// ====== Dominus ===== //
 variable "dominus_server_file" {
   type = string
 
@@ -32,7 +33,18 @@ variable "dominus_server_volume_env" {
   default = "./env:/env:ro"
 }
 
-variable "dominus_server_volume_env_driver" {
+
+// ===== Grafana ==== //
+
+
+// ==== Prometheus ==== //
+
+
+// ==== Sidecar ==== //
+
+
+// ======== Shared ========= //
+variable "volume_env_driver" {
   type = string
   default = "local"
 }

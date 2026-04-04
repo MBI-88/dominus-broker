@@ -1,6 +1,4 @@
 locals {
-  # Volúmenes derivados de variables `dominus_volume_*`: cada bloque merge corresponde
-  # a un grupo nombre + driver. Para uno nuevo, declara las variables y añade un mapa aquí.
   docker_volumes = merge(
     {
       cert = {

@@ -52,3 +52,13 @@ variable "dominus_network_name" {
   type = string
 
 }
+
+variable "dominus_network_driver" {
+  type = string
+  default = "bridge"
+}
+
+variable "dominus_network_attachable" {
+  type = bool
+  default = true
+}

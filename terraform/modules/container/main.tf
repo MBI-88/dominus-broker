@@ -9,10 +9,4 @@ resource "docker_container" "container" {
       external = ports.value.external
     }
   }
-
-  network_mode = var.network_mode
-
-  networks_advanced {
-    name =  var.container_name
-  }
 }

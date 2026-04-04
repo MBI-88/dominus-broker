@@ -1,6 +1,6 @@
 
 
-variable "network" {
+variable "name" {
   type = string
 }
 
