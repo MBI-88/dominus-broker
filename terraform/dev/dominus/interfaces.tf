@@ -1,8 +1,7 @@
 
-
 variable "dominus_image_name" {
   type = string
-  default = "dominus-broker:latest"
+  default = "dominus-broker:local"
 }
 
 variable "dominus_file" {
@@ -25,40 +24,29 @@ variable "dominus_container_ports" {
 variable "dominus_volume_cert" {
   type = string
   description = "Name cert"
+  default = "dominus_certs"
 }
 
-variable "dominus_volume_cert_driver" {
+variable "dominus_volume_driver" {
   type = string
   default = "local"
 }
 
-variable "dominus_volume_env" {
-  type = string
-  description = "Name env"
-}
-
-variable "dominus_volume_env_driver" {
-  type        = string
-  default     = "local"
-  description = "Docker volume driver for the env volume"
-}
-
-variable "dominus_network_mode" {
-  type = string
-  default = "bridge"
-}
-
 variable "dominus_network_name" {
   type = string
-
 }
 
-variable "dominus_network_driver" {
+variable "dominus_container_cpu_resources" {
   type = string
-  default = "bridge"
+  default = "4.5"
 }
 
-variable "dominus_network_attachable" {
-  type = bool
-  default = true
+variable "dominus_container_memory_resources" {
+  type = number
+  default = 10
+}
+
+variable "dominus_container_healcheck" {
+  type = list(string)
+  default = ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://127.0.0.1:8000/health"]
 }

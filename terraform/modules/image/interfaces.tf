@@ -1,6 +1,8 @@
 variable "image" {
   type        = string
   description = "Image name:tag to assign to the built image (e.g. dominus-broker:latest)"
+  default = null
+  nullable = true
 }
 
 variable "keep_localy" {
@@ -10,7 +12,9 @@ variable "keep_localy" {
 
 variable "path" {
   type        = string
-  description = "Build context directory path (relative to the Terraform working directory or absolute)"
+  default     = null
+  nullable    = true
+  description = "Build context path; null or empty = only pull var.image from the registry"
 }
 
 variable "dockerfile" {

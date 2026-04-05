@@ -1,7 +1,7 @@
 
-variable "name" {
+variable "volume_name" {
   type = string
 }
-variable "driver" {
+variable "volume_driver" {
   type = string
 }

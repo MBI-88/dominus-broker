@@ -1,12 +1,12 @@
 
-output "dominus_image_name" {
-  value = module.dominus_image
+output "dominus_image_id" {
+  value = module.dominus_image.image_id
 }
 
 output "dominus_container_name" {
   value = module.dominus_container.container_name
 }
 
-output "docker_container_ports" {
-  value = jsonencode(module.dominus_container.container_ports)
+output "dominus_container_ports" {
+  value = jsonencode(var.dominus_container_ports)
 }

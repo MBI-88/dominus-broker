@@ -1,14 +1,14 @@
 
 
-variable "name" {
+variable "network_name" {
   type = string
 }
 
-variable "driver" {
+variable "network_driver" {
   type = string
 
 }
 
-variable "attachable" {
+variable "network_attachable" {
   type = bool
 }

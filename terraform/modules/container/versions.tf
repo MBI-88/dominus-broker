@@ -5,11 +5,4 @@ terraform {
       version = "~> 3.6.2"
     }
   }
-  backend "local" {
-    path = "terraform.tfstate"
-  }
-}
-
-provider "docker" {
-  host = "npipe:////.//pipe//docker_engine"
 }

@@ -1,7 +1,7 @@
 
 
 resource "docker_network" "network"{
-  name = var.name
-  driver = var.driver
-  attachable = var.attachable
+  name = var.network_name
+  driver = var.network_driver
+  attachable = var.network_attachable
 }
