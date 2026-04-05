@@ -52,21 +52,25 @@ repos:
         pass_filenames: false
         types: [go]
 
-  # Bash helper hooks (local)
-#      - id: shfmt
-#        name: Run lint check (shfmt -d)
-#        entry: shfmt
-#        language: system
-#        files: \.(sh|bash)$
-#        types: [file]
-#        args: ["-i", "0", "-ci", "-sr", "-d"]
-#      # shfmt -w (must manually invoke)
-#      #
-#      - id: shfmtw
-#        name: Auto-fix lint errors (shfmt -w)
-#        entry: shfmt
-#        language: system
-#        stages: [manual]
-#        files: \.(sh|bash)$
-#        types: [file]
-#        args: ["-i", "0", "-ci", "-sr", "-kp", "-w"]
+  - repo: local
+    hooks:
+      - id: terraform_init
+        name: terraform init
+        entry: powershell -NoProfile -Command "Set-Location terraform; terraform init"
+        language: system
+        pass_filenames: false
+        files: ^terraform/
+
+      - id: terraform_fmt
+        name: terraform fmt
+        entry: powershell -NoProfile -Command "Set-Location terraform; terraform fmt -recursive"
+        language: system
+        pass_filenames: false
+        files: ^terraform/
+
+      - id: terraform_validate
+        name: terraform validate
+        entry: powershell -NoProfile -Command "Set-Location terraform; terraform validate"
+        language: system
+        pass_filenames: false
+        files: ^terraform/

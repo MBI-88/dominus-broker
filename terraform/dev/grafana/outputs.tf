@@ -4,7 +4,7 @@ output "grafana_image_id" {
 }
 
 output "grafana_container_ports" {
-  value =  jsonencode(var.grafana_container_ports)
+  value = jsonencode(var.grafana_container_ports)
 }
 
 output "grafana_container_name" {

@@ -1,23 +1,23 @@
 
 resource "docker_container" "container" {
-  image = var.container_image
-  name  = var.container_name
-  env   = var.container_env
+  image        = var.container_image
+  name         = var.container_name
+  env          = var.container_env
   network_mode = var.container_network_mode
 
   command = var.container_conmands
-  memory = var.container_memory_resources
-  cpus = var.container_cpu_resources
+  memory  = var.container_memory_resources
+  cpus    = var.container_cpu_resources
 
   healthcheck {
     interval = var.container_healcheck_interval
-    timeout = var.container_healcheck_timeout
-    retries = var.container_healcheck_retries
-    test = var.container_healcheck
+    timeout  = var.container_healcheck_timeout
+    retries  = var.container_healcheck_retries
+    test     = var.container_healcheck
   }
 
   networks_advanced {
-    name =  var.container_network_name
+    name = var.container_network_name
   }
 
   dynamic "ports" {

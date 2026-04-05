@@ -3,11 +3,11 @@ module "prometheus_image" {
 
   image       = var.prometheus_image_name
   keep_localy = false
-  path = null
+  path        = null
 }
 
 module "prometheus_volume" {
-  source   = "../../modules/volume"
+  source = "../../modules/volume"
 
   volume_name   = var.prometheus_volume_name
   volume_driver = var.prometheus_volume_driver
@@ -16,12 +16,12 @@ module "prometheus_volume" {
 module "prometheus_container" {
   source = "../../modules/container"
 
-  container_image = module.prometheus_image.image_id
-  container_name  = var.prometheus_container_name
-  container_ports = var.prometheus_container_ports
-  container_network_name = var.prometheus_network_name
+  container_image         = module.prometheus_image.image_id
+  container_name          = var.prometheus_container_name
+  container_ports         = var.prometheus_container_ports
+  container_network_name  = var.prometheus_network_name
   container_cpu_resources = var.prometheus_container_cpu_resources
-  container_healcheck = var.prometheus_container_healcheck
+  container_healcheck     = var.prometheus_container_healcheck
 
   container_bind_mounts = [
     {

@@ -57,6 +57,7 @@ Detailed design and file-level notes live under **[`doc/`](doc/)**:
 | [doc/testing.md](doc/testing.md) | `tests/cases` vs `tests/integration`, commands |
 | [doc/tradeoffs.md](doc/tradeoffs.md) | Trade-offs: architecture, broker concurrency, Redis, security, ops |
 | [doc/coverage.md](doc/coverage.md) | **`Makefile.ps1 -Target test-cover`**, baseline **91.8%**, per-function breakdown |
+| [doc/terraform.md](doc/terraform.md) | Local stack: Terraform + Docker provider, modules, **`Makefile.ps1`** Terraform targets |
 
 ---
 
@@ -77,7 +78,7 @@ Makefile.ps1          # Windows PowerShell: build, test, coverage, lint, audit (
 tests/
   cases/              # Layered tests (unit / component)
   integration/        # broker_flow_test, sqs_flow_test, etc.
-docker/               # Compose per service (dominus, sidecar, redis, prometheus, grafana)
+terraform/            # Terraform: Docker provider, dev stack (Dominus, Redis, sidecar, Prometheus, Grafana)
 ```
 
 ---
@@ -92,7 +93,7 @@ docker/               # Compose per service (dominus, sidecar, redis, prometheus
 
 ## Configuration
 
-- **Development**: Viper reads `env/env.dev.json` (path relative to the process; often run from `cmd/api` or with `env` mounted in Docker).
+- **Development**: Viper reads `env/env.dev.json` (path relative to the process; often run from `cmd/api`). For containers, see **[doc/terraform.md](doc/terraform.md)** (`APP_CONFIG` or extend mounts).
 - **Production**: `APP_CONFIG` environment variable with inline JSON (see `config.NewConfig`).
 
 Main root JSON fields:
@@ -134,23 +135,9 @@ Default ports come from `env.dev.json` (e.g. gRPC **5000**, REST **8000**).
 
 ---
 
-## Docker Compose
+## Infrastructure (Terraform)
 
-Root `docker-compose.yml` defines:
-
-| Service | Role |
-|---------|------|
-| `app` | Dominus image (`docker/dominus`) — ports 8000/5000, HTTP `/health` healthcheck with `x-api-key` header |
-| `worker` | Nginx sidecar (`docker/sidecar`) |
-| `trazabilty` | Prometheus |
-| `dashboard` | Grafana |
-| `memory` | Redis |
-
-Docker network: `dominus`.
-
-```bash
-docker compose up -d
-```
+A full **local** stack (broker, Redis, Nginx sidecar, Prometheus, Grafana) is defined under **`terraform/`** using the Docker provider. See **[doc/terraform.md](doc/terraform.md)** for prerequisites, raw CLI usage, variable defaults, and **`Makefile.ps1`** wrappers (**`-Target terraform-init`**, **`terraform-plan`**, **`terraform-apply`**, **`terraform-destroy`**, etc.).
 
 ---
 
@@ -188,7 +175,7 @@ Meaningful totals for **`internal/...`** need **`-coverpkg`** (see **[doc/covera
 
 - **Mocks**: `go generate` / `mockgen` per code comments; output in `mocks/`.
 - **Lint**: `.golangci.yaml`, optional hooks in `.pre-commit-config.yaml`.
-- **Windows automation**: **`Makefile.ps1`** at repo root (`-Target build`, `test`, `test-cover`, `fmt`, `lint`, `vuln`, `audit`, `deploy-check`). **`go`**, **`golangci-lint`**, and **`govulncheck`** must already be on **`PATH`** (e.g. via your Go version manager); the script does not modify `PATH`.
+- **Windows automation**: **`Makefile.ps1`** at repo root (`-Target build`, `test`, `test-cover`, `fmt`, `lint`, `vuln`, `audit`, `deploy-check`, and Terraform: **`terraform-init`**, **`terraform-fmt`**, **`terraform-validate`**, **`terraform-plan`**, **`terraform-apply`**, **`terraform-destroy`**, **`terraform-output`** — see **[doc/terraform.md](doc/terraform.md)**). **`go`**, **`golangci-lint`**, **`govulncheck`**, and **`terraform`** (for those targets) must already be on **`PATH`**; the script does not modify `PATH`.
 
 ---
 

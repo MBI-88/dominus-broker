@@ -1,8 +1,8 @@
 variable "image" {
   type        = string
   description = "Image name:tag to assign to the built image (e.g. dominus-broker:latest)"
-  default = null
-  nullable = true
+  default     = null
+  nullable    = true
 }
 
 variable "keep_localy" {

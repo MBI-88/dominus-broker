@@ -1,6 +1,6 @@
 
 variable "dominus_image_name" {
-  type = string
+  type    = string
   default = "dominus-broker:local"
 }
 
@@ -10,7 +10,7 @@ variable "dominus_file" {
 }
 
 variable "dominus_container_name" {
-  type = string
+  type    = string
   default = "dominus_broker"
 }
 
@@ -22,13 +22,13 @@ variable "dominus_container_ports" {
 }
 
 variable "dominus_volume_cert" {
-  type = string
+  type        = string
   description = "Name cert"
-  default = "dominus_certs"
+  default     = "dominus_certs"
 }
 
 variable "dominus_volume_driver" {
-  type = string
+  type    = string
   default = "local"
 }
 
@@ -37,16 +37,16 @@ variable "dominus_network_name" {
 }
 
 variable "dominus_container_cpu_resources" {
-  type = string
+  type    = string
   default = "4.5"
 }
 
 variable "dominus_container_memory_resources" {
-  type = number
+  type    = number
   default = 10
 }
 
 variable "dominus_container_healcheck" {
-  type = list(string)
-  default = ["CMD", "wget", "-qO-", "--header","x-api-key: dominus_example_@10102024KeyServerToken","http://127.0.0.1:8000/health"]
+  type    = list(string)
+  default = ["CMD", "wget", "-qO-", "--header", "x-api-key: dominus_example_@10102024KeyServerToken", "http://127.0.0.1:8000/health"]
 }

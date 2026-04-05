@@ -14,7 +14,7 @@ REST surface is built with **valyala/fasthttp** and **fasthttp/router** in `inte
 
 ## Health checks
 
-Docker healthcheck (`docker/dominus/docker-compose.yml`) calls HTTP **`/health`** with header **`x-api-key`** set to the same token as in config (see `rest_config.api_token` in `env` samples).
+The Dominus container health check (Terraform: [`terraform/dev/dominus/interfaces.tf`](../terraform/dev/dominus/interfaces.tf), wired through [`terraform/modules/container`](../terraform/modules/container)) calls HTTP **`/health`** with header **`x-api-key`** set to match config (see `rest_config.api_token` in `env` samples). Details: **[doc/terraform.md](terraform.md)**.
 
 ## Tests
 

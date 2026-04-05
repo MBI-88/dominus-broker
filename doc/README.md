@@ -14,3 +14,4 @@ In-depth notes for contributors. The [main README](../README.md) stays high-leve
 | [testing.md](testing.md) | `tests/cases` vs `tests/integration`, commands |
 | [tradeoffs.md](tradeoffs.md) | Architectural choices, limits, Redis/gRPC/broker trade-offs (English) |
 | [coverage.md](coverage.md) | **`Makefile.ps1 -Target test-cover`**, `-coverpkg`, baseline **91.8%**, per-function table |
+| [terraform.md](terraform.md) | Local Docker stack: Terraform layout, `apply` / `destroy`, **`Makefile.ps1`** targets (`terraform-init`, …), variables, services |

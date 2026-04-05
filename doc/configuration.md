@@ -34,4 +34,4 @@ If certificate files are missing (`Stat` on cert paths), gRPC and REST fall back
 ## Related files
 
 - `env/env.dev.json`, `env/env.prod.json` — samples / deployment templates
-- `docker/dominus/docker-compose.yml` — mounts `./env` read-only into the container
+- **[doc/terraform.md](terraform.md)** — local Docker stack via Terraform (certs volume; use `APP_CONFIG` or extra mounts for in-container JSON)

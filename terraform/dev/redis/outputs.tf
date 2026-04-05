@@ -3,7 +3,7 @@ output "redis_image_id" {
 }
 
 output "redis_container_ports" {
-  value =  jsonencode(var.redis_container_ports)
+  value = jsonencode(var.redis_container_ports)
 }
 
 output "redis_container_name" {

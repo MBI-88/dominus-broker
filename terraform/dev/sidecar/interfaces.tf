@@ -1,11 +1,11 @@
 
 variable "sidecar_image_name" {
-  type = string
+  type    = string
   default = "nginx:latest"
 }
 
 variable "sidecar_container_name" {
-  type = string
+  type    = string
   default = "sidecar"
 }
 
@@ -21,21 +21,21 @@ variable "sidecar_network_name" {
 }
 
 variable "sidecar_environments" {
-  type = list(string)
-  default = ["NGINX_HOST=0.0.0.0", "NGINX_PORT=80", "NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf" ]
+  type    = list(string)
+  default = ["NGINX_HOST=0.0.0.0", "NGINX_PORT=80", "NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf"]
 }
 
 variable "sidecar_path" {
-  type = string
+  type    = string
   default = "./nginx.conf"
 }
 
 variable "sidecar_container_cpu_resources" {
-  type = string
+  type    = string
   default = "1.5"
 }
 
 variable "sidecar_container_healcheck" {
-  type = list(string)
+  type    = list(string)
   default = ["CMD", "curl", "-f", "http://127.0.0.1:80/"]
 }

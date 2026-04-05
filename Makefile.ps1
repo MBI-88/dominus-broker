@@ -12,6 +12,7 @@
     hits) so data races fail the run and are not masked by cached results.
 
     Coverage: -coverpkg from go list (internal minus boostrap + tests); see doc/coverage.md.
+    Terraform: see doc/terraform.md; targets terraform-init, terraform-plan, terraform-apply, etc.
 
 .PARAMETER Target
     Action to run (default: help).
@@ -22,6 +23,15 @@
 .PARAMETER AuditDocsDir
     Optional directory containing a release checklist (e.g. PENDIENTES.md). If empty,
     audit skips the documentation reminder.
+
+.PARAMETER TerraformDir
+    Path to the Terraform root module, relative to the repository root (default: terraform).
+
+.PARAMETER TerraformAutoApprove
+    For terraform-apply and terraform-destroy only: pass -auto-approve to Terraform (non-interactive).
+
+.PARAMETER TerraformExtraArgs
+    Extra arguments appended after the subcommand (e.g. -upgrade for init, -var foo=bar for plan/apply).
 #>
 
 [CmdletBinding()]
@@ -29,20 +39,30 @@ param(
     [Parameter(Position = 0)]
     [ValidateSet(
         'build', 'test', 'test-cover', 'check-coverage',
-        'fmt', 'lint', 'vuln', 'audit', 'deploy-check', 'help'
+        'fmt', 'lint', 'vuln', 'audit', 'deploy-check',
+        'terraform-init', 'terraform-fmt', 'terraform-validate', 'terraform-plan',
+        'terraform-apply', 'terraform-destroy', 'terraform-output', 'help'
     )]
     [string] $Target = 'help',
 
     [ValidateRange(0, 100)]
     [int] $CoverageMinPct = 90,
 
-    [string] $AuditDocsDir = ''
+    [string] $AuditDocsDir = '',
+
+    [string] $TerraformDir = 'terraform',
+
+    [switch] $TerraformAutoApprove,
+
+    [string[]] $TerraformExtraArgs = @()
 )
 
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = $PSScriptRoot
 Set-Location -LiteralPath $repoRoot
+
+$terraformRoot = [IO.Path]::GetFullPath((Join-Path $repoRoot $TerraformDir))
 
 # Main package path and output binary name (see cmd/api/main.go)
 $mainPackagePath = './cmd/api'
@@ -289,13 +309,97 @@ function Invoke-DeployCheckStep {
     Write-Host 'Successful! (deploy-check)' -ForegroundColor Blue
 }
 
+function Assert-TerraformCli {
+    $null = & terraform version 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host 'terraform is not available on PATH (install Terraform CLI and retry).' -ForegroundColor Red
+        exit 1
+    }
+}
+
+function Assert-TerraformDirectory {
+    if (-not (Test-Path -LiteralPath $terraformRoot -PathType Container)) {
+        Write-Host "Terraform directory not found: $terraformRoot" -ForegroundColor Red
+        exit 1
+    }
+}
+
+function Invoke-Terraform {
+    param(
+        [Parameter(Mandatory)]
+        [string[]] $Arguments
+    )
+    Assert-TerraformCli
+    Assert-TerraformDirectory
+    $verb = if ($Arguments.Count -gt 0) { $Arguments[0] } else { 'terraform' }
+    Write-StepMessage "terraform $verb (cwd: $terraformRoot)"
+    Push-Location -LiteralPath $terraformRoot
+    try {
+        & terraform @Arguments
+        Assert-LastExitCode "terraform $verb"
+    }
+    finally {
+        Pop-Location
+    }
+}
+
+function Invoke-TerraformInitStep {
+    $tfCliArgs = @('init') + $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-init)' -ForegroundColor Blue
+}
+
+function Invoke-TerraformFmtStep {
+    $tfCliArgs = @('fmt', '-recursive') + $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-fmt)' -ForegroundColor Blue
+}
+
+function Invoke-TerraformValidateStep {
+    $tfCliArgs = @('validate') + $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-validate)' -ForegroundColor Blue
+}
+
+function Invoke-TerraformPlanStep {
+    $tfCliArgs = @('plan') + $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-plan)' -ForegroundColor Blue
+}
+
+function Invoke-TerraformApplyStep {
+    $tfCliArgs = @('apply')
+    if ($TerraformAutoApprove) {
+        $tfCliArgs += '-auto-approve'
+    }
+    $tfCliArgs += $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-apply)' -ForegroundColor Blue
+}
+
+function Invoke-TerraformDestroyStep {
+    $tfCliArgs = @('destroy')
+    if ($TerraformAutoApprove) {
+        $tfCliArgs += '-auto-approve'
+    }
+    $tfCliArgs += $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-destroy)' -ForegroundColor Blue
+}
+
+function Invoke-TerraformOutputStep {
+    $tfCliArgs = @('output') + $TerraformExtraArgs
+    Invoke-Terraform -Arguments $tfCliArgs
+    Write-Host 'Successful! (terraform-output)' -ForegroundColor Blue
+}
+
 function Show-Help {
     $bin = Get-BinaryFileName
     Write-Host @"
 dominus-broker - local automation (PowerShell)
 
 Usage:
-  .\Makefile.ps1 [-Target <name>] [-CoverageMinPct <n>] [-AuditDocsDir <path>]
+  .\Makefile.ps1 [-Target <name>] [-CoverageMinPct <n>] [-AuditDocsDir <path>] [-TerraformDir <dir>] [-TerraformAutoApprove] [-TerraformExtraArgs <string[]> ...]
 
 Targets:
   build           Build API binary to bin\$bin ($mainPackagePath)
@@ -307,6 +411,15 @@ Targets:
   vuln            govulncheck ./...
   audit           go vet + vuln + lint; optional PENDIENTES.md if -AuditDocsDir is set
   deploy-check    test-cover + audit (pre-deploy gate)
+
+  terraform-init     terraform init in -TerraformDir (default: terraform); extra args: -TerraformExtraArgs
+  terraform-fmt        terraform fmt -recursive in -TerraformDir
+  terraform-validate   terraform validate in -TerraformDir (run init first)
+  terraform-plan       terraform plan; optional -TerraformExtraArgs
+  terraform-apply      terraform apply; -TerraformAutoApprove for non-interactive; -TerraformExtraArgs
+  terraform-destroy    terraform destroy; -TerraformAutoApprove for non-interactive; -TerraformExtraArgs
+  terraform-output     terraform output; optional -TerraformExtraArgs (e.g. -json, a name)
+
   help            Show this text
 "@ -ForegroundColor Gray
 }
@@ -321,5 +434,12 @@ switch ($Target) {
     'vuln' { Invoke-VulnStep }
     'audit' { Invoke-AuditStep }
     'deploy-check' { Invoke-DeployCheckStep }
+    'terraform-init' { Invoke-TerraformInitStep }
+    'terraform-fmt' { Invoke-TerraformFmtStep }
+    'terraform-validate' { Invoke-TerraformValidateStep }
+    'terraform-plan' { Invoke-TerraformPlanStep }
+    'terraform-apply' { Invoke-TerraformApplyStep }
+    'terraform-destroy' { Invoke-TerraformDestroyStep }
+    'terraform-output' { Invoke-TerraformOutputStep }
     'help' { Show-Help }
 }

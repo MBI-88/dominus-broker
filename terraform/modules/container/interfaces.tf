@@ -44,46 +44,46 @@ variable "container_network_name" {
 }
 
 variable "container_network_mode" {
-  type =  string
+  type    = string
   default = "bridge"
 }
 
 variable "container_conmands" {
-  type = list(string)
+  type    = list(string)
   default = null
 }
 
 variable "container_healcheck" {
-  type = list(string)
+  type        = list(string)
   description = "Conmand secuencies"
 }
 
 variable "container_cpu_resources" {
-  type = string
-  default = "2.5"
+  type        = string
+  default     = "2.5"
   description = "Specify how much of the available CPU resources a container can use. e.g a value of 1.5 means the container is guaranteed at most one and a half of the CPUs. Has precedence over cpu_period and cpu_quota."
 }
 
 variable "container_memory_resources" {
-  type = number
-  default = 3
+  type        = number
+  default     = 3
   description = "The memory limit for the container in MBs."
 }
 
 variable "container_healcheck_interval" {
-  type = string
-  default = "1m"
+  type        = string
+  default     = "1m"
   description = "Time between running the check (ms|s|m|h). Defaults to 0s."
 }
 
 variable "container_healcheck_timeout" {
-  type = string
-  default = "1s"
+  type        = string
+  default     = "1s"
   description = "Maximum time to allow one check to run (ms|s|m|h). Defaults to 0s."
 }
 
 variable "container_healcheck_retries" {
-  type = number
-  default = 3
+  type        = number
+  default     = 3
   description = "Consecutive failures needed to report unhealthy. Defaults to 0."
 }
