@@ -22,3 +22,8 @@ variable "dockerfile" {
   default     = "Dockerfile"
   description = "Dockerfile path relative to the build context"
 }
+
+variable "github_token" {
+  type    = string
+  default = null
+}

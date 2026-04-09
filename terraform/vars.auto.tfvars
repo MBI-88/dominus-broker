@@ -1,11 +1,14 @@
 network_mode = "bridge"
 network_name = "dominus"
 
-dominus_server_file = "./../Dockerfile"
+dominus_server_file = "./../"
 dominus_server_container_ports = [
   { internal = 8000, external = 8000 },
   { internal = 5000, external = 5000 },
 ]
+
+dominus_server_container_cpu    = "5.0"
+dominus_server_container_memory = 500
 
 
 grafana_server_container_ports = [

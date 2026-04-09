@@ -11,9 +11,12 @@ module "network" {
 module "dominus_server" {
   source = "./dev/dominus"
 
-  dominus_file            = var.dominus_server_file
-  dominus_container_ports = var.dominus_server_container_ports
-  dominus_network_name    = module.network.network_name
+  dominus_file                       = var.dominus_server_file
+  dominus_container_ports            = var.dominus_server_container_ports
+  dominus_network_name               = module.network.network_name
+  dominus_container_cpu_resources    = var.dominus_server_container_cpu
+  dominus_container_memory_resources = var.dominus_server_container_memory
+  dominus_github_token               = var.dominus_server_token
 
   depends_on = [module.redis_server]
 }

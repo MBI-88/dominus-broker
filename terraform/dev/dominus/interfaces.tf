@@ -50,3 +50,7 @@ variable "dominus_container_healcheck" {
   type    = list(string)
   default = ["CMD", "wget", "-qO-", "--header", "x-api-key: dominus_example_@10102024KeyServerToken", "http://127.0.0.1:8000/health"]
 }
+
+variable "dominus_github_token" {
+  type = string
+}

@@ -3,7 +3,7 @@ module "redis_image" {
   source = "../../modules/image"
 
   image = var.redis_image_name
-  path  = "./"
+  path  = abspath("${path.module}/")
 
 }
 

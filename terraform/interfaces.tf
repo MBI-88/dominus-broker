@@ -11,6 +11,17 @@ variable "dominus_server_container_ports" {
   }))
 }
 
+variable "dominus_server_container_cpu" {
+  type = string
+}
+
+variable "dominus_server_container_memory" {
+  type = number
+}
+
+variable "dominus_server_token" {
+  type = string
+}
 
 // ===== Grafana ==== //
 variable "grafana_server_container_ports" {

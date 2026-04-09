@@ -66,7 +66,7 @@ variable "container_cpu_resources" {
 
 variable "container_memory_resources" {
   type        = number
-  default     = 3
+  default     = 6
   description = "The memory limit for the container in MBs."
 }
 

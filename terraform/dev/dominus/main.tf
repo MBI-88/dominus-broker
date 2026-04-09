@@ -3,8 +3,9 @@
 module "dominus_image" {
   source = "../../modules/image"
 
-  image = var.dominus_image_name
-  path  = var.dominus_file
+  image        = var.dominus_image_name
+  path         = abspath("${var.dominus_file}")
+  github_token = var.dominus_github_token
 }
 
 module "dominus_container" {
