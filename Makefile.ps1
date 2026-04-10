@@ -40,7 +40,7 @@ param(
     [ValidateSet(
         'build', 'test', 'test-cover', 'check-coverage',
         'fmt', 'lint', 'vuln', 'audit', 'deploy-check',
-        'terraform-init', 'terraform-fmt', 'terraform-validate', 'terraform-plan',
+        'local', 'terraform-init', 'terraform-fmt', 'terraform-validate', 'terraform-plan',
         'terraform-apply', 'terraform-destroy', 'terraform-output', 'help'
     )]
     [string] $Target = 'help',
@@ -309,6 +309,28 @@ function Invoke-DeployCheckStep {
     Write-Host 'Successful! (deploy-check)' -ForegroundColor Blue
 }
 
+function Invoke-LocalRunStep {
+    $configFile = Join-Path $repoRoot 'env' 'env.local.json'
+
+    if (-not (Test-Path -LiteralPath $configFile)) {
+        Write-Host "Configuration file not found: $configFile" -ForegroundColor Red
+        exit 1
+    }
+
+    Write-StepMessage "Setting APP_CONFIG to $configFile"
+    $env:APP_CONFIG = (Get-Content $configFile -Raw | ConvertFrom-Json | ConvertTo-Json -Compress)
+    Write-Host "APP_CONFIG = $env:APP_CONFIG" -ForegroundColor Green
+
+    Write-StepMessage "Running $mainPackagePath with local configuration"
+    & go run $mainPackagePath
+    $exitCode = $LASTEXITCODE
+
+    if ($exitCode -ne 0) {
+        Write-Host "Application exited with code $exitCode" -ForegroundColor Red
+        exit $exitCode
+    }
+}
+
 function Assert-TerraformCli {
     $null = & terraform version 2>&1
     if ($LASTEXITCODE -ne 0) {
@@ -411,6 +433,7 @@ Targets:
   vuln            govulncheck ./...
   audit           go vet + vuln + lint; optional PENDIENTES.md if -AuditDocsDir is set
   deploy-check    test-cover + audit (pre-deploy gate)
+  local           Run application locally with env/env.local.json configuration
 
   terraform-init     terraform init in -TerraformDir (default: terraform); extra args: -TerraformExtraArgs
   terraform-fmt        terraform fmt -recursive in -TerraformDir
@@ -434,6 +457,7 @@ switch ($Target) {
     'vuln' { Invoke-VulnStep }
     'audit' { Invoke-AuditStep }
     'deploy-check' { Invoke-DeployCheckStep }
+    'local' { Invoke-LocalRunStep }
     'terraform-init' { Invoke-TerraformInitStep }
     'terraform-fmt' { Invoke-TerraformFmtStep }
     'terraform-validate' { Invoke-TerraformValidateStep }

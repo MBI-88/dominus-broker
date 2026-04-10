@@ -1,23 +1,23 @@
 {
     "grpc_config": {
         "port": 5000,
-        "api_token": "dominus-api-key-1233464687"
+        "api_token": ""
     },
     "rest_config": {
         "port": 8000,
-        "api_token": "dominus_example_@10102024KeyServerToken",
+        "api_token": "",
         "allow_origins": "0.0.0.0/0"
     },
     "cert_config": {
-        "key_file": "/etc/dominus/certs/cert.key",
-        "ssl_ca_cert": "/etc/dominus/certs/ca_cert.pem",
-        "ssl_cert": "/etc/dominus/certs/cert.pem"
+        "key_file": "./certs/cert.key",
+        "ssl_ca_cert": "./certs/ca_cert.pem",
+        "ssl_cert": "./certs/cert.pem"
     },
     "redis_config": {
         "port": 6379,
         "memory_db": 0,
         "checker_db": 1,
-        "host": "redis",
+        "host": "localhost",
         "password": "dominus",
         "tls": false,
         "username": "dominus",

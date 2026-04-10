@@ -37,4 +37,4 @@ EXPOSE ${GRPC_PORT}
 
 ENTRYPOINT ["/app/env/entrypoint.sh"]
 
-CMD ["./dominus", "-prod=true", "-banner=true"]
+CMD ["./dominus", "-prod=false", "-banner=true"]

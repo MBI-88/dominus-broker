@@ -40,11 +40,6 @@ variable "redis_path" {
   default = "./redis.conf"
 }
 
-variable "redis_container_cpu_resources" {
-  type    = string
-  default = "2.5"
-}
-
 variable "redis_container_healcheck" {
   type    = list(string)
   default = ["CMD", "redis-cli", "-p", "6379", "ping"]

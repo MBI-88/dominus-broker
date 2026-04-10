@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
 
 	"dominus-broker/internal/domain/repositories"
 	"dominus-broker/internal/infrastructure/enum"
@@ -27,11 +26,6 @@ func newCheckerClient(t *testing.T, s *miniredis.Miniredis) repositories.Checker
 		t.Fatalf("ParseInt port: %v", err)
 	}
 	return cchecker.NewCheckerClient(
-		10,
-		0,
-		int(time.Second),
-		int(time.Second),
-		int(time.Second),
 		port,
 		0,
 		host,

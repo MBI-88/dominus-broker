@@ -30,11 +30,6 @@ variable "sidecar_path" {
   default = "./nginx.conf"
 }
 
-variable "sidecar_container_cpu_resources" {
-  type    = string
-  default = "1.5"
-}
-
 variable "sidecar_container_healcheck" {
   type    = list(string)
   default = ["CMD", "curl", "-f", "http://127.0.0.1:80/"]

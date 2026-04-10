@@ -60,13 +60,13 @@ variable "container_healcheck" {
 
 variable "container_cpu_resources" {
   type        = string
-  default     = "2.5"
+  default     = "2"
   description = "Specify how much of the available CPU resources a container can use. e.g a value of 1.5 means the container is guaranteed at most one and a half of the CPUs. Has precedence over cpu_period and cpu_quota."
 }
 
 variable "container_memory_resources" {
   type        = number
-  default     = 6
+  default     = 500
   description = "The memory limit for the container in MBs."
 }
 

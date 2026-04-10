@@ -3,12 +3,9 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/env.${MODE:-dev}.json"
+CONFIG_FILE="$SCRIPT_DIR/env.${MODE:-prod}.json"
 
 echo "MODE=$MODE"
-echo "Looking for config: $CONFIG_FILE"
-
-ls -la "$SCRIPT_DIR"
 
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "❌ Config file not found: $CONFIG_FILE"
@@ -25,7 +22,5 @@ if [ -z "$CONTENT" ]; then
 fi
 
 export APP_CONFIG="$(echo "$CONTENT" | tr -d '\n')"
-
-echo "APP_CONFIG length: ${#APP_CONFIG}"
 
 exec "$@"

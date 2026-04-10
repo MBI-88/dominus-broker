@@ -19,11 +19,6 @@ type memory struct {
 }
 
 func NewMemoryClient(
-	PoolSize int,
-	MaxRetries int,
-	DialTimeOut int,
-	ReadTimeOut int,
-	WriteTimeOut int,
 	Port int64,
 	Db int,
 	Host string,
@@ -42,16 +37,11 @@ func NewMemoryClient(
 	}
 
 	client := redis.NewClient(&redis.Options{
-		PoolSize:     PoolSize,
-		MaxRetries:   MaxRetries,
-		DialTimeout:  time.Duration(DialTimeOut),
-		ReadTimeout:  time.Duration(ReadTimeOut),
-		WriteTimeout: time.Duration(WriteTimeOut),
-		DB:           Db,
-		Addr:         fmt.Sprintf("%s:%d", Host, Port),
-		Password:     Password,
-		TLSConfig:    cfTls,
-		Username:     Username,
+		DB:        Db,
+		Addr:      fmt.Sprintf("%s:%d", Host, Port),
+		Password:  Password,
+		TLSConfig: cfTls,
+		Username:  Username,
 	})
 
 	if _, err := client.Ping(context.Background()).Result(); err != nil {

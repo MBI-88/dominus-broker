@@ -11,7 +11,7 @@ variable "dominus_file" {
 
 variable "dominus_container_name" {
   type    = string
-  default = "dominus_broker"
+  default = "dominus"
 }
 
 variable "dominus_container_ports" {
@@ -38,12 +38,12 @@ variable "dominus_network_name" {
 
 variable "dominus_container_cpu_resources" {
   type    = string
-  default = "4.5"
+  default = "4"
 }
 
 variable "dominus_container_memory_resources" {
   type    = number
-  default = 10
+  default = 1000
 }
 
 variable "dominus_container_healcheck" {

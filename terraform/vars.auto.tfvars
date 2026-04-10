@@ -7,8 +7,8 @@ dominus_server_container_ports = [
   { internal = 5000, external = 5000 },
 ]
 
-dominus_server_container_cpu    = "5.0"
-dominus_server_container_memory = 500
+dominus_server_container_cpu    = "4"
+dominus_server_container_memory = 1000
 
 
 grafana_server_container_ports = [

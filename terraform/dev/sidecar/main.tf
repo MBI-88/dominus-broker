@@ -9,13 +9,12 @@ module "sidecar_image" {
 module "sidecar_container" {
   source = "../../modules/container"
 
-  container_image         = module.sidecar_image.image_id
-  container_name          = var.sidecar_container_name
-  container_ports         = var.sidecar_container_ports
-  container_network_name  = var.sidecar_network_name
-  container_env           = var.sidecar_environments
-  container_cpu_resources = var.sidecar_container_cpu_resources
-  container_healcheck     = var.sidecar_container_healcheck
+  container_image        = module.sidecar_image.image_id
+  container_name         = var.sidecar_container_name
+  container_ports        = var.sidecar_container_ports
+  container_network_name = var.sidecar_network_name
+  container_env          = var.sidecar_environments
+  container_healcheck    = var.sidecar_container_healcheck
 
   container_bind_mounts = [
     {

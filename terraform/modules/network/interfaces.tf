@@ -13,3 +13,8 @@ variable "network_attachable" {
   type    = bool
   default = false
 }
+
+variable "network_internal" {
+  type    = bool
+  default = false
+}

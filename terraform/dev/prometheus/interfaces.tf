@@ -39,11 +39,6 @@ variable "prometheus_network_name" {
   type = string
 }
 
-variable "prometheus_container_cpu_resources" {
-  type    = string
-  default = "2.5"
-}
-
 variable "prometheus_container_healcheck" {
   type    = list(string)
   default = ["CMD", "wget", "-qO-", "http://prometheus:9090/-/ready"]

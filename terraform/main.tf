@@ -25,7 +25,7 @@ module "grafana_server" {
   grafana_network_name    = module.network.network_name
   grafana_container_ports = var.grafana_server_container_ports
 
-  depends_on = [module.dominus_server, module.prometheus_server, module.sidecar_server]
+  depends_on = [module.prometheus_server]
 }
 
 module "prometheus_server" {

@@ -31,11 +31,6 @@ func newMemoryClient(t *testing.T, s *miniredis.Miniredis, streamID string, lg e
 		t.Fatalf("ParseInt port: %v", err)
 	}
 	return cmemory.NewMemoryClient(
-		10,
-		0,
-		int(time.Second),
-		int(time.Second),
-		int(time.Second),
 		port,
 		0,
 		host,

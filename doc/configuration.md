@@ -6,7 +6,7 @@ Runtime settings are loaded through `config.NewConfig(prod bool)` in `config/con
 
 | `prod` | Source |
 |--------|--------|
-| `false` (default CLI) | File `./../env/env.dev.json` relative to the process working directory (typically run from `cmd/api`, so `env/env.dev.json` at repo root). |
+| `false` (default CLI) | File `./../env/env.local.json` relative to the process working directory (typically run from `cmd/api`, so `env/env.local.json` at repo root). |
 | `true` (`-prod` flag) | Environment variable **`APP_CONFIG`**: full JSON string unmarshalled into `Config`. `viper.AutomaticEnv()` is enabled. |
 
 ## Root JSON shape (`Config`)
@@ -17,7 +17,7 @@ Struct tags define the expected keys:
 - `rest_config` → `RestConfig`: `rest_port`, `api_token`, `allow_origins`
 - `cert_config` → `CertConfig`: paths for TLS materials
 - `redis_config` → `RedisConfig`: Redis client, DB indices, stream/group names, idempotency TTL (`id_potency`), timeouts, TLS flag
-- `infra_config` → `InfraConfig`: `log_mode`, `log_url`
+- `log_config` → `LogConfig`: `log_mode`, `log_url`
 
 **Important**: `redis_config` must sit at the **root** of the JSON object, matching `json:"redis_config"` on `Config`. Nesting it (e.g. under `provider_config`) will not populate `cf.RedisConfig` unless you change the struct or file layout.
 
