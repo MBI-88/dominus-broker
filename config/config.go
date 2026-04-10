@@ -32,7 +32,7 @@ type RedisConfig struct {
 	WriteTimeOut int
 	MemoryDB     int
 	CheckerDB    int
-	IdPotency    int
+	IdPotencyEX  int
 	Host         string
 	Password     string
 	Username     string
@@ -59,7 +59,11 @@ func NewConfig(prod bool) *Config {
 
 	if prod {
 		viper.AutomaticEnv()
-		if err := json.Unmarshal([]byte(viper.GetString("APP_CONFIG")), &cf); err != nil {
+		raw := viper.GetString("APP_CONFIG")
+		if raw == "" {
+			panic("APP_CONFIG is empty or not set")
+		}
+		if err := json.Unmarshal([]byte(raw), &cf); err != nil {
 			panic(err)
 		}
 	} else {

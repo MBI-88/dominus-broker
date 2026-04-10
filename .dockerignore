@@ -11,8 +11,6 @@ Dockerfile.*
 k8s/
 *.conf
 *.md
-logs/
-certs/
 .vscode/
 ./docker
 ./terraform

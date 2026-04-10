@@ -65,7 +65,7 @@ func gRPServer(
 		cf.RedisConfig.Password,
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
-		cf.RedisConfig.IdPotency,
+		cf.RedisConfig.IdPotencyEX,
 	)
 
 	midGs := gm.NewMiddleware(cf.GrpcConfig.ConnectionKey, logs, checker)

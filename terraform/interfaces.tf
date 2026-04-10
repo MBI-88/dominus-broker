@@ -59,7 +59,7 @@ variable "sidecar_server_container_ports" {
 
 
 // ======== Shared ========= //
-variable "network_mode" {
+variable "network_driver" {
   type = string
 }
 

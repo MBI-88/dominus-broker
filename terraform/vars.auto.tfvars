@@ -1,5 +1,5 @@
-network_mode = "bridge"
-network_name = "dominus"
+network_driver = "bridge"
+network_name   = "dominus"
 
 dominus_server_file = "./../"
 dominus_server_container_ports = [

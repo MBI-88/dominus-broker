@@ -10,5 +10,6 @@ variable "network_driver" {
 }
 
 variable "network_attachable" {
-  type = bool
+  type    = bool
+  default = false
 }
