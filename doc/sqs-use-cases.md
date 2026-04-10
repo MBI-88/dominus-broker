@@ -5,7 +5,7 @@ The **`SqsAPI`** service (protobuf package `dominus`) exposes **Producer**, **Co
 | Layer | Location |
 |-------|----------|
 | gRPC handlers | `internal/infrastructure/grpc/inbound/sqs_v1.3.7.go` |
-| Application | `internal/application/use_cases/sqs/` |
+| Application | `internal/application/usecases/sqs/` |
 | Domain entity | `internal/domain/entities/sqs_message.go` (`Message`) |
 | Redis adapter | `internal/infrastructure/redis/cmemory/outbound.go` (`MemoryClient`) |
 
@@ -14,7 +14,8 @@ The **`SqsAPI`** service (protobuf package `dominus`) exposes **Producer**, **Co
 ## Ports and DTOs
 
 - **`repositories.MemoryClient`** — Redis Streams adapter (`cmemory`).
-- **DTOs** — `internal/application/dtos/sqs_dto.go` (`ProducerDto`, `ConsumerDto`) for use-case inputs; protobuf requests implement these interfaces at the edge.
+- **DTOs** — `internal/application/usecases/sqs/dto.go` (`ProducerDto`, `ConsumerDto`) for use-case inputs; protobuf requests implement these interfaces at the edge.
+- **Context**: All SQS use case methods (`Producer`, `Consumer`, `Ack`) accept `context.Context` as the first parameter for cancellation and timeout control.
 
 Factory: **`sqs.NewSQS(client)`** in bootstrap; the same Redis client is configured with stream and consumer group from config (`Group` is created at startup).
 
@@ -24,9 +25,9 @@ Factory: **`sqs.NewSQS(client)`** in bootstrap; the same Redis client is configu
 
 | RPC | Use case | Redis-backed behavior (via `MemoryClient`) |
 |-----|----------|---------------------------------------------|
-| **Producer** | Validates payload, builds `entities.Message`, sends | `SendMessage` → `XADD` with JSON payload under `enum.PAYLOAD`; optional explicit stream ID from the message |
-| **Consumer** | Reads for a worker + group | `GetMessage` → `XREADGROUP` (blocking read, count 1); stream entry ID is applied to the entity after unmarshal |
-| **Ack** | Validates message ID format, then acknowledges | `AckMessage` → `XACK` for `(stream, group, messageId)` |
+| **Producer** | Signature: `Producer(ctx context.Context, ms ProducerDto) error`. Validates payload, builds `entities.Message`, sends | `SendMessage(ctx, q)` → `XADD` with JSON payload under `enum.PAYLOAD`; optional explicit stream ID from the message |
+| **Consumer** | Signature: `Consumer(ctx context.Context, ms ConsumerDto) (*entities.Message, error)`. Reads for a worker + group | Calls `GetMessage(ctx, workerId, groupId)` → `XREADGROUP` (blocking read, count 1); stream entry ID is applied to the entity after unmarshal |
+| **Ack** | Signature: `Ack(ctx context.Context, ms ConsumerDto) error`. Validates message ID format, then acknowledges | Calls `AckMessage(ctx, messageId, groupId)` → `XACK` for `(stream, group, messageId)` |
 
 ---
 
@@ -58,9 +59,9 @@ Domain rules live on **`entities.Message.SetMessageId`** / `checkValidFormatID`;
 
 ### Unit — application (`tests/cases/application/use_cases/sqs_test/`)
 
-- **Producer** — Asserts delegation to `SendMessage` with a non-empty `*entities.Message` whose **body** matches the DTO payload; empty payload and Redis errors.
-- **Consumer** — Asserts `GetMessage` arguments and, on success, returned **body**, **id**, and **created-at** match the mocked message.
-- **Ack** — Valid stream-style IDs with `AckMessage` success/failure; **invalid** IDs (e.g. `message-1`, `123456789`) ensure **`AckMessage` is not invoked** and error text is `invalid messageId`.
+- **Producer** — Signature assertions: expects `ctx context.Context` and `ProducerDto`; asserts delegation to `SendMessage(ctx, msg)` with a non-empty `*entities.Message` whose **body** matches the DTO payload; empty payload and Redis errors.
+- **Consumer** — Signature assertions: expects `ctx context.Context` and `ConsumerDto`; asserts delegation to `GetMessage(ctx, workerId, groupId)` and, on success, returned **body**, **id**, and **created-at** match the mocked message.
+- **Ack** — Signature assertions: expects `ctx context.Context` and `ConsumerDto`; validates stream-style IDs with `AckMessage(ctx, messageId, groupId)` success/failure; **invalid** IDs (e.g. `message-1`, `123456789`) ensure **`AckMessage` is not invoked** and error text is `invalid messageId`.
 
 ### Unit — gRPC inbound (`tests/cases/infrastructure/grpc/inbound_test/sqs_test.go`)
 

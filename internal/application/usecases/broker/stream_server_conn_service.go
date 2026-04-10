@@ -3,11 +3,10 @@ package broker
 import (
 	"context"
 
-	"dominus-broker/internal/application/dtos"
 	"fmt"
 )
 
-func (b *broker) StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServerDto) error {
+func (b *broker) StreamServerConn(req BrokerRequestDto, st BrokerServerDto) error {
 	ctx, cancel := context.WithCancel(st.Context())
 	defer cancel()
 	subscribers := req.GetSubscribers()

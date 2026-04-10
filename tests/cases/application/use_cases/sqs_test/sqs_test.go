@@ -3,7 +3,7 @@ package sqs_test
 import (
 	"testing"
 
-	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/application/usecases/sqs"
 	"dominus-broker/mocks"
 
 	"go.uber.org/mock/gomock"

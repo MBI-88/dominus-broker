@@ -177,8 +177,20 @@ Meaningful totals for **`internal/...`** need **`-coverpkg`** (see **[doc/covera
 - **Lint**: `.golangci.yaml`, optional hooks in `.pre-commit-config.yaml`.
 - **Windows automation**: **`Makefile.ps1`** at repo root (`-Target build`, `test`, `test-cover`, `fmt`, `lint`, `vuln`, `audit`, `deploy-check`, and Terraform: **`terraform-init`**, **`terraform-fmt`**, **`terraform-validate`**, **`terraform-plan`**, **`terraform-apply`**, **`terraform-destroy`**, **`terraform-output`** — see **[doc/terraform.md](doc/terraform.md)**). **`go`**, **`golangci-lint`**, **`govulncheck`**, and **`terraform`** (for those targets) must already be on **`PATH`**; the script does not modify `PATH`.
 
+- **Dependency sync**: If module or workspace sums are inconsistent (for example `go.mod` requires `github.com/MBI-88/dominus-proto-definition v1.3.7` but `go.work.sum` lists v1.3.6), sync dependencies with:
+
+```bash
+go get github.com/MBI-88/dominus-proto-definition@v1.3.7
+go work sync
+```
+
+Run the commands from the repository root and commit any changes to `go.mod`, `go.sum`, or `go.work.sum` as appropriate.
+
 ---
 
 ## License
 
 See the `LICENSE` file in the repository.
+
+For commercial licensing, redistribution, or enterprise terms, contact:
+`licensing@dominus-broker.example` (see `LICENSE` for details).

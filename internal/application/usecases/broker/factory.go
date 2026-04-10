@@ -1,14 +1,13 @@
 package broker
 
 import (
-	"dominus-broker/internal/application/dtos"
 	"dominus-broker/internal/domain/repositories"
 )
 
 type Broker interface {
-	StreamClientConn(st dtos.BrokerClientDto) error
-	StreamServerConn(req dtos.BrokerRequestDto, st dtos.BrokerServerDto) error
-	StreamBiConn(st dtos.BrokerBidirectionalDto) error
+	StreamClientConn(st BrokerClientDto) error
+	StreamServerConn(req BrokerRequestDto, st BrokerServerDto) error
+	StreamBiConn(st BrokerBidirectionalDto) error
 }
 
 type broker struct {

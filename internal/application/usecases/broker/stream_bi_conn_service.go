@@ -3,11 +3,10 @@ package broker
 import (
 	"context"
 
-	"dominus-broker/internal/application/dtos"
 	"fmt"
 )
 
-func (b *broker) StreamBiConn(stream dtos.BrokerBidirectionalDto) error {
+func (b *broker) StreamBiConn(stream BrokerBidirectionalDto) error {
 	closed := make(chan struct{})
 	ctx, cancel := context.WithCancel(stream.Context())
 	defer cancel()

@@ -2,7 +2,7 @@ package inbound_test
 
 import (
 	"context"
-	appsqs "dominus-broker/internal/application/use_cases/sqs"
+	appsqs "dominus-broker/internal/application/usecases/sqs"
 	"dominus-broker/internal/domain/entities"
 	"dominus-broker/internal/infrastructure/grpc/inbound"
 	"dominus-broker/mocks"

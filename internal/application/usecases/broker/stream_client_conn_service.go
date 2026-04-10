@@ -3,11 +3,10 @@ package broker
 import (
 	"context"
 
-	"dominus-broker/internal/application/dtos"
 	"fmt"
 )
 
-func (b *broker) StreamClientConn(st dtos.BrokerClientDto) error {
+func (b *broker) StreamClientConn(st BrokerClientDto) error {
 	ctx, cancel := context.WithCancel(st.Context())
 	defer cancel()
 	stream := make(chan []byte)

@@ -1,14 +1,14 @@
 # Broker streaming
 
-gRPC service **`BrokerAPI`** (protobuf package `dominus`) exposes three streaming RPCs. The server implementation lives in `internal/infrastructure/grpc/inbound/broker_v1.3.7.go`; business logic in `internal/application/use_cases/broker/`.
+gRPC service **`BrokerAPI`** (protobuf package `dominus`) exposes three streaming RPCs. The server implementation lives in `internal/infrastructure/grpc/inbound/broker_v1.3.7.go`; business logic in `internal/application/usecases/broker/`.
 
 ## Layers
 
 | Layer | Path | Role |
 |--------|------|------|
 | Transport | `inbound/broker_v1.3.7.go` | Implements `BrokerAPIServer`, maps streams to DTOs |
-| Mappers | `internal/infrastructure/grpc/mappers/mappers.go` | Wraps gRPC streams as `dtos.Broker*` interfaces |
-| Use cases | `internal/application/use_cases/broker/*.go` | `StreamClientConn`, `StreamServerConn`, `StreamBiConn` |
+| Mappers | `internal/infrastructure/grpc/mappers/mappers.go` | Wraps gRPC streams as `Broker*Dto` interfaces |
+| Use cases | `internal/application/usecases/broker/*_service.go` | `StreamClientConn`, `StreamServerConn`, `StreamBiConn` |
 | Outbound client | `internal/infrastructure/grpc/outbound/client_v1.3.7.go` | `repositories.BrokerClient` — dials subscriber URLs |
 
 `broker.NewBroker(client)` receives the outbound `BrokerClient` created in `internal/boostrap/boostrap.go` with the same dial options as production (TLS or insecure, metrics, auth interceptor, compression).
@@ -80,5 +80,5 @@ For each `msg` from `provMsg`, outbound `BidirectionalStream` launches `go cls(m
 ## Related tests
 
 - Unit-style: `tests/cases/application/use_cases/broker_test/`
-- gRPC wiring: `tests/cases/infrastructure/grpc/inbound_test/broker_test.go`
+- gRPC wiring: `tests/cases/infrastructure/grpc/inbound_test/broker_test.go` (handlers, `Broker` interface mocking, context-driven flows)
 - Integration: `tests/integration/broker_flow_test/` (real broker + outbound + TCP peers or bufconn). For **BidirectionalStream** shutdown expectations when subscribers keep streams open, see **`doc/concurrency.md`** (*Integration tests: CloseSend vs context cancel*).

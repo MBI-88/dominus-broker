@@ -2,7 +2,7 @@ package sqs_test
 
 import (
 	"context"
-	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/application/usecases/sqs"
 	"dominus-broker/internal/domain/entities"
 	"dominus-broker/mocks"
 	"fmt"

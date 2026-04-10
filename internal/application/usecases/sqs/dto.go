@@ -1,4 +1,4 @@
-package dtos
+package sqs
 
 type ProducerDto interface {
 	GetPayload() []byte

@@ -4,8 +4,8 @@ import (
 	"context"
 	"dominus-broker/config"
 
-	"dominus-broker/internal/application/use_cases/broker"
-	"dominus-broker/internal/application/use_cases/sqs"
+	"dominus-broker/internal/application/usecases/broker"
+	"dominus-broker/internal/application/usecases/sqs"
 	"dominus-broker/internal/infrastructure/enum"
 
 	"dominus-broker/internal/infrastructure/event"

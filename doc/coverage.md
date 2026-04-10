@@ -97,14 +97,14 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 Snapshot from a recent **`test-cover`** run; re-run locally after changes—line-level % can drift while **total** above stays the tracked baseline until you refresh it.
 
 ```
-dominus-broker/internal/application/use_cases/broker/factory.go:18:                    NewBroker               100.0%
-dominus-broker/internal/application/use_cases/broker/stream_bi_conn.go:10:         StreamBiConn            100.0%
-dominus-broker/internal/application/use_cases/broker/stream_client_conn.go:10:       StreamClientConn        100.0%
-dominus-broker/internal/application/use_cases/broker/stream_server_conn.go:10:       StreamServerConn        100.0%
-dominus-broker/internal/application/use_cases/sqs/ack.go:10:                          Ack                     100.0%
-dominus-broker/internal/application/use_cases/sqs/consumer.go:9:                     Consumer                100.0%
-dominus-broker/internal/application/use_cases/sqs/factory.go:20:                     NewSQS                  100.0%
-dominus-broker/internal/application/use_cases/sqs/producer.go:10:                    Producer                100.0%
+dominus-broker/internal/application/usecases/broker/factory.go:18:                    NewBroker               100.0%
+dominus-broker/internal/application/usecases/broker/stream_bi_conn_service.go:10:         StreamBiConn            100.0%
+dominus-broker/internal/application/usecases/broker/stream_client_conn_service.go:10:       StreamClientConn        100.0%
+dominus-broker/internal/application/usecases/broker/stream_server_conn_service.go:10:       StreamServerConn        100.0%
+dominus-broker/internal/application/usecases/sqs/ack_service.go:10:                          Ack                     100.0%
+dominus-broker/internal/application/usecases/sqs/consumer_service.go:9:                     Consumer                100.0%
+dominus-broker/internal/application/usecases/sqs/factory.go:20:                     NewSQS                  100.0%
+dominus-broker/internal/application/usecases/sqs/producer_service.go:10:                    Producer                100.0%
 dominus-broker/internal/domain/entities/sqs_message.go:16:                            NewMessageWithID        100.0%
 dominus-broker/internal/domain/entities/sqs_message.go:24:                            NewMessage              100.0%
 dominus-broker/internal/domain/entities/sqs_message.go:28:                            SetMessage              100.0%

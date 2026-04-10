@@ -1,7 +1,7 @@
 package inbound
 
 import (
-	"dominus-broker/internal/application/use_cases/broker"
+	"dominus-broker/internal/application/usecases/broker"
 	"dominus-broker/internal/infrastructure/enum"
 	"dominus-broker/internal/infrastructure/event"
 	"dominus-broker/internal/infrastructure/grpc/mappers"

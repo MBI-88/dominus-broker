@@ -2,7 +2,8 @@ package inbound_test
 
 import (
 	"context"
-	"dominus-broker/internal/application/dtos"
+
+	"dominus-broker/internal/application/usecases/broker"
 	"dominus-broker/internal/infrastructure/grpc/inbound"
 	"dominus-broker/internal/infrastructure/grpc/outbound"
 	"dominus-broker/mocks"
@@ -130,7 +131,7 @@ func TestClientStream(t *testing.T) {
 		brokerMock.EXPECT().
 			StreamClientConn(gomock.Any()).
 			DoAndReturn(func(st any) error {
-				bc := st.(dtos.BrokerClientDto)
+				bc := st.(broker.BrokerClientDto)
 				if _, err := bc.Recv(); err != nil {
 					return err
 				}
@@ -293,7 +294,7 @@ func TestServerStream(t *testing.T) {
 		brokerMock.EXPECT().
 			StreamServerConn(gomock.All(), gomock.All()).
 			DoAndReturn(func(req, st any) error {
-				tem := st.(dtos.BrokerServerDto)
+				tem := st.(broker.BrokerServerDto)
 				for range 10 {
 					if err := tem.Send([]byte("test-body")); err != nil {
 						log.Panicln(err)
@@ -355,7 +356,7 @@ func TestServerStream(t *testing.T) {
 		brokerMock.EXPECT().
 			StreamServerConn(gomock.All(), gomock.All()).
 			DoAndReturn(func(req, st any) error {
-				tem := st.(dtos.BrokerServerDto)
+				tem := st.(broker.BrokerServerDto)
 				for range 10 {
 					if err := tem.Send([]byte("test-body")); err != nil {
 						log.Panicln(err)
@@ -423,7 +424,7 @@ func TestBidirectionalStream(t *testing.T) {
 		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
 			DoAndReturn(func(st any) error {
-				tem := st.(dtos.BrokerBidirectionalDto)
+				tem := st.(broker.BrokerBidirectionalDto)
 				go func() {
 					for {
 						resp, err := tem.Recv()
@@ -512,7 +513,7 @@ func TestBidirectionalStream(t *testing.T) {
 		brokerMock.EXPECT().
 			StreamBiConn(gomock.All()).
 			DoAndReturn(func(st any) error {
-				tem := st.(dtos.BrokerBidirectionalDto)
+				tem := st.(broker.BrokerBidirectionalDto)
 				go func() {
 					for {
 						resp, err := tem.Recv()
