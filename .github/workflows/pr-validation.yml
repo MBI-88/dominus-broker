@@ -35,13 +35,15 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          PKG_LIST=$(go list ./... \
-            | grep -vE '(/config($|/))|(/cmd($|/))|(/mocks($|/))|(/internal/boostrap($|/))')
+          PKG_LIST=$(go list ./internal/... | grep -vE '/boostrap$')
+          TEST_LIST=$(go list ./tests/...)
 
-          PACKAGES=$(echo "$PKG_LIST" | tr '\n' ' ')
-          COVERPKG=$(echo "$PKG_LIST" | tr '\n' ',' | sed 's/,$//')
+          ALL_PKGS=$(printf "%s\n%s\n" "$PKG_LIST" "$TEST_LIST")
 
-          go test -race -count=1 $PACKAGES \
+          PACKAGES=$(echo "$ALL_PKGS" | tr '\n' ' ')
+          COVERPKG=$(echo "$ALL_PKGS" | tr '\n' ',' | sed 's/,$//')
+
+          go test -race -count=1 ./... \
             -coverprofile=coverage.out \
             -coverpkg=$COVERPKG
 
