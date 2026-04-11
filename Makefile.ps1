@@ -174,14 +174,14 @@ function Get-CoverageProfilePath {
 }
 
 # Build -coverpkg as explicit import paths (go list). Excludes: cmd/, config/, mocks/
-# (not listed), and internal/boostrap/ (bootstrap wiring, not unit-tested here).
+# (not listed), and internal/bootstrap/ (bootstrap wiring, not unit-tested here).
 function Get-CoveragePkgArg {
     $internalLines = & go list ./internal/...
     Assert-LastExitCode 'go list ./internal/...'
     $internalPkgs = foreach ($line in $internalLines) {
         $t = [string]$line.Trim()
         if ($t -eq '') { continue }
-        if ($t -match '[/\\]boostrap$') { continue }
+        if ($t -match '[/\\]bootstrap$') { continue }
         $t
     }
     $testLines = & go list ./tests/...
