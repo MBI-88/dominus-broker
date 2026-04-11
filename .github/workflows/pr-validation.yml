@@ -35,7 +35,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          PACKAGES=$(go list ./... | grep -vE /cmd|/mocks|/internal/boostrap)
+          PACKAGES=$(go list -f '{{if not (or (contains .ImportPath "/cmd/") (contains .ImportPath "/mocks/"))}}{{.ImportPath}} {{end}}' ./...)
 
           go test -race -count=1 $PAGKAGES \
             -covermode=atomic \
