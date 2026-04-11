@@ -35,14 +35,27 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          go test -race -count=1 ./tests/... \
+          PACKAGES=$(go list ./... | grep -vE /cmd|/mocks|/internal/boostrap)
+
+          go test -race -count=1 $PAGKAGES \
             -covermode=atomic \
             -coverprofile=coverage.out
 
       - name: Calculate coverage
         id: coverage
         run: |
-          TOTAL=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          if [ ! -f coverage.out ]; then
+            echo "❌ coverage.out not found"
+            exit 1
+          fi
+
+          TOTAL=$(go tool cover -func=coverage.out | awk '/^total:/ {print $3}' | tr -d '%')
+
+          if [ -z "$TOTAL" ]; then
+            echo "❌ Failed to extract coverage"
+            go tool cover -func=coverage.out
+            exit 1
+          fi
 
           echo "Total coverage: $TOTAL%"
           echo "coverage=$TOTAL" >> $GITHUB_OUTPUT
