@@ -35,7 +35,9 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          PACKAGES=$(go list ./... | grep -vE /cmd | /mocks | /internal/boostrap)
+          PACKAGES=$(go list ./... | grep -vE '(/cmd($|/))|(/mocks($|/))|(/bootstrap($|/))')
+
+          echo "$PACKAGES"
 
           go test -race -count=1 $PAGKAGES \
             -covermode=atomic \
