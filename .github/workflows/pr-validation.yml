@@ -34,18 +34,7 @@ jobs:
         run: go mod tidy
 
       - name: Run tests with coverage
-        run: |
-          PKG_LIST=$(go list ./internal/... | grep -vE '/boostrap$')
-          TEST_LIST=$(go list ./tests/...)
-
-          ALL_PKGS=$(printf "%s\n%s\n" "$PKG_LIST" "$TEST_LIST")
-
-          PACKAGES=$(echo "$ALL_PKGS" | tr '\n' ' ')
-          COVERPKG=$(echo "$ALL_PKGS" | tr '\n' ',' | sed 's/,$//')
-
-          go test -race -count=1 ./... \
-            -coverprofile=coverage.out \
-            -coverpkg=$COVERPKG
+        run: pwsh ./Makefile.ps1 -Target test-cover
 
       - name: Calculate coverage
         id: coverage
