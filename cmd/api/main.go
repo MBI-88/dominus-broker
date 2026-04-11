@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dominus-broker/internal/bootstrap"
+	"dominus-broker/internal/bootstraps"
 
 	"flag"
 	"fmt"
@@ -43,5 +43,5 @@ func init() {
 func main() {
 	//Receives commands from cli
 	flag.Parse()
-	bootstrap.RunApp(mode, showBanner, banner)
+	bootstraps.RunApp(mode, showBanner, banner)
 }
