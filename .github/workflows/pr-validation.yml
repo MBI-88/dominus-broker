@@ -35,13 +35,15 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          PACKAGES=$(go list ./... \
-            | grep -vE '(/config($|/))|(/cmd($|/))|(/mocks($|/))|(/internal/boostrap($|/))' \
-            | tr '\n' ' ')
+          PKG_LIST=$(go list ./... \
+            | grep -vE '(/config($|/))|(/cmd($|/))|(/mocks($|/))|(/internal/boostrap($|/))')
+
+          PACKAGES=$(echo "$PKG_LIST" | tr '\n' ' ')
+          COVERPKG=$(echo "$PKG_LIST" | tr '\n' ',' | sed 's/,$//')
 
           go test -race -count=1 $PACKAGES \
-            -covermode=atomic \
-            -coverprofile=coverage.out
+            -coverprofile=coverage.out \
+            -coverpkg=$COVERPKG
 
       - name: Calculate coverage
         id: coverage
