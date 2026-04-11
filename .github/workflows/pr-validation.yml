@@ -88,14 +88,8 @@ jobs:
               body
             });
 
-      - name: Run go fmt
-        run: go fmt ./...
+      - name: Validate golang format
+        run: pwsh ./Makefile.ps1 -Target fmt
 
-      - name: Run go vet
+      - name: Check static code
         run: go vet ./...
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          args: --timeout=5m
