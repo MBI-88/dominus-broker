@@ -56,21 +56,21 @@ repos:
     hooks:
       - id: terraform_init
         name: terraform init
-        entry: powershell -NoProfile -Command "Set-Location terraform; terraform init"
+        entry: pwsh -NoProfile -Command "Set-Location terraform; terraform init"
         language: system
         pass_filenames: false
         files: ^terraform/
 
       - id: terraform_fmt
         name: terraform fmt
-        entry: powershell -NoProfile -Command "Set-Location terraform; terraform fmt -recursive"
+        entry: pwsh -NoProfile -Command "Set-Location terraform; terraform fmt -recursive"
         language: system
         pass_filenames: false
         files: ^terraform/
 
       - id: terraform_validate
         name: terraform validate
-        entry: powershell -NoProfile -Command "Set-Location terraform; terraform validate"
+        entry: pwsh -NoProfile -Command "Set-Location terraform; terraform validate"
         language: system
         pass_filenames: false
         files: ^terraform/
