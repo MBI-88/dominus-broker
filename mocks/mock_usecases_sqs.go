@@ -11,39 +11,39 @@ package mocks
 
 import (
 	context "context"
-	dtos "dominus-broker/internal/application/usecases/sqs"
+	sqs "dominus-broker/internal/application/usecases/sqs"
 	entities "dominus-broker/internal/domain/entities"
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockSQS is a mock of SQS interface.
-type MockSQS struct {
+// MockSqs is a mock of Sqs interface.
+type MockSqs struct {
 	ctrl     *gomock.Controller
-	recorder *MockSQSMockRecorder
+	recorder *MockSqsMockRecorder
 	isgomock struct{}
 }
 
-// MockSQSMockRecorder is the mock recorder for MockSQS.
-type MockSQSMockRecorder struct {
-	mock *MockSQS
+// MockSqsMockRecorder is the mock recorder for MockSqs.
+type MockSqsMockRecorder struct {
+	mock *MockSqs
 }
 
-// NewMockSQS creates a new mock instance.
-func NewMockSQS(ctrl *gomock.Controller) *MockSQS {
-	mock := &MockSQS{ctrl: ctrl}
-	mock.recorder = &MockSQSMockRecorder{mock}
+// NewMockSqs creates a new mock instance.
+func NewMockSqs(ctrl *gomock.Controller) *MockSqs {
+	mock := &MockSqs{ctrl: ctrl}
+	mock.recorder = &MockSqsMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockSQS) EXPECT() *MockSQSMockRecorder {
+func (m *MockSqs) EXPECT() *MockSqsMockRecorder {
 	return m.recorder
 }
 
 // Ack mocks base method.
-func (m *MockSQS) Ack(ctx context.Context, ms dtos.ConsumerDto) error {
+func (m *MockSqs) Ack(ctx context.Context, ms sqs.ConsumerDto) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Ack", ctx, ms)
 	ret0, _ := ret[0].(error)
@@ -51,13 +51,13 @@ func (m *MockSQS) Ack(ctx context.Context, ms dtos.ConsumerDto) error {
 }
 
 // Ack indicates an expected call of Ack.
-func (mr *MockSQSMockRecorder) Ack(ctx, ms any) *gomock.Call {
+func (mr *MockSqsMockRecorder) Ack(ctx, ms any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ack", reflect.TypeOf((*MockSQS)(nil).Ack), ctx, ms)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ack", reflect.TypeOf((*MockSqs)(nil).Ack), ctx, ms)
 }
 
 // Consumer mocks base method.
-func (m *MockSQS) Consumer(ctx context.Context, ms dtos.ConsumerDto) (*entities.Message, error) {
+func (m *MockSqs) Consumer(ctx context.Context, ms sqs.ConsumerDto) (*entities.Message, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Consumer", ctx, ms)
 	ret0, _ := ret[0].(*entities.Message)
@@ -66,13 +66,13 @@ func (m *MockSQS) Consumer(ctx context.Context, ms dtos.ConsumerDto) (*entities.
 }
 
 // Consumer indicates an expected call of Consumer.
-func (mr *MockSQSMockRecorder) Consumer(ctx, ms any) *gomock.Call {
+func (mr *MockSqsMockRecorder) Consumer(ctx, ms any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consumer", reflect.TypeOf((*MockSQS)(nil).Consumer), ctx, ms)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consumer", reflect.TypeOf((*MockSqs)(nil).Consumer), ctx, ms)
 }
 
 // Producer mocks base method.
-func (m *MockSQS) Producer(ctx context.Context, ms dtos.ProducerDto) error {
+func (m *MockSqs) Producer(ctx context.Context, ms sqs.ProducerDto) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Producer", ctx, ms)
 	ret0, _ := ret[0].(error)
@@ -80,7 +80,7 @@ func (m *MockSQS) Producer(ctx context.Context, ms dtos.ProducerDto) error {
 }
 
 // Producer indicates an expected call of Producer.
-func (mr *MockSQSMockRecorder) Producer(ctx, ms any) *gomock.Call {
+func (mr *MockSqsMockRecorder) Producer(ctx, ms any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Producer", reflect.TypeOf((*MockSQS)(nil).Producer), ctx, ms)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Producer", reflect.TypeOf((*MockSqs)(nil).Producer), ctx, ms)
 }

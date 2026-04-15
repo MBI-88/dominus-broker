@@ -7,7 +7,7 @@ import (
 	"dominus-broker/internal/domain/repositories"
 )
 
-type SQS interface {
+type Sqs interface {
 	Producer(ctx context.Context, ms ProducerDto) error
 	Consumer(ctx context.Context, ms ConsumerDto) (*entities.Message, error)
 	Ack(ctx context.Context, ms ConsumerDto) error
@@ -17,7 +17,7 @@ type sqs struct {
 	client repositories.MemoryClient
 }
 
-func NewSQS(client repositories.MemoryClient) SQS {
+func NewSQS(client repositories.MemoryClient) Sqs {
 	return &sqs{
 		client: client,
 	}

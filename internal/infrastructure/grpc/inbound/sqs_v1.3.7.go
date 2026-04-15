@@ -15,49 +15,51 @@ import (
 
 type sqsAPI struct {
 	pb.UnimplementedSqsAPIServer
-	q   sqs.SQS
+	q   sqs.Sqs
 	log event.Event
 }
 
-func NewSqsAPI(server *grpc.Server, q sqs.SQS, log event.Event) {
+func NewSqsAPI(server *grpc.Server, q sqs.Sqs, log event.Event) {
 	gsrv := &sqsAPI{log: log, q: q}
 	pb.RegisterSqsAPIServer(server, gsrv)
 }
 
 // Receives simple messages from client
 func (s *sqsAPI) Producer(ctx context.Context, ms *pb.ProducerRequest) (*pb.ProducerResponse, error) {
-	go s.log.WriteLog(ctx, enum.DEBUG, "sqsAPI.Producer", enum.REQUEST_OK)
+	s.log.WriteLog(ctx, enum.DEBUG, "sqsAPI.Producer", enum.REQUEST_OK)
 
 	if len(ms.GetPayload()) == 0 {
-		go s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Producer.GetPayload", enum.INVALID_PAYLOAD)
+		s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Producer.GetPayload", enum.INVALID_PAYLOAD)
 		return nil, status.Error(codes.OutOfRange, enum.INVALID_PAYLOAD)
 	}
 
 	if err := s.q.Producer(ctx, ms); err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Producer.Producer", err.Error())
+		s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Producer.Producer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
+
 	return &pb.ProducerResponse{Status: 0}, nil
 }
 
 func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
-	go s.log.WriteLog(ctx, enum.DEBUG, "sqsAPI.Consumer", enum.REQUEST_OK)
+	s.log.WriteLog(ctx, enum.DEBUG, "sqsAPI.Consumer", enum.REQUEST_OK)
 
 	if ms.GetGroupId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Consumer.GetGroupId", enum.GROUP_ID)
+		s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Consumer.GetGroupId", enum.GROUP_ID)
 		return nil, status.Error(codes.NotFound, enum.GROUP_ID)
 	}
 
 	if ms.GetWorkerId() == "" {
-		go s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Consumer.GetWorkerId", enum.WORKER_ID)
+		s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Consumer.GetWorkerId", enum.WORKER_ID)
 		return nil, status.Error(codes.NotFound, enum.WORKER_ID)
 	}
 
 	response, err := s.q.Consumer(ctx, ms)
 	if err != nil {
-		go s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Consumer.Consumer", err.Error())
+		s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Consumer.Consumer", err.Error())
 		return nil, status.Error(codes.Aborted, err.Error())
 	}
+
 	return &pb.ConsumerResponse{
 		MessageId: response.GetMessageId(),
 		Message:   response.GetMessage(),
@@ -66,7 +68,7 @@ func (s *sqsAPI) Consumer(ctx context.Context, ms *pb.ConsumerRequest) (*pb.Cons
 }
 
 func (s *sqsAPI) Ack(ctx context.Context, ms *pb.ConsumerRequest) (*pb.ConsumerResponse, error) {
-	go s.log.WriteLog(ctx, enum.DEBUG, "sqsAPI.Ack", enum.REQUEST_OK)
+	s.log.WriteLog(ctx, enum.DEBUG, "sqsAPI.Ack", enum.REQUEST_OK)
 
 	if ms.GetMessageId() == "" {
 		s.log.WriteLog(ctx, enum.ERROR, "sqsAPI.Ack.GetMessageId", enum.INVALID_ID)

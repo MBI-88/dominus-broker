@@ -43,7 +43,7 @@ func TestProducer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		sqsMock.EXPECT().
 			Producer(gomock.All(), gomock.All()).
@@ -85,7 +85,7 @@ func TestProducer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -119,7 +119,7 @@ func TestProducer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		sqsMock.EXPECT().
 			Producer(gomock.All(), gomock.All()).
@@ -161,7 +161,7 @@ func TestConsumer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		wantID := "1730000000000-0"
 		sqsMock.EXPECT().
@@ -216,7 +216,7 @@ func TestConsumer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -252,7 +252,7 @@ func TestConsumer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -287,7 +287,7 @@ func TestConsumer(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -329,7 +329,7 @@ func TestAck(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -377,7 +377,7 @@ func TestAck(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -414,7 +414,7 @@ func TestAck(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -451,7 +451,7 @@ func TestAck(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
@@ -487,7 +487,7 @@ func TestAck(t *testing.T) {
 		lis := bufconn.Listen(buffSize)
 		ctrl := gomock.NewController(t)
 		evnetMock := mocks.NewMockEvent(ctrl)
-		sqsMock := mocks.NewMockSQS(ctrl)
+		sqsMock := mocks.NewMockSqs(ctrl)
 
 		evnetMock.EXPECT().
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).

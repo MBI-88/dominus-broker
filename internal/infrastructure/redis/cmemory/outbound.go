@@ -103,7 +103,7 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 	}
 
 	entity := entities.NewMessage()
-	if !entity.SetMessageId(streamMsg.ID) {
+	if !entity.SetMessageId(data.MessageId) {
 		return nil, fmt.Errorf("memory.invalid messageID format")
 	}
 

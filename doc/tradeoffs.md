@@ -10,7 +10,7 @@ This document captures deliberate choices, known limitations, and engineering tr
 |-----------|---------|------|
 | **`internal/` + `tests/...` packages** | Production code cannot be imported by other modules; tests stay as first-class packages with clear `dominus-broker/tests/...` imports. | Extra path depth; no `_test.go` next to handlers (must open two trees when editing). |
 | **Thin domain (`entities`, `repositories` interfaces)** | Swappable Redis / gRPC adapters; mocks in `mocks/`. | More boilerplate and `mockgen` churn when interfaces change. |
-| **Application use cases as facades** | Single place for orchestration (broker streams, SQS-like flows). | Complex stream code (channels, defers) is harder to follow than a single linear handler. |
+| **Application use cases as facades** | Single place for orchestration (broker streams, Sqs-like flows). | Complex stream code (channels, defers) is harder to follow than a single linear handler. |
 
 ---
 
@@ -28,7 +28,7 @@ This document captures deliberate choices, known limitations, and engineering tr
 
 | Trade-off | Benefit | Cost |
 |-----------|---------|------|
-| **Redis Streams (`cmemory`) instead of AWS SQS** | Single deployment artifact; predictable latency in owned infra. | Not SQS-semantics-complete; scaling and durability are Redis-cluster concerns, not Amazon’s. |
+| **Redis Streams (`cmemory`) instead of AWS SQS** | Single deployment artifact; predictable latency in owned infra. | Not Sqs-semantics-complete; scaling and durability are Redis-cluster concerns, not Amazon's. |
 | **Separate DB indices (`MemoryDB`, `CheckerDB`)** | Logical separation of queue vs idempotency keys. | Two pools/config knobs; operational mistakes (wrong DB) are harder to spot. |
 | **Unary idempotency: `EXISTS` then async `SET NX`** | Fast happy path; handler proceeds immediately after spawn. | **Logical race**: concurrent duplicate keys can both pass before either `SET NX` completes (see **[grpc-security.md](grpc-security.md)**). Stronger deduplication needs an atomic reserve (e.g. synchronous `SET NX` before handler). |
 
