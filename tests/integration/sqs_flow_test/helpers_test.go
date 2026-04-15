@@ -27,7 +27,7 @@ func bufDialer(lis *bufconn.Listener) func(context.Context, string) (net.Conn, e
 	}
 }
 
-func newMemoryClient(t *testing.T, s *miniredis.Miniredis, streamID string, lg event.Event) repositories.MemoryClient {
+func newMemoryClient(t *testing.T, s *miniredis.Miniredis, streamID string, _ event.Event) repositories.MemoryClient {
 	t.Helper()
 	host, portStr, err := net.SplitHostPort(s.Addr())
 	if err != nil {

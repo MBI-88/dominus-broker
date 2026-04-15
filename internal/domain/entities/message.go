@@ -8,15 +8,15 @@ import (
 )
 
 type Message struct {
-	Message   []byte    `json:"message"`
-	MeesageId string    `json:"message_id"`
-	CreatedAt time.Time `json:"created_at"`
+	Message   []byte
+	MessageId string
+	CreatedAt time.Time
 }
 
 func NewMessageWithID(message []byte) *Message {
 	return &Message{
 		Message:   message,
-		MeesageId: fmt.Sprintf("%d-0", time.Now().UnixMilli()),
+		MessageId: fmt.Sprintf("%d-0", time.Now().UnixMilli()),
 		CreatedAt: time.Now(),
 	}
 }
@@ -36,12 +36,12 @@ func (q *Message) SetMessageId(id string) bool {
 	if !q.checkValidFormatID(id) {
 		return false
 	}
-	q.MeesageId = id
+	q.MessageId = id
 	return true
 }
 
 func (q *Message) GetMessageId() string {
-	return q.MeesageId
+	return q.MessageId
 }
 
 func (q *Message) GetCreatedAt() time.Time {

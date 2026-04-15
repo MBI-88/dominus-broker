@@ -96,15 +96,24 @@ func TestSendMessage(t *testing.T) {
 		if !ok {
 			t.Fatalf("missing %q field in stream values: %v", enum.PAYLOAD, entries[0].Values)
 		}
-		var got entities.Message
+		var got cmemory.MessageDto
 		if err := jsoniter.Unmarshal([]byte(raw), &got); err != nil {
 			t.Fatalf("Unmarshal payload: %v", err)
 		}
-		if string(got.GetMessage()) != "hello-redis" {
-			t.Fatalf("message body: got %q", got.GetMessage())
+
+		entity := entities.NewMessage()
+		entity.SetCreateAt(got.CreatedAt)
+		entity.SetMessage(got.Message)
+
+		if !entity.SetMessageId(got.MessageId) {
+			t.Fatalf("invalid format id %s", got.MessageId)
 		}
-		if got.GetMessageId() != "1-0" {
-			t.Fatalf("message id: got %q", got.GetMessageId())
+
+		if string(entity.GetMessage()) != "hello-redis" {
+			t.Fatalf("message body: got %q", entity.GetMessage())
+		}
+		if entity.GetMessageId() != "1-0" {
+			t.Fatalf("message id: got %q", entity.GetMessageId())
 		}
 	})
 
