@@ -9,7 +9,7 @@ Go test packages live under **`tests/...`** so they import **`internal/...`** as
 | Area | Path (example) | Typical focus |
 |------|----------------|----------------|
 | Broker use cases | `tests/cases/application/use_cases/broker_test/` | `broker_test.go` (`NewBroker`, `Broker` interface); `StreamClientConn` / `StreamServerConn` / `StreamBiConn` in dedicated `*_test.go` files with mocks |
-| SQS use cases | `tests/cases/application/use_cases/sqs_test/` | `sqs_test.go` (`NewSQS`, `SQS` interface); Producer / Consumer / Ack in dedicated `*_test.go` files with `MockMemoryClient`; context parameter assertions; payload and message-ID assertions; invalid Ack IDs without calling Redis |
+| Sqs use cases | `tests/cases/application/use_cases/sqs_test/` | `sqs_test.go` (`NewSQS`, `Sqs` interface); Producer / Consumer / Ack in dedicated `*_test.go` files with `MockMemoryClient`; context parameter assertions; payload and message-ID assertions; invalid Ack IDs without calling Redis |
 | gRPC inbound | `tests/cases/infrastructure/grpc/inbound_test/` | `BrokerAPI`, `SqsAPI` handlers with bufconn / mocks; SqsAPI Ack invalid-ID path uses real `sqs.NewSQS` + mock client |
 | gRPC middleware | `tests/cases/infrastructure/grpc/middleware_test/` | `ApiToken`, interceptors, logging |
 | gRPC mappers | `tests/cases/infrastructure/grpc/mappers_test/` | DTO wrappers around streams |

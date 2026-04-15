@@ -31,16 +31,19 @@ func (s *brokerAPI) ClientStream(stream pb.BrokerAPI_ClientStreamServer) error {
 	s.log.WriteLog(stream.Context(), enum.DEBUG, "brokerAPI.ClientStream", enum.REQUEST_OK)
 	ctx := mappers.NewClientStreamContext(stream)
 	err := s.br.StreamClientConn(ctx)
+
 	if err == io.EOF {
 		s.log.WriteLog(stream.Context(), enum.DEBUG, "brokerAPI.ClientStream.EOF", err.Error())
 		return stream.SendAndClose(&pb.StreamResponseMessage{
 			Status: int64(codes.OK),
 		})
 	}
+
 	if err != nil {
 		s.log.WriteLog(stream.Context(), enum.ERROR, "brokerAPI.ClientStream.StreamClientConn", err.Error())
 		return status.Error(codes.Aborted, err.Error())
 	}
+
 	return stream.SendAndClose(&pb.StreamResponseMessage{
 		Status: int64(codes.OK),
 	})

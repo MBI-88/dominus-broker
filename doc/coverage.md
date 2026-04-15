@@ -78,13 +78,13 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 | Area | Coverage notes |
 |------|----------------|
 | **Broker use cases** | `StreamClientConn`, `StreamServerConn`, `StreamBiConn`, `NewBroker` — **100%** |
-| **SQS use cases** | `Producer`, `Consumer`, `Ack`, `NewSQS` — **100%** |
+| **Sqs use cases** | `Producer`, `Consumer`, `Ack`, `NewSqs` — **100%** |
 | **Domain `Message`** | `NewMessageWithID`, `NewMessage`, getters/setters, `checkValidFormatID` — **100%** |
 | **gRPC mappers** | All listed methods — **100%** |
 | **gRPC interceptors** | `NewInterceptor`, `UnaryAuthInterceptor`, `StreamAuthInterceptor` — **100%** |
 | **gRPC middleware** | `ApiToken`, `UnaryLog`, `StreamLog`, `LogErrors`, `NewMiddleware`, **`IdPotency`** — **100%** (last full run) |
 | **gRPC inbound broker** | `ClientStream`, `ServerStream`, `BidirectionalStream`, `NewBrokerAPI` — **100%** |
-| **gRPC inbound SQS** | **100%** on listed handlers |
+| **gRPC inbound Sqs** | **100%** on listed handlers |
 | **gRPC outbound** | **`ClientStream` — 78.8%**, **`ServerStream` — 90.6%**, **`BidirectionalStream` — 74.4%** (retry / error branches partially hit) |
 | **Redis `cchecker`** | **`SaveConsumer` / `CheckConsumer` — 100%**; **`NewCheckerClient` — 71.4%** (e.g. TLS branch not hit) |
 | **Redis `cmemory`** | **`AckMessage` / `Group` — 100%**; **`GetMessage` — 90.9%**; **`SendMessage` — 83.3%**; **`NewMemoryClient` — 71.4%** |
