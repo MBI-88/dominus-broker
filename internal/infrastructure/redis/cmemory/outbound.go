@@ -54,7 +54,11 @@ func NewMemoryClient(
 }
 
 func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
-	data, err := jsoniter.Marshal(q)
+	data, err := jsoniter.Marshal(&MessageDto{
+		Message:   q.GetMessage(),
+		MessageId: q.GetMessageId(),
+		CreatedAt: q.GetCreatedAt(),
+	})
 	if err != nil {
 		return err
 	}
@@ -93,16 +97,19 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 	streamMsg := response[0].Messages[0]
 	message := streamMsg.Values[enum.PAYLOAD].(string)
 
-	var q entities.Message
-	if err := jsoniter.Unmarshal([]byte(message), &q); err != nil {
+	var data MessageDto
+	if err := jsoniter.Unmarshal([]byte(message), &data); err != nil {
 		return nil, fmt.Errorf("memory.GetMessage %s", err)
 	}
 
-	if !q.SetMessageId(streamMsg.ID) {
+	entity := entities.NewMessage()
+	if !entity.SetMessageId(streamMsg.ID) {
 		return nil, fmt.Errorf("memory.invalid messageID format")
 	}
 
-	return &q, nil
+	entity.SetCreateAt(data.CreatedAt)
+	entity.SetMessage(data.Message)
+	return entity, nil
 }
 
 func (m *memory) Group(groupId string) error {

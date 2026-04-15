@@ -168,7 +168,7 @@ func TestConsumer(t *testing.T) {
 			Consumer(gomock.All(), gomock.All()).
 			Return(&entities.Message{
 				Message:   []byte("test-done"),
-				MeesageId: wantID,
+				MessageId: wantID,
 				CreatedAt: time.Now(),
 			}, nil).
 			AnyTimes()

@@ -16,7 +16,7 @@ func TestConsumer(t *testing.T) {
 	fixedAt := time.Date(2026, 3, 28, 12, 0, 0, 0, time.UTC)
 	wantMsg := &entities.Message{
 		Message:   []byte("consumer-ok-body"),
-		MeesageId: "1700000000123-0",
+		MessageId: "1700000000123-0",
 		CreatedAt: fixedAt,
 	}
 

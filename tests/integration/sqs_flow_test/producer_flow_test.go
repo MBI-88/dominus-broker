@@ -8,6 +8,7 @@ import (
 	"dominus-broker/internal/domain/entities"
 	"dominus-broker/internal/infrastructure/enum"
 	"dominus-broker/internal/infrastructure/grpc/inbound"
+	"dominus-broker/internal/infrastructure/redis/cmemory"
 	"dominus-broker/mocks"
 
 	pb "github.com/MBI-88/dominus-proto-definition/dominus"
@@ -77,16 +78,25 @@ func TestProducerFlow(t *testing.T) {
 		if !ok {
 			t.Fatalf("missing %q in values: %v", enum.PAYLOAD, entries[0].Values)
 		}
-		var got entities.Message
+		var got cmemory.MessageDto
 		if err := jsoniter.Unmarshal([]byte(raw), &got); err != nil {
 			t.Fatalf("Unmarshal payload: %v", err)
 		}
-		if string(got.GetMessage()) != string(want) {
-			t.Fatalf("message body: got %q want %q", got.GetMessage(), want)
+
+		entity := entities.NewMessage()
+		entity.SetCreateAt(got.CreatedAt)
+		entity.SetMessage(got.Message)
+
+		if !entity.SetMessageId(got.MessageId) {
+			t.Fatalf("invalid id %s", got.MessageId)
+		}
+
+		if string(entity.GetMessage()) != string(want) {
+			t.Fatalf("message body: got %q want %q", entity.GetMessage(), want)
 		}
 		streamEntryID := entries[0].ID
-		if got.GetMessageId() != streamEntryID {
-			t.Fatalf("message_id in JSON %q != Redis stream entry id %q", got.GetMessageId(), streamEntryID)
+		if entity.GetMessageId() != streamEntryID {
+			t.Fatalf("message_id in JSON %q != Redis stream entry id %q", entity.GetMessageId(), streamEntryID)
 		}
 	})
 

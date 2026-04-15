@@ -5,6 +5,7 @@ import (
 	"dominus-broker/internal/domain/entities"
 )
 
+// MemoryClient
 type MemoryClient interface {
 	SendMessage(ctx context.Context, q *entities.Message) error
 	AckMessage(ctx context.Context, messageId, groupId string) error
@@ -12,6 +13,7 @@ type MemoryClient interface {
 	Group(groupId string) error
 }
 
+// CheckerClient
 type CheckerClient interface {
 	SaveConsumer(ctx context.Context, key string) error
 	CheckConsumer(ctx context.Context, key string) bool
