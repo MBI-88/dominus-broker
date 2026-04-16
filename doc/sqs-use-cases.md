@@ -17,7 +17,7 @@ The **`SqsAPI`** service (protobuf package `dominus`) exposes **Producer**, **Co
 - **DTOs** — `internal/application/usecases/sqs/dto.go` (`ProducerDto`, `ConsumerDto`) for use-case inputs; protobuf requests implement these interfaces at the edge.
 - **Context**: All Sqs use case methods (`Producer`, `Consumer`, `Ack`) accept `context.Context` as the first parameter for cancellation and timeout control.
 
-Factory: **`sqs.NewSQS(client)`** in bootstrap; the same Redis client is configured with stream and consumer group from config (`Group` is created at startup).
+Factory: **`sqs.NewSqs(client)`** in bootstrap; the same Redis client is configured with stream and consumer group from config (`Group` is created at startup).
 
 ---
 
@@ -66,7 +66,7 @@ Domain rules live on **`entities.Message.SetMessageId`** / `checkValidFormatID`;
 ### Unit — gRPC inbound (`tests/cases/infrastructure/grpc/inbound_test/sqs_test.go`)
 
 - Handlers with **mocked** `sqs.Sqs` for wiring, empty-field validation, and error propagation.
-- **`Ack` with invalid `message_id`** uses the **real** `sqs.NewSQS(MockMemoryClient)` so application validation runs end-to-end through the handler (expects `Aborted` / `invalid messageId`).
+- **`Ack` with invalid `message_id`** uses the **real** `sqs.NewSqs(MockMemoryClient)` so application validation runs end-to-end through the handler (expects `Aborted` / `invalid messageId`).
 - Happy-path **Consumer** / **Ack** mocks use **stream-shaped** message IDs so they align with production contracts.
 
 ### Redis adapter (`tests/cases/infrastructure/redis/cmemory_test/`)
@@ -75,7 +75,7 @@ Domain rules live on **`entities.Message.SetMessageId`** / `checkValidFormatID`;
 
 ### Integration (`tests/integration/sqs_flow_test/`)
 
-- **bufconn** gRPC + **miniredis** + real **`cmemory`** and **`sqs.NewSQS`**: full Producer / Consumer / Ack flows, empty payload, Redis failures, empty IDs, multiple messages per group, and post-Ack pending checks (`XPendingExt`).
+- **bufconn** gRPC + **miniredis** + real **`cmemory`** and **`sqs.NewSqs`**: full Producer / Consumer / Ack flows, empty payload, Redis failures, empty IDs, multiple messages per group, and post-Ack pending checks (`XPendingExt`).
 
 ### Domain (`tests/cases/domain/entities_test/message_test.go`)
 
