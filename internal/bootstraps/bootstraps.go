@@ -127,7 +127,7 @@ func gRPServer(
 
 	// Create group if not exist
 	if err := qclient.Group(cf.RedisConfig.GroupID); err != nil {
-		panic(err)
+		logs.WriteLog(context.Background(), enum.ERROR, "qclient.Group", err.Error())
 	}
 
 	// Server
