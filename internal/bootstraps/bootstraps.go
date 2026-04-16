@@ -127,7 +127,7 @@ func gRPServer(
 
 	// Create group if not exist
 	if err := qclient.Group(cf.RedisConfig.GroupID); err != nil {
-		panic(err)
+		logs.WriteLog(context.Background(), enum.ERROR, "qclient.Group", err.Error())
 	}
 
 	// Server
@@ -143,7 +143,7 @@ func gRPServer(
 	// Listener
 	listener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", cf.GrpcConfig.Port))
 	if err != nil {
-		log.Println(err)
+		logs.WriteLog(context.Background(), enum.ERROR, "net.Listen", err.Error())
 		return nil
 	}
 	go func(sr *grpc.Server, list net.Listener, cancel context.CancelFunc) {
