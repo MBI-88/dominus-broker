@@ -38,7 +38,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func gRPServer(
+func gRPCServer(
 	cf *config.Config,
 	logs event.Event,
 	errC,
@@ -250,7 +250,7 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//*********Grpc server************
 	//********************************
 
-	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
+	srG := gRPCServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
 	if srG == nil {
 		panic("GRPC server error")
 	}
