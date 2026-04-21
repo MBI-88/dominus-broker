@@ -123,7 +123,7 @@ func gRPCServer(
 
 	// Interactors
 	broker := broker.NewBroker(bclient)
-	sqs := sqs.NewSQS(qclient)
+	sqs := sqs.NewSqs(qclient)
 
 	// Create group if not exist
 	if err := qclient.Group(cf.RedisConfig.GroupID); err != nil {

@@ -53,7 +53,7 @@ func TestConsumerFlow(t *testing.T) {
 		}
 		wantMessageID := streamEntries[0].ID
 
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -115,7 +115,7 @@ func TestConsumerFlow(t *testing.T) {
 			}
 		}
 
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -150,7 +150,7 @@ func TestConsumerFlow(t *testing.T) {
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 		mem := newMemoryClient(t, s, streamID, eventMock)
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -184,7 +184,7 @@ func TestConsumerFlow(t *testing.T) {
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 		mem := newMemoryClient(t, s, streamID, eventMock)
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -221,7 +221,7 @@ func TestConsumerFlow(t *testing.T) {
 		if err := mem.Group(groupID); err != nil {
 			t.Fatalf("Group: %v", err)
 		}
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
