@@ -22,12 +22,12 @@ const (
 	DOMAIN                     = "dominus.com"
 	ROUTER_CLIENT              = `{"loadBalancingConfig":[{"round_robin":{}}]}`
 	PROJECT_NAME               = "Dominus"
-	IDEM_POTENCY_HEADER        = "idem-pontency"
+	IDEM_POTENCY_HEADER        = "idem-potency"
 	IDEM_POTENCY_TAG           = "idempotency"
 	CONTENT_TYPE_TEXT          = "application/text"
 	PAYLOAD                    = "payload"
 	START_FROM_NEW_MESSAGE     = "$"
 	GROUP_ID                   = "empty group id"
 	WORKER_ID                  = "empty worker id"
-	ID_POTENCY_NOT_FOUND       = "id potency not found"
+	IDEM_POTENCY_NOT_FOUND     = "idempotency not found"
 )
