@@ -22,7 +22,7 @@ const (
 	DOMAIN                     = "dominus.com"
 	ROUTER_CLIENT              = `{"loadBalancingConfig":[{"round_robin":{}}]}`
 	PROJECT_NAME               = "Dominus"
-	IDEM_POTENCY_HEADER        = "idem-potency"
+	IDEM_POTENCY_HEADER        = "idempotency-header"
 	IDEM_POTENCY_TAG           = "idempotency"
 	CONTENT_TYPE_TEXT          = "application/text"
 	PAYLOAD                    = "payload"

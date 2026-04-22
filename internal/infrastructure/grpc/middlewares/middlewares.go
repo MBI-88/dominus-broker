@@ -94,8 +94,8 @@ func (m *middlewares) IdemPotency(ctx context.Context) (context.Context, error) 
 
 	key := md.Get(enum.IDEM_POTENCY_HEADER)[0]
 	if key == "" {
-		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdemPotency.Get", enum.NOT_FOUND)
-		return nil, status.Error(codes.DataLoss, enum.NOT_FOUND)
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdemPotency.Get", enum.IDEM_POTENCY_NOT_FOUND)
+		return nil, status.Error(codes.DataLoss, enum.IDEM_POTENCY_NOT_FOUND)
 	}
 
 	if ok := m.ch.CheckConsumer(ctx, key); ok {

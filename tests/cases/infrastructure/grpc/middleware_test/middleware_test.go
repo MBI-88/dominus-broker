@@ -329,8 +329,8 @@ func TestIdemPotency(t *testing.T) {
 		if !ok {
 			t.Fatalf("not a status error: %v", err)
 		}
-		if st.Code() != codes.DataLoss || st.Message() != enum.NOT_FOUND {
-			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.NOT_FOUND)
+		if st.Code() != codes.DataLoss || st.Message() != enum.IDEM_POTENCY_NOT_FOUND {
+			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.IDEM_POTENCY_NOT_FOUND)
 		}
 	})
 
