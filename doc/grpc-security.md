@@ -12,7 +12,7 @@ Server and client interceptors are wired in `internal/boostrap/boostrap.go`. Mid
 
 ## Idempotency (unary only)
 
-- **Server**: `auth.UnaryServerInterceptor(midGs.IdPotency)` — **not** applied to streaming RPCs in the current bootstrap chain.
+- **Server**: `auth.UnaryServerInterceptor(midGs.IdemPotency)` — **not** applied to streaming RPCs in the current bootstrap chain.
 - Uses header from `enum` (e.g. idempotency key) and `repositories.CheckerClient` (`cchecker`) to reject duplicates or persist keys.
 
 ### Concurrency semantics (important for operators and future changes)

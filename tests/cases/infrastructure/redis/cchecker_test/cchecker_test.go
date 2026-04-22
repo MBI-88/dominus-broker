@@ -48,7 +48,7 @@ func TestSaveConsumer(t *testing.T) {
 			t.Fatalf("SaveConsumer: %v", err)
 		}
 
-		redisKey := enum.ID_POTENCY_TAG + ":" + key
+		redisKey := enum.IDEM_POTENCY_TAG + ":" + key
 		if !s.DB(0).Exists(redisKey) {
 			t.Fatalf("miniredis: key %q should exist", redisKey)
 		}

@@ -60,7 +60,7 @@ func gRPCServer(
 		cf.RedisConfig.Password,
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
-		cf.RedisConfig.IdPotencyEx,
+		cf.RedisConfig.IdemPotencyEx,
 	)
 
 	midGs := gm.NewMiddleware(cf.GrpcConfig.ApiToken, logs, checker)
@@ -88,7 +88,7 @@ func gRPCServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
 			auth.UnaryServerInterceptor(midGs.ApiToken),
-			auth.UnaryServerInterceptor(midGs.IdPotency),
+			auth.UnaryServerInterceptor(midGs.IdemPotency),
 			metricserver.UnaryServerInterceptor(),
 			logging.UnaryServerInterceptor(midGs.LogErrors()),
 		),

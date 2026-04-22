@@ -22,8 +22,8 @@ const (
 	DOMAIN                     = "dominus.com"
 	ROUTER_CLIENT              = `{"loadBalancingConfig":[{"round_robin":{}}]}`
 	PROJECT_NAME               = "Dominus"
-	ID_POTENCY_HEADER          = "id-pontency"
-	ID_POTENCY_TAG             = "idepotency"
+	IDEM_POTENCY_HEADER        = "idem-pontency"
+	IDEM_POTENCY_TAG           = "idempotency"
 	CONTENT_TYPE_TEXT          = "application/text"
 	PAYLOAD                    = "payload"
 	START_FROM_NEW_MESSAGE     = "$"

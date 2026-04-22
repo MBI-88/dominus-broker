@@ -82,7 +82,7 @@ Open `coverage.html` in a browser for line-by-line highlighting.
 | **Domain `Message`** | `NewMessageWithID`, `NewMessage`, getters/setters, `checkValidFormatID` — **100%** |
 | **gRPC mappers** | All listed methods — **100%** |
 | **gRPC interceptors** | `NewInterceptor`, `UnaryAuthInterceptor`, `StreamAuthInterceptor` — **100%** |
-| **gRPC middleware** | `ApiToken`, `UnaryLog`, `StreamLog`, `LogErrors`, `NewMiddleware`, **`IdPotency`** — **100%** (last full run) |
+| **gRPC middleware** | `ApiToken`, `UnaryLog`, `StreamLog`, `LogErrors`, `NewMiddleware`, **`IdemPotency`** — **100%** (last full run) |
 | **gRPC inbound broker** | `ClientStream`, `ServerStream`, `BidirectionalStream`, `NewBrokerAPI` — **100%** |
 | **gRPC inbound Sqs** | **100%** on listed handlers |
 | **gRPC outbound** | **`ClientStream` — 78.8%**, **`ServerStream` — 90.6%**, **`BidirectionalStream` — 74.4%** (retry / error branches partially hit) |
@@ -162,7 +162,7 @@ dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:40:      
 dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:57:        UnaryLog                100.0%
 dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:62:        StreamLog               100.0%
 dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:67:        LogErrors               100.0%
-dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:85:        IdPotency               100.0%
+dominus-broker/internal/infrastructure/grpc/middlewares/middlewares.go:85:        IdemPotency             100.0%
 dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:22:          NewGrpClient            100.0%
 dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:29:          ClientStream            78.8%
 dominus-broker/internal/infrastructure/grpc/outbound/client_v1.3.7.go:79:          ServerStream            90.6%
