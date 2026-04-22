@@ -213,7 +213,7 @@ func TestLogErrors(t *testing.T) {
 	})
 }
 
-func TestIdPotency(t *testing.T) {
+func TestIdemPotency(t *testing.T) {
 	t.Run("ok schedules SaveConsumer for new key", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		lgMock := mocks.NewMockEvent(ctrl)
@@ -224,7 +224,7 @@ func TestIdPotency(t *testing.T) {
 		ctx := metadata.NewIncomingContext(baseCtx, metadata.Pairs(enum.IDEM_POTENCY_HEADER, "idem-key-1"))
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, gomock.Any(), enum.DEBUG_DESCRIPTION).
 			AnyTimes()
 
 		checkerMock.EXPECT().
@@ -279,8 +279,8 @@ func TestIdPotency(t *testing.T) {
 		if !ok {
 			t.Fatalf("not a status error: %v", err)
 		}
-		if st.Code() != codes.Aborted || st.Message() != enum.ID_POTENCY_NOT_FOUND {
-			t.Fatalf("got code=%v msg=%q want Aborted / %q", st.Code(), st.Message(), enum.ID_POTENCY_NOT_FOUND)
+		if st.Code() != codes.Aborted || st.Message() != enum.IDEM_POTENCY_NOT_FOUND {
+			t.Fatalf("got code=%v msg=%q want Aborted / %q", st.Code(), st.Message(), enum.IDEM_POTENCY_NOT_FOUND)
 		}
 	})
 
@@ -329,8 +329,8 @@ func TestIdPotency(t *testing.T) {
 		if !ok {
 			t.Fatalf("not a status error: %v", err)
 		}
-		if st.Code() != codes.DataLoss || st.Message() != enum.NOT_FOUND {
-			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.NOT_FOUND)
+		if st.Code() != codes.DataLoss || st.Message() != enum.IDEM_POTENCY_NOT_FOUND {
+			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.IDEM_POTENCY_NOT_FOUND)
 		}
 	})
 
@@ -343,7 +343,7 @@ func TestIdPotency(t *testing.T) {
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.IDEM_POTENCY_HEADER, "idem-fail-save"))
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION).
+			WriteLog(gomock.Any(), enum.DEBUG, gomock.Any(), enum.DEBUG_DESCRIPTION).
 			AnyTimes()
 
 		checkerMock.EXPECT().
@@ -357,12 +357,12 @@ func TestIdPotency(t *testing.T) {
 			Return(saveErr)
 
 		lgMock.EXPECT().
-			WriteLog(gomock.Any(), enum.ERROR, "middlewares.IdPotency.SaveConsumer", saveErr.Error()).
+			WriteLog(gomock.Any(), enum.ERROR, gomock.Any(), saveErr.Error()).
 			Do(func(context.Context, string, string, string) { close(logDone) })
 
 		out, err := mid.IdemPotency(ctx)
 		if err != nil {
-			t.Fatalf("IdPotency: %v", err)
+			t.Fatalf("IdemPotency: %v", err)
 		}
 		if out != ctx {
 			t.Fatalf("expected same context")
