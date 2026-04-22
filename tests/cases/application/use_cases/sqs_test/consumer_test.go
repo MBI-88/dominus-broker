@@ -74,7 +74,7 @@ func TestConsumer(t *testing.T) {
 			mockClient := mocks.NewMockMemoryClient(ctrl)
 
 			tt.setupMock(ctx, mockDto, mockClient)
-			service := sqs.NewSQS(mockClient)
+			service := sqs.NewSqs(mockClient)
 			got, err := service.Consumer(ctx, mockDto)
 
 			if tt.output == nil {

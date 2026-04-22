@@ -21,7 +21,7 @@ type Middleware interface {
 	LogErrors() logging.Logger
 	UnaryLog(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error)
 	StreamLog(srv any, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error
-	IdPotency(ctx context.Context) (context.Context, error)
+	IdemPotency(ctx context.Context) (context.Context, error)
 }
 
 type middlewares struct {
@@ -83,7 +83,7 @@ func (m *middlewares) LogErrors() logging.Logger {
 	})
 }
 
-func (m *middlewares) IdPotency(ctx context.Context) (context.Context, error) {
+func (m *middlewares) IdemPotency(ctx context.Context) (context.Context, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	m.logs.WriteLog(ctx, enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION)
 
@@ -92,7 +92,7 @@ func (m *middlewares) IdPotency(ctx context.Context) (context.Context, error) {
 		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
 	}
 
-	key := md.Get(enum.ID_POTENCY_HEADER)[0]
+	key := md.Get(enum.IDEM_POTENCY_HEADER)[0]
 	if key == "" {
 		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdPotency.Get", enum.NOT_FOUND)
 		return nil, status.Error(codes.DataLoss, enum.NOT_FOUND)

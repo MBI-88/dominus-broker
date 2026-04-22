@@ -533,7 +533,7 @@ func TestAck(t *testing.T) {
 			WriteLog(gomock.All(), gomock.All(), gomock.All(), gomock.All()).
 			AnyTimes()
 
-		svc := appsqs.NewSQS(memMock)
+		svc := appsqs.NewSqs(memMock)
 		server := grpc.NewServer([]grpc.ServerOption{}...)
 		inbound.NewSqsAPI(server, svc, evnetMock)
 		client := newSqsAPITestClient(t, lis)

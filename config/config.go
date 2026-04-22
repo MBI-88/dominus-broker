@@ -25,16 +25,16 @@ type CertConfig struct {
 }
 
 type RedisConfig struct {
-	Port        int64  `json:"port" mapstructure:"port"`
-	MemoryDB    int    `json:"memory_db" mapstructure:"memory_db"`
-	CheckerDB   int    `json:"checker_db" mapstructure:"checker_db"`
-	IdPotencyEx int    `json:"id_potency_ex" mapstructure:"id_potency_ex"`
-	Host        string `json:"host" mapstructure:"host"`
-	Password    string `json:"password" mapstructure:"password"`
-	Username    string `json:"username" mapstructure:"username"`
-	StreamID    string `json:"stream_id" mapstructure:"stream_id"`
-	GroupID     string `json:"group_id" mapstructure:"group_id"`
-	Tls         bool   `json:"tls" mapstructure:"tls"`
+	Port          int64  `json:"port" mapstructure:"port"`
+	MemoryDB      int    `json:"memory_db" mapstructure:"memory_db"`
+	CheckerDB     int    `json:"checker_db" mapstructure:"checker_db"`
+	IdemPotencyEx int    `json:"idem_potency_ex" mapstructure:"idem_potency_ex"`
+	Host          string `json:"host" mapstructure:"host"`
+	Password      string `json:"password" mapstructure:"password"`
+	Username      string `json:"username" mapstructure:"username"`
+	StreamID      string `json:"stream_id" mapstructure:"stream_id"`
+	GroupID       string `json:"group_id" mapstructure:"group_id"`
+	Tls           bool   `json:"tls" mapstructure:"tls"`
 }
 
 type LogConfig struct {

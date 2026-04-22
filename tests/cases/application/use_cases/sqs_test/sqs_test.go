@@ -13,7 +13,7 @@ func TestNewSQS(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	t.Cleanup(ctrl.Finish)
 	c := mocks.NewMockMemoryClient(ctrl)
-	s := sqs.NewSQS(c)
+	s := sqs.NewSqs(c)
 	if s == nil {
 		t.Fatal("NewSQS returned nil")
 	}

@@ -45,7 +45,7 @@ func TestAckFlow(t *testing.T) {
 			t.Fatalf("SendMessage: %v", err)
 		}
 
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -115,7 +115,7 @@ func TestAckFlow(t *testing.T) {
 			AnyTimes()
 
 		mem := newMemoryClient(t, s, streamID, eventMock)
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)

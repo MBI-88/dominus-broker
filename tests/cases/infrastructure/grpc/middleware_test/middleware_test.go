@@ -221,7 +221,7 @@ func TestIdPotency(t *testing.T) {
 		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
 
 		baseCtx := context.Background()
-		ctx := metadata.NewIncomingContext(baseCtx, metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-key-1"))
+		ctx := metadata.NewIncomingContext(baseCtx, metadata.Pairs(enum.IDEM_POTENCY_HEADER, "idem-key-1"))
 
 		lgMock.EXPECT().
 			WriteLog(gomock.Any(), enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION).
@@ -240,7 +240,7 @@ func TestIdPotency(t *testing.T) {
 			}).
 			Times(1)
 
-		out, err := mid.IdPotency(ctx)
+		out, err := mid.IdemPotency(ctx)
 		if err != nil {
 			t.Fatalf("IdPotency: %v", err)
 		}
@@ -261,7 +261,7 @@ func TestIdPotency(t *testing.T) {
 		checkerMock := mocks.NewMockCheckerClient(ctrl)
 		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
 
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-dup"))
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.IDEM_POTENCY_HEADER, "idem-dup"))
 
 		lgMock.EXPECT().
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
@@ -271,7 +271,7 @@ func TestIdPotency(t *testing.T) {
 			CheckConsumer(gomock.Any(), "idem-dup").
 			Return(true)
 
-		_, err := mid.IdPotency(ctx)
+		_, err := mid.IdemPotency(ctx)
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -296,7 +296,7 @@ func TestIdPotency(t *testing.T) {
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 
-		_, err := mid.IdPotency(ctx)
+		_, err := mid.IdemPotency(ctx)
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -315,13 +315,13 @@ func TestIdPotency(t *testing.T) {
 		checkerMock := mocks.NewMockCheckerClient(ctrl)
 		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
 
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, ""))
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.IDEM_POTENCY_HEADER, ""))
 
 		lgMock.EXPECT().
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 
-		_, err := mid.IdPotency(ctx)
+		_, err := mid.IdemPotency(ctx)
 		if err == nil {
 			t.Fatal("expected error")
 		}
@@ -340,7 +340,7 @@ func TestIdPotency(t *testing.T) {
 		checkerMock := mocks.NewMockCheckerClient(ctrl)
 		mid := middlewares.NewMiddleware("test-token", lgMock, checkerMock)
 
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.ID_POTENCY_HEADER, "idem-fail-save"))
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(enum.IDEM_POTENCY_HEADER, "idem-fail-save"))
 
 		lgMock.EXPECT().
 			WriteLog(gomock.Any(), enum.DEBUG, "middlewares.IdPotency", enum.DEBUG_DESCRIPTION).
@@ -360,7 +360,7 @@ func TestIdPotency(t *testing.T) {
 			WriteLog(gomock.Any(), enum.ERROR, "middlewares.IdPotency.SaveConsumer", saveErr.Error()).
 			Do(func(context.Context, string, string, string) { close(logDone) })
 
-		out, err := mid.IdPotency(ctx)
+		out, err := mid.IdemPotency(ctx)
 		if err != nil {
 			t.Fatalf("IdPotency: %v", err)
 		}

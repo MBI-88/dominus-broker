@@ -17,7 +17,7 @@ type sqs struct {
 	client repositories.MemoryClient
 }
 
-func NewSQS(client repositories.MemoryClient) Sqs {
+func NewSqs(client repositories.MemoryClient) Sqs {
 	return &sqs{
 		client: client,
 	}

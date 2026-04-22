@@ -52,7 +52,7 @@ func NewCheckerClient(
 }
 
 func (c *checker) SaveConsumer(ctx context.Context, key string) error {
-	if _, err := c.rdb.SetArgs(ctx, fmt.Sprintf("%s:%s", enum.ID_POTENCY_TAG, key), "", redis.SetArgs{
+	if _, err := c.rdb.SetArgs(ctx, fmt.Sprintf("%s:%s", enum.IDEM_POTENCY_TAG, key), "", redis.SetArgs{
 		Mode: "NX",
 		TTL:  time.Duration(c.exp) * time.Second,
 	}).Result(); err != nil {
@@ -62,7 +62,7 @@ func (c *checker) SaveConsumer(ctx context.Context, key string) error {
 }
 
 func (c *checker) CheckConsumer(ctx context.Context, key string) bool {
-	result, err := c.rdb.Exists(ctx, fmt.Sprintf("%s:%s", enum.ID_POTENCY_TAG, key)).Result()
+	result, err := c.rdb.Exists(ctx, fmt.Sprintf("%s:%s", enum.IDEM_POTENCY_TAG, key)).Result()
 	if err != nil {
 		return false
 	}

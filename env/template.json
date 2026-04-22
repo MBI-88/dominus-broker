@@ -21,7 +21,7 @@
         "password": "dominus",
         "tls": false,
         "username": "dominus",
-        "id_potency_ex": 10,
+        "idem_potency_ex": 10,
         "stream_id": "consumer",
         "group_id": "consumer-group"
     },

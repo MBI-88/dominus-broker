@@ -68,7 +68,7 @@ func TestAck(t *testing.T) {
 			mockClient := mocks.NewMockMemoryClient(ctrl)
 
 			tt.setupMock(mockDto, mockClient)
-			service := sqs.NewSQS(mockClient)
+			service := sqs.NewSqs(mockClient)
 			err := service.Ack(ctx, mockDto)
 
 			if tt.output == nil {

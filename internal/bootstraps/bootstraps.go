@@ -38,7 +38,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func gRPServer(
+func gRPCServer(
 	cf *config.Config,
 	logs event.Event,
 	errC,
@@ -60,7 +60,7 @@ func gRPServer(
 		cf.RedisConfig.Password,
 		cf.RedisConfig.Tls,
 		cf.RedisConfig.Username,
-		cf.RedisConfig.IdPotencyEx,
+		cf.RedisConfig.IdemPotencyEx,
 	)
 
 	midGs := gm.NewMiddleware(cf.GrpcConfig.ApiToken, logs, checker)
@@ -88,7 +88,7 @@ func gRPServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.ChainUnaryInterceptor(
 			auth.UnaryServerInterceptor(midGs.ApiToken),
-			auth.UnaryServerInterceptor(midGs.IdPotency),
+			auth.UnaryServerInterceptor(midGs.IdemPotency),
 			metricserver.UnaryServerInterceptor(),
 			logging.UnaryServerInterceptor(midGs.LogErrors()),
 		),
@@ -123,7 +123,7 @@ func gRPServer(
 
 	// Interactors
 	broker := broker.NewBroker(bclient)
-	sqs := sqs.NewSQS(qclient)
+	sqs := sqs.NewSqs(qclient)
 
 	// Create group if not exist
 	if err := qclient.Group(cf.RedisConfig.GroupID); err != nil {
@@ -250,7 +250,7 @@ func RunApp(mode, showBanner *bool, banner string) {
 	//*********Grpc server************
 	//********************************
 
-	srG := gRPServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
+	srG := gRPCServer(cf, lgs, errC, errK, errCa, cancel, metricserver, metricclient)
 	if srG == nil {
 		panic("GRPC server error")
 	}

@@ -78,7 +78,7 @@ func TestProducer(t *testing.T) {
 			mockClient := mocks.NewMockMemoryClient(ctrl)
 
 			tt.setupMock(t, mockDto, mockClient)
-			service := sqs.NewSQS(mockClient)
+			service := sqs.NewSqs(mockClient)
 			err := service.Producer(ctx, mockDto)
 
 			if tt.output == nil {

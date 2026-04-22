@@ -46,7 +46,7 @@ func TestProducerFlow(t *testing.T) {
 		mem := newMemoryClient(t, s, streamID, eventMock)
 		ctx := context.Background()
 
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -110,7 +110,7 @@ func TestProducerFlow(t *testing.T) {
 			AnyTimes()
 
 		mem := newMemoryClient(t, s, streamID, eventMock)
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
@@ -142,7 +142,7 @@ func TestProducerFlow(t *testing.T) {
 			AnyTimes()
 
 		mem := newMemoryClient(t, s, streamID, eventMock)
-		svc := sqs.NewSQS(mem)
+		svc := sqs.NewSqs(mem)
 		lis := bufconn.Listen(buffSize)
 		server := grpc.NewServer()
 		inbound.NewSqsAPI(server, svc, eventMock)
