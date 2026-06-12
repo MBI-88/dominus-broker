@@ -1,5 +1,0 @@
-{
-    "yaml.schemas": {
-        "kubernetes://schema/apps/v1%40deployment": "file:///d%3A/www.projects.com/master/dominus-project/k8s/dominus.yml"
-    }
-}

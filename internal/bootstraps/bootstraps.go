@@ -4,8 +4,12 @@ import (
 	"context"
 	"dominus-broker/config"
 
-	"dominus-broker/internal/application/usecases/broker"
-	"dominus-broker/internal/application/usecases/sqs"
+	"dominus-broker/internal/application/usecases/ack"
+	"dominus-broker/internal/application/usecases/consumer"
+	"dominus-broker/internal/application/usecases/producer"
+	streambidirectional "dominus-broker/internal/application/usecases/stream_bidirectional"
+	streamclient "dominus-broker/internal/application/usecases/stream_client"
+	streamserver "dominus-broker/internal/application/usecases/stream_server"
 	"dominus-broker/internal/infrastructure/enum"
 
 	"dominus-broker/internal/infrastructure/event"
@@ -122,8 +126,13 @@ func gRPCServer(
 	)
 
 	// Interactors
-	broker := broker.NewBroker(bclient)
-	sqs := sqs.NewSqs(qclient)
+	bidirectionalUseCase := streambidirectional.New(bclient)
+	clientUsecase := streamclient.New(bclient)
+	serverUsecase := streamserver.New(bclient)
+
+	ackUseCase := ack.New(qclient)
+	consumerUseCase := consumer.New(qclient)
+	producerUseCase := producer.New(qclient)
 
 	// Create group if not exist
 	if err := qclient.Group(cf.RedisConfig.GroupID); err != nil {
@@ -134,8 +143,20 @@ func gRPCServer(
 	server := grpc.NewServer(optsS...)
 
 	// Register APIs
-	gi.NewBrokerAPI(server, broker, logs)
-	gi.NewSqsAPI(server, sqs, logs)
+	gi.NewBrokerStream(
+		server,
+		clientUsecase,
+		serverUsecase,
+		bidirectionalUseCase,
+		logs,
+	)
+	gi.NewBrokerSqs(
+		server,
+		producerUseCase,
+		consumerUseCase,
+		ackUseCase,
+		logs,
+	)
 
 	// Reflecting server
 	reflection.Register(server)
