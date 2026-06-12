@@ -1,22 +1,20 @@
 # Broker streaming
 
-gRPC service **`BrokerAPI`** (protobuf package `dominus`) exposes three streaming RPCs. The server implementation lives in `internal/infrastructure/grpc/inbound/broker_v1.3.7.go`; business logic in `internal/application/usecases/broker/`.
+gRPC service **`BrokerStream`** (protobuf package `dominus`) exposes three streaming RPCs. The server implementation lives in `internal/infrastructure/grpc/inbound/` (gRPC handlers); business logic lives under `internal/application/usecases/` in the `stream_client`, `stream_server`, and `stream_bidirectional` packages.
 
 ## Layers
 
 | Layer | Path | Role |
 |--------|------|------|
-| Transport | `inbound/broker_v1.3.7.go` | Implements `BrokerAPIServer`, maps streams to DTOs |
+| Transport | `inbound/broker_stream.go` | Implements `BrokerAPIServer`, maps streams to DTOs |
 | Mappers | `internal/infrastructure/grpc/mappers/mappers.go` | Wraps gRPC streams as `Broker*Dto` interfaces |
-| Use cases | `internal/application/usecases/broker/*_service.go` | `StreamClientConn`, `StreamServerConn`, `StreamBiConn` |
-| Outbound client | `internal/infrastructure/grpc/outbound/client_v1.3.7.go` | `repositories.BrokerClient` — dials subscriber URLs |
-
-`broker.NewBroker(client)` receives the outbound `BrokerClient` created in `internal/boostrap/boostrap.go` with the same dial options as production (TLS or insecure, metrics, auth interceptor, compression).
+| Use cases | `internal/application/usecases/stream_client`, `.../stream_server`, `.../stream_bidirectional` | `StreamClient`, `StreamServer`, `StreamBidirectional` |
+| Outbound client | `internal/infrastructure/grpc/outbound/client_stream.go` | `repositories.BrokerClient` — dials subscriber URLs |
 
 ## Client stream (ingress client → this server → outbound to subscribers)
 
 1. Ingress receives a **client-streaming** RPC: many `StreamRequestMessage`, one `StreamResponseMessage` at close.
-2. `StreamClientConn` (`stream_client_conn.go`) reads the **first** message and takes `Subscribers` (URLs). Further messages only carry `Payload`.
+2. The client-stream use case reads the **first** message and takes `Subscribers` (URLs). Further messages only carry `Payload`.
 3. It starts `go client.ClientStream(subscribers, stream, ctx)` and forwards each payload on a `chan []byte`.
 4. Outbound opens one **client** stream per subscriber URL and sends the same payload shape (`Subscribers` + `Payload`) to each.
 
@@ -25,14 +23,14 @@ gRPC service **`BrokerAPI`** (protobuf package `dominus`) exposes three streamin
 ## Server stream
 
 1. Unary-style request: first `StreamRequestMessage` includes `Subscribers` and initial `Payload`.
-2. `StreamServerConn` (`stream_server_conn.go`) calls `ServerStream` on the outbound client for each URL, merges responses into one channel, and sends chunks to the ingress **server-stream** response.
-3. When all subscriber streams signal completion, the use case returns `fmt.Errorf("connection closed")`. The gRPC handler maps that to **`codes.Aborted`** with that message (see inbound code).
+2. The server-stream use case calls the outbound client's `ServerStream` per URL, merges responses into a channel (current implementation uses a buffered channel sized `total + int(total*2/3)`), and sends chunks to the ingress **server-stream** response.
+3. When the outbound indicates completion the use case returns an error (e.g. a formatted `connection closed` message). The gRPC handler maps that to **`codes.Aborted`** with that message (see inbound code).
 
 ## Bidirectional stream
 
 1. First message must include non-empty `Subscribers`.
-2. `StreamBiConn` (`stream_bi_conn.go`) runs outbound `BidirectionalStream`, pumps provider payloads from the ingress stream into `streamProv`, and forwards subscriber payloads back through `stream.Send`.
-3. Completion is driven by per-URL workers in `outbound/client_v1.3.7.go` and the shared `done` channel; the use case returns `"connection closed"` when all subscribers finish.
+2. The bidirectional use case runs the outbound `BidirectionalStream`, pumps provider payloads from the ingress stream into an unbuffered `streamProv`, and forwards subscriber payloads back through `stream.Send` using a buffered `streamSub` sized `total + int(total*2/3)`.
+3. Completion is driven by per-URL workers and a `done` signal; the use case returns an error when all subscribers finish and the outbound signals shutdown.
 
 **Concurrency note**: the outbound implementation must **not** hold the process-wide mutex across blocking `Recv`/`Send` calls, or fan-out deadlocks against echoing peers. State per URL is tracked in a small `endpoint` struct guarded by short critical sections only.
 
@@ -55,11 +53,11 @@ When the ingress `Recv` loop hits an error, it `close(streamProv)` then blocks o
 
 **Context cancellation**
 
-`StreamBiConn` calls `cancel()` when `stream.Send` to the client fails (and `defer cancel()` on exit). Workers observe `ctx` in their send `select` and in retry loops, so cancellation can unblock a blocked send path. Normal subscriber completion is usually driven by `Recv` returning `EOF` rather than by an explicit cancel before `close(streamSub)`.
+`StreamBidirectional` calls `cancel()` when `stream.Send` to the client fails (and `defer cancel()` on exit). Workers observe `ctx` in their send `select` and in retry loops, so cancellation can unblock a blocked send path. Normal subscriber completion is usually driven by `Recv` returning `EOF` rather than by an explicit cancel before `close(streamSub)`.
 
-### Channel lifecycle in `StreamBiConn` (`stream_bi_conn.go`)
+### Channel lifecycle in `StreamBidirectional` (`stream_bidirectional_service.go`)
 
-These channels coordinate the provider goroutine, the main loop, the error logger, and `BidirectionalStream` in `outbound/client_v1.3.7.go`.
+These channels coordinate the provider goroutine, the main loop, the error logger, and `BidirectionalStream` in `outbound/client_stream.go`.
 
 | Channel | Capacity | Who closes | Role |
 |---------|----------|------------|------|
@@ -69,9 +67,11 @@ These channels coordinate the provider goroutine, the main loop, the error logge
 | **`done`** | `len(subscribers)` | **`defer close(done)`** after allocation | One send per worker when the worker goroutine exits; main counts down to zero, then closes `streamSub` / `errMsg`. |
 | **`closed`** | unbuffered | **Provider goroutine only**, after `<-closed` | Handed to outbound as `tx`. Outbound sends **once** after `provMsg` is drained and workers have joined. The provider waits on `<-closed` so it does not exit before that handshake; then it **`close(closed)`**. |
 
-**Do not `defer close(closed)` at the start of `StreamBiConn`.** The main loop can return (`"connection closed"`) while the outbound goroutine has not yet executed `tx <- struct{}{}`. A top-level `defer close(closed)` would run on return and race the send → **panic: send on closed channel**. The `closed` channel is therefore closed **only** in the provider path, **after** the outbound’s single send has been received.
+**Do not `defer close(closed)` at the start of `StreamBidirectional`.** The main loop can return (`"connection closed"`) while the outbound goroutine has not yet executed `tx <- struct{}{}`. A top-level `defer close(closed)` would run on return and race the send → **panic: send on closed channel**. The `closed` channel is therefore closed **only** in the provider path, **after** the outbound’s single send has been received.
 
 **`defer close(done)`** is safe here: the main loop only returns after receiving exactly `len(subscribers)` values from `done`, so no worker should still send on `done` when the defer runs. Early returns before `BidirectionalStream` is started never write to `done`; closing an empty buffered channel is fine.
+
+**Implementation notes:** current use-case implementations in `internal/application/usecases/stream_*` follow these concrete patterns observed in code: explicit `len(subscribers)` checks returning errors when empty; `context.WithCancel` used to cancel provider-side loops when `stream.Send` fails; `stream`/`streamSub` buffers sized relative to `total` to reduce blocking; and a `closed` handshake channel used so the provider waits for the outbound to drain and acknowledge shutdown before exiting.
 
 ### Payload fan-out and shared `[]byte`
 

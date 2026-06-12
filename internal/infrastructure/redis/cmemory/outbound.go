@@ -69,14 +69,14 @@ func (m *memory) SendMessage(ctx context.Context, q *entities.Message) error {
 		},
 		ID: q.GetMessageId(),
 	}).Result(); err != nil {
-		return fmt.Errorf("memory.SendMessage %s", err)
+		return fmt.Errorf("cmemory.SendMessage %s", err)
 	}
 	return nil
 }
 
 func (m *memory) AckMessage(ctx context.Context, messageId, groupId string) error {
 	if err := m.rdb.XAck(ctx, m.streamID, groupId, messageId).Err(); err != nil {
-		return fmt.Errorf("memory.AckMessage %s", err)
+		return fmt.Errorf("cmemory.AckMessage %s", err)
 	}
 	return nil
 }
@@ -91,7 +91,7 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 	}).Result()
 
 	if err != nil {
-		return nil, fmt.Errorf("memory.GetMessage %s", err)
+		return nil, fmt.Errorf("cmemory.GetMessage %s", err)
 	}
 
 	streamMsg := response[0].Messages[0]
@@ -99,12 +99,12 @@ func (m *memory) GetMessage(ctx context.Context, workerId, groupId string) (*ent
 
 	var data MessageDto
 	if err := jsoniter.Unmarshal([]byte(message), &data); err != nil {
-		return nil, fmt.Errorf("memory.GetMessage %s", err)
+		return nil, fmt.Errorf("cmemory.GetMessage %s", err)
 	}
 
 	entity := entities.NewMessage()
 	if !entity.SetMessageId(data.MessageId) {
-		return nil, fmt.Errorf("memory.invalid messageID format")
+		return nil, fmt.Errorf("cmemory.invalid messageID format")
 	}
 
 	entity.SetCreateAt(data.CreatedAt)
