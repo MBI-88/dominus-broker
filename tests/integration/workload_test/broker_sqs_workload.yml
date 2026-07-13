@@ -1,39 +1,24 @@
-
+# ghz --config test.yaml localhost:5000
 
 call: SqsAPI.Producer
-
 proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-
-data:
-
+data: {"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 50
-
-total:
-
+total: 100
 insecure: true
 
 
 call: SqsAPI.Producer
-
 proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-
-data:
-
+data: {"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 100
-
-total:
-
+total: 150
 insecure: true
 
 
 call: SqsAPI.Producer
-
 proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-
-data:
-
+data: {"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 150
-
-total:
-
+total: 200
 insecure: true
