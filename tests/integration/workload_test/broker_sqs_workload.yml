@@ -1,0 +1,39 @@
+
+
+call: SqsAPI.Producer
+
+proto: ./../../../../dominus-proto-definition/proto/dominus.proto
+
+data:
+
+concurrency: 50
+
+total:
+
+insecure: true
+
+
+call: SqsAPI.Producer
+
+proto: ./../../../../dominus-proto-definition/proto/dominus.proto
+
+data:
+
+concurrency: 100
+
+total:
+
+insecure: true
+
+
+call: SqsAPI.Producer
+
+proto: ./../../../../dominus-proto-definition/proto/dominus.proto
+
+data:
+
+concurrency: 150
+
+total:
+
+insecure: true
