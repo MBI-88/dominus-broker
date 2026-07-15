@@ -8,7 +8,7 @@ dominus_server_container_ports = [
 ]
 
 dominus_server_container_cpu    = "4"
-dominus_server_container_memory = 1000
+dominus_server_container_memory = 2048
 
 
 grafana_server_container_ports = [
@@ -32,3 +32,6 @@ sidecar_server_container_ports = [{
   internal = 80,
   external = 80
 }]
+
+
+dominus_server_token = "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"

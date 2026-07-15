@@ -27,3 +27,5 @@
 *.tfstate
 *.info
 *.backup
+*.tfvars
+tfplan
