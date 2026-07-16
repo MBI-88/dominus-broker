@@ -4,9 +4,9 @@
 ############################# Total 1000 with 50 ops ###########################
 ################################################################################
 
-call: BrokerAPI.ClientStream
-proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-data: {"subscribers":["http://192.168.1.3:5001","http://192.168.1.3:5002","http://192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+call: dominus.BrokerAPI.ClientStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+data: {"subscribers":["192.168.1.3:5001","192.168.1.3:5002","192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 50
 total: 1000
 insecure: true
@@ -14,9 +14,9 @@ metadata:
   x-api-key: dominus-api-key-1233464687
 
 
-call: BrokerAPI.ServerStream
-proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-data: {"subscribers":["http://192.168.1.3:5001","http://192.168.1.3:5002","http://192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+call: dominus.BrokerAPI.ServerStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+data: {"subscribers":["192.168.1.3:5001","192.168.1.3:5002","192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 50
 total: 1000
 insecure: true
@@ -24,9 +24,9 @@ metadata:
   x-api-key: dominus-api-key-1233464687
 
 
-call: BrokerAPI.BidirectionalStream
-proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-data: {"subscribers":["http://192.168.1.3:5001","http://192.168.1.3:5002","http://192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+call: dominus.BrokerAPI.BidirectionalStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+data: {"subscribers":["192.168.1.3:5001","192.168.1.3:5002","192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 50
 total: 1000
 insecure: true
@@ -37,27 +37,27 @@ metadata:
 ############################### Total 5000 with 100 ops ########################################
 ################################################################################################
 
-call: BrokerAPI.ClientStream
-proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-data: {"subscribers":["http://192.168.1.3:5001","http://192.168.1.3:5002","http://192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+call: dominus.BrokerAPI.ClientStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+data: {"subscribers":["192.168.1.3:5001","192.168.1.3:5002","192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 100
 total: 5000
 insecure: true
 metadata:
   x-api-key: dominus-api-key-1233464687
 
-call: BrokerAPI.ServerStream
-proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-data: {"subscribers":["http://192.168.1.3:5001","http://192.168.1.3:5002","http://192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+call: dominus.BrokerAPI.ServerStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+data: {"subscribers":["192.168.1.3:5001","192.168.1.3:5002","192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 100
 total: 5000
 insecure: true
 metadata:
   x-api-key: dominus-api-key-1233464687
 
-call: BrokerAPI.BidirectionalStream
-proto: ./../../../../dominus-proto-definition/proto/dominus.proto
-data: {"subscribers":["http://192.168.1.3:5001","http://192.168.1.3:5002","http://192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+call: dominus.BrokerAPI.BidirectionalStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+data: {"subscribers":["192.168.1.3:5001","192.168.1.3:5002","192.168.1.3:5003"],"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
 concurrency: 100
 total: 5000
 insecure: true
