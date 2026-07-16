@@ -1,0 +1,34 @@
+call: dominus.BrokerAPI.ClientStream
+proto: ../dominus-proto-definition/proto/dominus.proto
+import-paths:
+  - ../dominus-proto-definition/proto
+host: localhost:5000
+
+data:
+  subscribers:
+    - 192.168.1.3:5001
+    - 192.168.1.3:5002
+    - 192.168.1.3:5003
+  payload: eyJpZCI6MSwicm9sZSI6InRlc3QifQ==
+
+metadata:
+  x-api-key: dominus-api-key-1233464687
+
+insecure: true
+async: true
+
+concurrency: 10
+connections: 5
+rps: 600
+load-schedule: const
+duration: 5m
+timeout: 60s
+keepalive: 30s
+
+stream-call-duration: 30s
+stream-call-count: 50
+stream-interval: 20ms
+stream-dynamic-messages: false
+
+skipFirst: 10
+cpus: 2
