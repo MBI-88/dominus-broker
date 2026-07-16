@@ -29,8 +29,12 @@ func NewGrpClient(opts []grpc.DialOption, lgs event.Event) repositories.BrokerCl
 func (g *clientStream) ClientStream(urls []string, msg <-chan []byte, ctx context.Context) {
 	arrayDoQuery := make([]func([]byte), 0, len(urls))
 	lock := new(sync.Mutex)
+
 	connect := func(url string) (pb.BrokerAPI_ClientStreamClient, error) {
-		conn, _ := grpc.NewClient(url, g.opts...)
+		conn, err := grpc.NewClient(url, g.opts...)
+		if err != nil {
+			return nil, err
+		}
 		c := pb.NewBrokerAPIClient(conn)
 		return c.ClientStream(ctx)
 	}
@@ -44,7 +48,7 @@ func (g *clientStream) ClientStream(urls []string, msg <-chan []byte, ctx contex
 			if err == nil {
 				lock.Lock()
 				err := stream.Send(&pb.StreamRequestMessage{
-					Subscribers: urls,
+					Subscribers: nil,
 					Payload:     payload})
 				lock.Unlock()
 				if err != nil {
@@ -79,35 +83,40 @@ func (g *clientStream) ClientStream(urls []string, msg <-chan []byte, ctx contex
 func (g *clientStream) ServerStream(urls []string, initalMsg []byte, msg chan<- []byte, ctx context.Context, tx chan<- struct{}) {
 	var workerWG sync.WaitGroup
 	workerWG.Add(len(urls))
+
+	connect := func(url string) (pb.BrokerAPI_ServerStreamClient, error) {
+		conn, err := grpc.NewClient(url, g.opts...)
+		if err != nil {
+			return nil, err
+		}
+		client := pb.NewBrokerAPIClient(conn)
+		reqMsg := &pb.StreamRequestMessage{
+			Subscribers: nil,
+			Payload:     initalMsg,
+		}
+		return client.ServerStream(ctx, reqMsg)
+	}
+
 	for _, url := range urls {
 		go func(url string) {
 			defer workerWG.Done()
-			conn, _ := grpc.NewClient(url, g.opts...)
-			client := pb.NewBrokerAPIClient(conn)
-			reqMsg := &pb.StreamRequestMessage{
-				Subscribers: nil,
-				Payload:     initalMsg,
-			}
-		connect:
-			stream, err := client.ServerStream(ctx, reqMsg)
+		connectLabel:
+			stream, err := connect(url)
 			if err == nil {
 				for {
 					resp, err := stream.Recv()
 					if err == io.EOF {
 						g.lgs.WriteLog(ctx, enum.DEBUG, "outbound.ServerStream.Recv", enum.DEBUG_DESCRIPTION)
-						if err := stream.CloseSend(); err != nil {
-							g.lgs.WriteLog(ctx, enum.DEBUG, "outbound.ServerStream.ColseSend", err.Error())
-						}
 						return
 					} else if err != io.EOF && err != nil {
-						g.lgs.WriteLog(ctx, enum.DEBUG, "outbound.ServerStream.EOF", err.Error())
-						goto connect
+						g.lgs.WriteLog(ctx, enum.ERROR, "outbound.ServerStream.EOF", err.Error())
+						goto connectLabel
 					} else {
 						msg <- resp.GetPayload()
 					}
 				}
 			} else {
-				retry := time.NewTicker(time.Millisecond) // retrying
+				retry := time.NewTicker(5 * time.Millisecond) // retrying
 				for {
 					select {
 					case <-ctx.Done():
@@ -115,7 +124,7 @@ func (g *clientStream) ServerStream(urls []string, initalMsg []byte, msg chan<- 
 						return
 					case <-retry.C:
 						retry.Stop()
-						goto connect
+						goto connectLabel
 					}
 				}
 			}
@@ -138,9 +147,9 @@ func (g *clientStream) BidirectionalStream(urls []string, provMsg <-chan []byte,
 	}
 
 	connect := func(url string) (pb.BrokerAPI_BidirectionalStreamClient, error) {
-		conn, cerr := grpc.NewClient(url, g.opts...)
-		if cerr != nil {
-			return nil, cerr
+		conn, err := grpc.NewClient(url, g.opts...)
+		if err != nil {
+			return nil, err
 		}
 		c := pb.NewBrokerAPIClient(conn)
 		return c.BidirectionalStream(ctx)
@@ -163,7 +172,7 @@ func (g *clientStream) BidirectionalStream(urls []string, provMsg <-chan []byte,
 			lock.Unlock()
 			if e == nil && st != nil {
 				serr := st.Send(&pb.StreamRequestMessage{
-					Subscribers: urls,
+					Subscribers: nil,
 					Payload:     payload,
 				})
 				if serr != nil {
@@ -194,7 +203,7 @@ func (g *clientStream) BidirectionalStream(urls []string, provMsg <-chan []byte,
 			lock.Unlock()
 
 			if e != nil || st == nil {
-				retry := time.NewTicker(time.Millisecond)
+				retry := time.NewTicker(5 * time.Millisecond)
 				for {
 					select {
 					case <-ctx.Done():
@@ -217,9 +226,6 @@ func (g *clientStream) BidirectionalStream(urls []string, provMsg <-chan []byte,
 				resp, rerr := st.Recv()
 				if rerr == io.EOF {
 					g.lgs.WriteLog(ctx, enum.DEBUG, "outbound.BidirectionalStream.Recv", enum.DEBUG_DESCRIPTION)
-					if err := st.CloseSend(); err != nil {
-						g.lgs.WriteLog(ctx, enum.ERROR, "outbound.BidirectionalStream.CloseSend", err.Error())
-					}
 					return
 				}
 				if rerr != nil && rerr != io.EOF {
