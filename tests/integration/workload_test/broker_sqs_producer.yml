@@ -12,13 +12,13 @@ data:
 concurrency: 1
 total: 100
 insecure: true
-rps: 10000
+rps: 20000
 load-schedule: step
-load-start: 10
-load-step: 10
+load-start: 20
+load-step: 20
 load-step-duration: 3s
 load-max-duration: 1m
-load-end: 1000
+load-end: 10000
 stream-dynamic-messages: false
 metadata:
   x-api-key: dominus-api-key-1233464687

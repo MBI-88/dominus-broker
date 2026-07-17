@@ -18,14 +18,14 @@ insecure: true
 async: false
 
 concurrency-schedule: step
-concurrency-start: 10
-concurrency-step: 10
-concurrency-end: 100
-concurrency-step-duration: 3s
+concurrency-start: 20
+concurrency-step: 20
+concurrency-end: 1000
+concurrency-step-duration: 5s
 rps: 680
 load-schedule: step
 load-start: 10
-load-step: 10
+load-step: 20
 load-step-duration: 3s
 load-max-duration: 1m
 load-end: 10000
