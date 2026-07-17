@@ -7,18 +7,19 @@ import-paths:
 host: localhost:5000
 
 data:
-  payload: eyJpZCI6MSwicm9sZSI6InRlc3QifQ==
+  payload: "{{randomString 8}}"
 
 concurrency: 1
 total: 100
 insecure: true
-rps: 680
+rps: 10000
 load-schedule: step
 load-start: 10
 load-step: 10
 load-step-duration: 3s
 load-max-duration: 1m
 load-end: 1000
+stream-dynamic-messages: false
 metadata:
   x-api-key: dominus-api-key-1233464687
   idempotency-header: 123e4567-e89b-12d3-a456-426655440000
