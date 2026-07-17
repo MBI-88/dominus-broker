@@ -15,20 +15,28 @@ metadata:
   x-api-key: dominus-api-key-1233464687
 
 insecure: true
-async: true
+async: false
 
-concurrency: 5
-connections: 2
-rps: 600
-load-schedule: const
+concurrency-schedule: step
+concurrency-start: 10
+concurrency-step: 10
+concurrency-end: 100
+concurrency-step-duration: 3s
+rps: 680
+load-schedule: step
+load-start: 10
+load-step: 10
+load-step-duration: 3s
+load-max-duration: 1m
+load-end: 10000
 duration: 5m
 timeout: 60s
 keepalive: 30s
 
-stream-call-duration: 30s
-stream-call-count: 10
-stream-interval: 20ms
+stream-call-duration: 500ms
+stream-call-count: 20
+stream-interval: 100ms
 stream-dynamic-messages: false
 
-skipFirst: 10
+skipFirst: 0
 cpus: 2

@@ -2,11 +2,23 @@
 
 call: dominus.SqsAPI.Producer
 proto: ../dominus-proto-definition/proto/dominus.proto
-data: {"payload":"eyJpZCI6MSwicm9sZSI6InRlc3QifQ=="}
+import-paths:
+  - ../dominus-proto-definition/proto
+host: localhost:5000
+
+data:
+  payload: eyJpZCI6MSwicm9sZSI6InRlc3QifQ==
+
 concurrency: 1
 total: 100
 insecure: true
-rps: 600
+rps: 680
+load-schedule: step
+load-start: 10
+load-step: 10
+load-step-duration: 3s
+load-max-duration: 1m
+load-end: 1000
 metadata:
   x-api-key: dominus-api-key-1233464687
   idempotency-header: 123e4567-e89b-12d3-a456-426655440000

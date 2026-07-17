@@ -30,4 +30,5 @@ const (
 	GROUP_ID                   = "empty group id"
 	WORKER_ID                  = "empty worker id"
 	IDEM_POTENCY_NOT_FOUND     = "idempotency not found"
+	RATE_LIMIT_REACHED         = "rate limit reached"
 )
