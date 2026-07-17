@@ -279,8 +279,8 @@ func TestIdemPotency(t *testing.T) {
 		if !ok {
 			t.Fatalf("not a status error: %v", err)
 		}
-		if st.Code() != codes.Aborted || st.Message() != enum.IDEM_POTENCY_NOT_FOUND {
-			t.Fatalf("got code=%v msg=%q want Aborted / %q", st.Code(), st.Message(), enum.IDEM_POTENCY_NOT_FOUND)
+		if st.Code() != codes.Aborted || st.Message() != enum.RATE_LIMIT_REACHED {
+			t.Fatalf("got code=%v msg=%q want Aborted / %q", st.Code(), st.Message(), enum.RATE_LIMIT_REACHED)
 		}
 	})
 
@@ -309,7 +309,7 @@ func TestIdemPotency(t *testing.T) {
 		}
 	})
 
-	t.Run("data loss when idempotency header empty", func(t *testing.T) {
+	t.Run("empty header is forwarded to checker", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		lgMock := mocks.NewMockEvent(ctrl)
 		checkerMock := mocks.NewMockCheckerClient(ctrl)
@@ -321,16 +321,31 @@ func TestIdemPotency(t *testing.T) {
 			WriteLog(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
 			AnyTimes()
 
-		_, err := mid.IdemPotency(ctx)
-		if err == nil {
-			t.Fatal("expected error")
+		checkerMock.EXPECT().
+			CheckConsumer(gomock.Any(), "").
+			Return(false)
+
+		saveDone := make(chan struct{})
+		checkerMock.EXPECT().
+			SaveConsumer(gomock.Any(), "").
+			DoAndReturn(func(context.Context, string) error {
+				close(saveDone)
+				return nil
+			}).
+			Times(1)
+
+		out, err := mid.IdemPotency(ctx)
+		if err != nil {
+			t.Fatalf("IdemPotency: %v", err)
 		}
-		st, ok := status.FromError(err)
-		if !ok {
-			t.Fatalf("not a status error: %v", err)
+		if out != ctx {
+			t.Fatalf("expected same context")
 		}
-		if st.Code() != codes.DataLoss || st.Message() != enum.IDEM_POTENCY_NOT_FOUND {
-			t.Fatalf("got code=%v msg=%q want DataLoss / %q", st.Code(), st.Message(), enum.IDEM_POTENCY_NOT_FOUND)
+
+		select {
+		case <-saveDone:
+		case <-time.After(500 * time.Millisecond):
+			t.Fatal("SaveConsumer was not invoked")
 		}
 	})
 

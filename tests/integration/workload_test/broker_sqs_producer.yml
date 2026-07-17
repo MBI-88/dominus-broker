@@ -1,0 +1,25 @@
+# ghz --config test.yaml localhost:5000
+
+call: dominus.SqsAPI.Producer
+proto: ../dominus-proto-definition/proto/dominus.proto
+import-paths:
+  - ../dominus-proto-definition/proto
+host: localhost:5000
+
+data:
+  payload: "{{randomString 8}}"
+
+concurrency: 1
+total: 100
+insecure: true
+rps: 20000
+load-schedule: step
+load-start: 20
+load-step: 20
+load-step-duration: 3s
+load-max-duration: 1m
+load-end: 10000
+stream-dynamic-messages: false
+metadata:
+  x-api-key: dominus-api-key-1233464687
+  idempotency-header: 123e4567-e89b-12d3-a456-426655440000
