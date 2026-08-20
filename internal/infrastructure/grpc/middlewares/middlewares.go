@@ -42,11 +42,15 @@ func (m *middlewares) ApiToken(ctx context.Context) (context.Context, error) {
 	ctx = m.logs.CheckID(ctx)
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.ApiToken", enum.NOT_FOUND)
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.ApiToken.FromIncomingContext", enum.NOT_FOUND)
 		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
 	}
-	token := md.Get(enum.X_API_KEY)[0]
-	hashedTokenRecived := sha256.Sum256([]byte(token))
+	tokens := md.Get(enum.X_API_KEY)
+	if len(tokens) == 0 {
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.ApiToken.Get", enum.NOT_FOUND)
+		return nil, status.Errorf(codes.DataLoss, enum.NOT_FOUND)
+	}
+	hashedTokenRecived := sha256.Sum256([]byte(tokens[0]))
 	hashedKey := sha256.Sum256(m.token)
 	if subtle.ConstantTimeCompare(hashedTokenRecived[:], hashedKey[:]) == 0 {
 		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.ApiToken", enum.MATCH_TOKEN)
@@ -103,11 +107,9 @@ func (m *middlewares) IdemPotency(ctx context.Context) (context.Context, error) 
 		return nil, status.Error(codes.Aborted, enum.RATE_LIMIT_REACHED)
 	}
 
-	go func(key string) {
-		if err := m.ch.SaveConsumer(ctx, key); err != nil {
-			m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdemPotency.SaveConsumer", err.Error())
-		}
-	}(keys[0])
+	if err := m.ch.SaveConsumer(ctx, keys[0]); err != nil {
+		m.logs.WriteLog(ctx, enum.ERROR, "middlewares.IdemPotency.SaveConsumer", err.Error())
+	}
 
 	return ctx, nil
 }
