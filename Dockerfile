@@ -10,7 +10,7 @@ RUN apk add --no-cache git
 
 RUN git config --global url."https://${GITHUB_TOKEN}:x-oauth-basic@github.com/".insteadOf "https://github.com/"
 
-RUN go mod tidy && \
+RUN go mod download && \
     CGO_ENABLED=0 GOOS=linux go build  -ldflags="-s -w" -o ./dominus cmd/api/main.go
 
 
